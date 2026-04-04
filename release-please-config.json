@@ -2,7 +2,7 @@
   "packages": {
     "claude-marketplace/plugins/arc": {
       "release-type": "simple",
-      "component": "arc",
+      "component": "claude-arc",
       "bump-minor-pre-major": true,
       "extra-files": [
         {
@@ -23,7 +23,7 @@
     },
     "claude-marketplace/plugins/mneme": {
       "release-type": "simple",
-      "component": "mneme",
+      "component": "claude-mneme",
       "bump-minor-pre-major": true,
       "extra-files": [
         {
@@ -44,7 +44,7 @@
     },
     "claude-marketplace/plugins/slop-review": {
       "release-type": "simple",
-      "component": "slop-review",
+      "component": "claude-slop-review",
       "bump-minor-pre-major": true,
       "extra-files": [
         {
@@ -143,7 +143,7 @@
     },
     "codex-marketplace/plugins/atlassian": {
       "release-type": "simple",
-      "component": "atlassian",
+      "component": "codex-atlassian",
       "bump-minor-pre-major": true,
       "extra-files": [
         {

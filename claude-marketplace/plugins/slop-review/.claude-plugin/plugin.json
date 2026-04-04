@@ -1,6 +1,6 @@
 {
   "name": "slop-review",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Detect low-quality AI-generated code using a 3-lens parallel review architecture with model-tiered agents. Scans for AI authorship signals, idiom violations, and code quality issues.",
   "author": {
     "name": "SentioLabs",

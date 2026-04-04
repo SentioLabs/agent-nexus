@@ -1,0 +1,68 @@
+{
+  "name": "sentiolabs-plugins",
+  "interface": {
+    "displayName": "Sentio Labs"
+  },
+  "plugins": [
+    {
+      "name": "arc",
+      "source": {
+        "source": "local",
+        "path": "./codex-marketplace/plugins/arc"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "mneme",
+      "source": {
+        "source": "local",
+        "path": "./codex-marketplace/plugins/mneme"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "slop-review",
+      "source": {
+        "source": "local",
+        "path": "./codex-marketplace/plugins/slop-review"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Coding"
+    },
+    {
+      "name": "atlassian",
+      "source": {
+        "source": "local",
+        "path": "./codex-marketplace/plugins/atlassian"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "worktrunk",
+      "source": {
+        "source": "local",
+        "path": "./codex-marketplace/plugins/worktrunk"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

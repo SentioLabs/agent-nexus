@@ -1,0 +1,43 @@
+{
+  "name": "arc",
+  "version": "0.6.0",
+  "description": "Central issue tracker for AI-assisted coding workflows. Manage tasks, track work, and maintain context with simple CLI commands.",
+  "author": {
+    "name": "Sentio Labs",
+    "url": "https://github.com/sentiolabs"
+  },
+  "homepage": "https://github.com/sentiolabs/arc",
+  "repository": "https://github.com/sentiolabs/arc",
+  "license": "MIT",
+  "keywords": [
+    "issue-tracker",
+    "task-management",
+    "ai-workflow",
+    "agent-memory"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks.json",
+  "interface": {
+    "displayName": "Arc",
+    "shortDescription": "Track multi-session coding work with durable issues",
+    "longDescription": "Use arc to manage durable issues, plans, dependencies, and implementation workflows across long-running coding sessions. Codex support keeps project context primed automatically at session start and before compaction so work can resume cleanly.",
+    "developerName": "Sentio Labs",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/sentiolabs/arc",
+    "privacyPolicyURL": "https://github.com/sentiolabs/claude-marketplace/blob/main/docs/legal/privacy.md",
+    "termsOfServiceURL": "https://github.com/sentiolabs/claude-marketplace/blob/main/docs/legal/terms.md",
+    "defaultPrompt": [
+      "Show me the best unblocked arc task and onboard me to it",
+      "Break this approved design into arc tasks with exact file paths",
+      "Review my current arc issue and tell me the next safe step"
+    ],
+    "brandColor": "#2563EB",
+    "composerIcon": "./assets/arc-icon.svg",
+    "logo": "./assets/arc-logo.svg",
+    "screenshots": []
+  }
+}

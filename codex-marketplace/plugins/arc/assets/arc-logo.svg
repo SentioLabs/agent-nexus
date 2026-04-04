@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 96" role="img" aria-labelledby="title">
+  <title>Arc logo</title>
+  <rect width="256" height="96" rx="24" fill="#0F172A"/>
+  <rect x="12" y="12" width="72" height="72" rx="18" fill="#2563EB"/>
+  <path d="M33 67 48 29l15 38h-8.5l-2.4-7h-8.2l-2.4 7H33Zm14.6-15h5L50 44.7 47.6 52Z" fill="#FFFFFF"/>
+  <text x="106" y="58" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="30" font-weight="700">ARC</text>
+</svg>

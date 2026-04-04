@@ -1,0 +1,10 @@
+{
+  "claude-marketplace/plugins/arc": "0.6.0",
+  "claude-marketplace/plugins/mneme": "0.9.2",
+  "claude-marketplace/plugins/slop-review": "0.2.0",
+  "codex-marketplace/plugins/arc": "0.6.0",
+  "codex-marketplace/plugins/atlassian": "0.1.0",
+  "codex-marketplace/plugins/mneme": "0.9.2",
+  "codex-marketplace/plugins/slop-review": "0.2.0",
+  "codex-marketplace/plugins/worktrunk": "0.1.0"
+}

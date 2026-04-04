@@ -1,0 +1,126 @@
+{
+  "skill_name": "mneme",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Analyze the build output from cargo test and summarize any failures",
+      "expected_output": "The agent uses mneme execute to run cargo test in sandbox rather than raw Bash",
+      "expectations": [
+        "Uses mneme execute or mneme batch instead of raw Bash for running tests",
+        "Does not dump full test output into context",
+        "Provides a concise summary of test results"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Fetch the Rust documentation for the axum crate and find how to add middleware",
+      "expected_output": "The agent uses mneme fetch, WebFetch, or similar to retrieve docs, then mneme search to query",
+      "expectations": [
+        "Uses mneme fetch or WebFetch to retrieve documentation (WebFetch content is automatically indexed by mneme)",
+        "Uses mneme search to query the indexed documentation",
+        "Does not use curl or wget in any Bash command"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Parse this 500-line JSON log file and count how many error entries there are",
+      "expected_output": "The agent uses mneme exec-file or mneme execute for analysis rather than reading the entire file into context",
+      "expectations": [
+        "Uses mneme exec-file or mneme execute instead of Read + inline analysis",
+        "Only the summary count enters context, not the raw log content",
+        "Correct count is returned"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Find all TODO comments in the codebase and give me a summary",
+      "expected_output": "The agent uses mneme execute with shell grep rather than raw Grep that could flood context",
+      "expectations": [
+        "Uses mneme execute or mneme batch for the search",
+        "Provides a structured summary rather than dumping raw grep output",
+        "Does not use raw Grep for a potentially large result set"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Call the GitHub API to check the latest release of tokio-rs/tokio",
+      "expected_output": "The agent uses mneme fetch or mneme execute for the API call instead of curl in Bash",
+      "expectations": [
+        "Does not use curl or wget in Bash",
+        "Uses mneme fetch or mneme execute for the HTTP call",
+        "Returns the release version information"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Read src/main.rs and explain the command routing architecture",
+      "expected_output": "The agent uses mneme exec-file for analysis since it's reading to understand, not to edit",
+      "expectations": [
+        "Uses mneme exec-file for file analysis rather than Read",
+        "Provides architectural explanation without dumping full file content",
+        "Identifies key structures like CLI enum and command dispatch"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Run git log for the last 50 commits and identify which areas of the codebase changed most",
+      "expected_output": "The agent uses mneme execute to run git log in sandbox and analyze results",
+      "expectations": [
+        "Uses mneme execute or mneme batch instead of raw Bash for git log",
+        "Performs analysis in sandbox, not in context window",
+        "Returns a focused summary of most-changed areas"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "I'm in Codex. Pull https://valkey.io/clients/ and summarize which clients are supported.",
+      "expected_output": "The Codex agent transparently routes webpage retrieval through mneme-compatible fetch behavior and summarizes supported clients without requiring explicit mneme instructions.",
+      "expectations": [
+        "Uses mneme fetch or WebFetch for webpage retrieval (WebFetch content may be auto-indexed by mneme)",
+        "Allows optional follow-up mneme search for extraction, but does not require a fixed fetch then search sequence",
+        "Does not require the user to explicitly say \"use mneme\" to route fetch/search"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "I just ran a huge test suite in Codex and the output is massive. Tell me what failed.",
+      "expected_output": "The Codex agent routes large-output analysis through mneme execution primitives and returns a concise failure summary.",
+      "expectations": [
+        "Uses mneme execute or mneme batch for large-output analysis",
+        "Avoids dumping full raw output into context",
+        "Returns focused failures, not a verbose transcript"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Before we continue, what does mneme memory already know about this repo?",
+      "expected_output": "The agent accurately reports available project memory via session-recalled context or explicit mneme memory retrieval, and handles empty-memory states without fabricating facts.",
+      "expectations": [
+        "Returns important stored context when available (preferences, decisions, durable project facts), including SessionStart-recalled memory when present",
+        "If no repo memory exists yet, clearly says so instead of inventing content",
+        "May use mneme memory recall/search for additional lookup, but does not require a turn-local recall/search call",
+        "Does not fabricate memories that were never stored"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Remember this decision for future Codex sessions: use --platform codex --server 127.0.0.1:7435 for mneme hook commands.",
+      "expected_output": "The agent persists the decision using mneme memory add with durable wording suitable for future recall.",
+      "expectations": [
+        "Uses mneme memory add to store the decision",
+        "Stores it as a durable preference/decision rather than ephemeral chatter",
+        "Writes a concise, self-contained memory statement suitable for future recall"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "I'm in Codex and just added a large local docs folder. Make it searchable for later questions.",
+      "expected_output": "The Codex agent transparently routes standalone indexing through mneme index so later retrieval can use search without bloating context.",
+      "expectations": [
+        "Uses mneme index for the indexing step (not only fetch-based implicit indexing)",
+        "Keeps user-facing output concise while preparing content for later search/recall",
+        "Does not require the user to explicitly say \"use mneme\" to trigger indexing behavior"
+      ]
+    }
+  ]
+}

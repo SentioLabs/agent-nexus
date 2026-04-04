@@ -1,0 +1,359 @@
+[
+  {
+    "eval_id": 1,
+    "eval_name": "Implement dispatches subagent — never writes code itself",
+    "prompt": "Implement the tasks from epic ARC-5. Start with ARC-5.1 (JWT token generation).",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output dispatches an arc-implementer subagent via Agent tool",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Output does NOT write implementation code directly (no Write/Edit tool calls for .go/.ts files)",
+        "type": "constraint"
+      },
+      {
+        "id": 3,
+        "text": "Subagent dispatch prompt includes the task spec from `arc show`",
+        "type": "quality"
+      },
+      {
+        "id": 4,
+        "text": "Subagent dispatch prompt includes the project test command",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 2,
+    "eval_name": "Implement claims task before dispatching",
+    "prompt": "Start implementing the next ready task.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output runs `arc ready` to find next task",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Output runs `arc update <id> --status in_progress` before dispatching subagent",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "Output records PRE_TASK_SHA before dispatching",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 3,
+    "eval_name": "Implement verifies result and dispatches evaluation + review in parallel",
+    "prompt": "The arc-implementer just reported back with PASS on all gate checks for ARC-5.1. This task is a child of epic ARC-5.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output runs the project test command fresh (does NOT trust subagent report alone)",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Output dispatches arc-evaluator AND arc-reviewer (via review skill) simultaneously after tests pass",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "Evaluator dispatch prompt includes the task spec and design spec but NOT the git diff",
+        "type": "quality"
+      },
+      {
+        "id": 4,
+        "text": "Both agent dispatches happen in a single response (parallel, not sequential)",
+        "type": "quality"
+      },
+      {
+        "id": 5,
+        "text": "Output closes the task with `arc close` only after independent test verification, evaluation, AND review all pass",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 4,
+    "eval_name": "Implement handles PARTIAL result correctly",
+    "prompt": "The arc-implementer reported PARTIAL. Gate: Unresolved — spec compliance missed step 3 (error handling for invalid tokens). Test coverage missing edge case for expired tokens.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output does NOT close the task",
+        "type": "constraint"
+      },
+      {
+        "id": 2,
+        "text": "Output re-dispatches arc-implementer with the specific gate feedback included in the prompt",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "Re-dispatch prompt includes the original task spec AND the previous gate feedback",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 5,
+    "eval_name": "Implement routes docs-only tasks to doc-writer",
+    "prompt": "The next ready task ARC-5.4 has a docs-only label. It's about updating the API documentation.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output checks for the docs-only label (via arc show --json + jq or similar)",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Output dispatches arc-doc-writer subagent (NOT arc-implementer)",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 6,
+    "eval_name": "Implement parallel dispatch uses worktree isolation",
+    "prompt": "Tasks ARC-5.2, ARC-5.3, and ARC-5.4 are independent with no shared files. Dispatch them in parallel.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output commits and pushes all sequential work before parallel dispatch",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Output records PARALLEL_BASE SHA before dispatching",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "All parallel Agent calls use isolation: 'worktree'",
+        "type": "quality"
+      },
+      {
+        "id": 4,
+        "text": "All parallel Agent calls are in a single message (not spread across multiple turns)",
+        "type": "constraint"
+      },
+      {
+        "id": 5,
+        "text": "After agents complete, output verifies commit history against PARALLEL_BASE",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 7,
+    "eval_name": "Implement runs integration checkpoint after 2-3 tasks",
+    "prompt": "We just closed ARC-5.1 and ARC-5.2. ARC-5.3 is next.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output runs integration tests (make test-integration or equivalent) before starting ARC-5.3",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 8,
+    "eval_name": "Implement handles deviation from review — fix path",
+    "prompt": "The review skill reported a Deviation (fix) for ARC-5.1: the implementer used string IDs but the design specifies int64. The reviewer recommends fixing to match the design.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output re-dispatches arc-implementer with explicit instruction to change string IDs to int64",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Output does NOT close the task until the deviation is resolved",
+        "type": "constraint"
+      },
+      {
+        "id": 3,
+        "text": "Output re-dispatches review after the fix to confirm the deviation is resolved",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 9,
+    "eval_name": "Implement handles deviation from review — accept path",
+    "prompt": "The review skill reported a Deviation (accept) for ARC-5.3: the implementer used a custom error type instead of the plain error return specified in the design. The reviewer says the deviation aligns with existing codebase conventions.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output accepts the deviation rather than forcing a fix",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Output logs the accepted deviation as an arc comment on the task with description and rationale",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "Output proceeds to close the task (does not re-dispatch for accepted deviations)",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 10,
+    "eval_name": "Implement handles evaluator FAIL — spec-intent gap",
+    "prompt": "The arc-evaluator reported FAIL for ARC-5.2. Spec-Intent Gap: spec says 'Return 401 if refresh token is expired' but the evaluator's acceptance test shows the endpoint returns 400 instead of 401 for expired tokens.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output re-dispatches arc-implementer with the evaluator's finding (expected 401, got 400 for expired tokens)",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Output does NOT close the task while the spec-intent gap is unresolved",
+        "type": "constraint"
+      },
+      {
+        "id": 3,
+        "text": "Output re-dispatches evaluator after the fix to verify spec compliance (not just reviewer)",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 11,
+    "eval_name": "Implement prioritizes evaluator spec-intent over reviewer code quality",
+    "prompt": "For ARC-5.3, the arc-reviewer says the code is clean with no issues. But the arc-evaluator reports FAIL: spec requires 'idempotent delete — deleting a non-existent resource returns 204' but the acceptance test shows 404 is returned.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output treats the evaluator's spec-intent finding as the priority issue to fix",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Output re-dispatches arc-implementer to fix the idempotent delete behavior (204 not 404)",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "Output does NOT close the task because the reviewer said 'no issues' — the evaluator's FAIL takes precedence",
+        "type": "constraint"
+      }
+    ]
+  },
+  {
+    "eval_id": 12,
+    "eval_name": "Implement applies evaluator circuit breaker after 3 cycles",
+    "prompt": "This is the 3rd evaluate/fix cycle for ARC-5.4. The evaluator keeps reporting FAIL on the same finding: spec says 'rate limit per user' but the implementation rate-limits per IP. The implementer keeps re-implementing per-IP rate limiting.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output recognizes the 3-cycle evaluator circuit breaker threshold",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Output STOPS the evaluate/fix loop and escalates to the user",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "Output presents both interpretations (evaluator: per-user, implementer: per-IP) for the user to clarify",
+        "type": "quality"
+      },
+      {
+        "id": 4,
+        "text": "Output does NOT dispatch a 4th cycle without user guidance",
+        "type": "constraint"
+      }
+    ]
+  },
+  {
+    "eval_id": 13,
+    "eval_name": "Implement skips evaluator for docs-only tasks",
+    "prompt": "The arc-doc-writer just completed ARC-5.9, a docs-only task for updating API reference docs.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output does NOT dispatch arc-evaluator for docs-only tasks",
+        "type": "constraint"
+      },
+      {
+        "id": 2,
+        "text": "Output proceeds to close the task without adversarial evaluation",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 14,
+    "eval_name": "Implement handles evaluator BLOCKED — does not blame implementer",
+    "prompt": "The arc-evaluator reported BLOCKED for ARC-5.6. Implementation Health shows PASS (project builds, tests pass). Evaluator Setup shows FAIL (acceptance tests couldn't compile due to a dependency conflict the evaluator introduced).",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output does NOT re-dispatch arc-implementer — BLOCKED is the evaluator's problem, not the implementer's",
+        "type": "constraint"
+      },
+      {
+        "id": 2,
+        "text": "Output notes the inconclusive evaluation in an arc comment",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "Output proceeds with the workflow (review findings are still valid even if evaluator was BLOCKED)",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 15,
+    "eval_name": "Implement handles evaluator FAIL due to broken implementer build",
+    "prompt": "The arc-evaluator reported FAIL for ARC-5.7. Implementation Health shows FAIL — the project doesn't compile. The evaluator never got to run acceptance tests because the build itself is broken.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output re-dispatches arc-implementer with the build failure as a Critical finding to fix",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Output does NOT treat this as an evaluator problem — a broken build is the implementer's fault",
+        "type": "constraint"
+      },
+      {
+        "id": 3,
+        "text": "Output does NOT close the task while the build is broken",
+        "type": "constraint"
+      }
+    ]
+  },
+  {
+    "eval_id": 16,
+    "eval_name": "Implement dispatches evaluator with worktree isolation",
+    "prompt": "The arc-implementer just reported PASS on all gate checks for ARC-5.3. Tests pass. Time to dispatch evaluation and review.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Evaluator agent is dispatched with isolation: 'worktree'",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Reviewer agent is NOT dispatched with worktree isolation (it is read-only and doesn't need it)",
+        "type": "quality"
+      }
+    ]
+  }
+]

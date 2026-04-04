@@ -1,0 +1,45 @@
+{
+  "name": "mneme",
+  "version": "0.9.2",
+  "description": "Transparent context-window protection for Codex using hook-based routing and project-scoped memory recall.",
+  "author": {
+    "name": "Sentio Labs",
+    "url": "https://github.com/sentiolabs"
+  },
+  "homepage": "https://github.com/sentiolabs/mneme",
+  "repository": "https://github.com/sentiolabs/mneme",
+  "license": "MIT",
+  "keywords": [
+    "context-window",
+    "sandbox",
+    "code-execution",
+    "fts",
+    "bm25",
+    "rust"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks.json",
+  "interface": {
+    "displayName": "Mneme",
+    "shortDescription": "Route large analysis to mneme and recall important memory automatically",
+    "longDescription": "Mneme for Codex uses plugin hooks to transparently route large-output operations through the mneme runtime, reducing context usage while preserving searchable memory. It is designed for practical feature parity: context reduction, memory recall, and conservative durable memory capture.",
+    "developerName": "Sentio Labs",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/sentiolabs/mneme",
+    "privacyPolicyURL": "https://github.com/sentiolabs/claude-marketplace/blob/main/docs/legal/privacy.md",
+    "termsOfServiceURL": "https://github.com/sentiolabs/claude-marketplace/blob/main/docs/legal/terms.md",
+    "defaultPrompt": [
+      "Analyze this large output with mneme and summarize what matters",
+      "Recall what we already know about this repo from mneme memory",
+      "Store this explicit preference or decision in mneme memory"
+    ],
+    "brandColor": "#0F766E",
+    "composerIcon": "./assets/mneme-icon.svg",
+    "logo": "./assets/mneme-logo.svg",
+    "screenshots": []
+  }
+}

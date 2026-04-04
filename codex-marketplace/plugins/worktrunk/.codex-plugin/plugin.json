@@ -1,0 +1,43 @@
+{
+  "name": "worktrunk",
+  "version": "0.1.0",
+  "description": "Codex packaging of Worktrunk guidance for git worktree management and parallel AI agent workflows.",
+  "author": {
+    "name": "Max Rozen",
+    "url": "https://worktrunk.dev"
+  },
+  "homepage": "https://worktrunk.dev",
+  "repository": "https://github.com/max-sixty/worktrunk",
+  "license": "MIT",
+  "keywords": [
+    "git",
+    "worktree",
+    "parallel",
+    "agents",
+    "codex"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Worktrunk",
+    "shortDescription": "Manage git worktrees for parallel agent workflows",
+    "longDescription": "Codex-native packaging of Worktrunk's setup, commit generation, and multi-worktree workflow guidance, with a reference hook configuration for environments where experimental Codex hooks are confirmed to load manually.",
+    "developerName": "Max Rozen",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://worktrunk.dev",
+    "privacyPolicyURL": "https://github.com/sentiolabs/claude-marketplace/blob/main/docs/legal/privacy.md",
+    "termsOfServiceURL": "https://github.com/sentiolabs/claude-marketplace/blob/main/docs/legal/terms.md",
+    "defaultPrompt": [
+      "Help me set up worktrunk for this project",
+      "Configure Worktrunk commit message generation in Codex",
+      "Show me how to use Worktrunk with multiple Codex worktrees"
+    ],
+    "brandColor": "#4A9B6E",
+    "composerIcon": "./assets/worktrunk-icon.svg",
+    "logo": "./assets/worktrunk-logo.svg",
+    "screenshots": []
+  }
+}

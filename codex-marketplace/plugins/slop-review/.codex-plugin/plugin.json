@@ -1,0 +1,43 @@
+{
+  "name": "slop-review",
+  "version": "0.2.0",
+  "description": "Detect low-quality AI-generated code using a 3-lens parallel review architecture with model-tiered agents. Scans for AI authorship signals, idiom violations, and code quality issues.",
+  "author": {
+    "name": "Sentio Labs",
+    "url": "https://github.com/sentiolabs"
+  },
+  "homepage": "https://github.com/sentiolabs/claude-marketplace",
+  "repository": "https://github.com/sentiolabs/claude-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "ai-slop",
+    "code-review",
+    "code-quality",
+    "idiom-fluency",
+    "ai-authorship"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Slop Review",
+    "shortDescription": "Detect low-quality AI-generated code patterns",
+    "longDescription": "Use slop-review to inspect code for AI authorship signals, idiom breaks, and low-quality patterns using a three-lens review workflow that focuses on actionable quality issues.",
+    "developerName": "Sentio Labs",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/sentiolabs/claude-marketplace",
+    "privacyPolicyURL": "https://github.com/sentiolabs/claude-marketplace/blob/main/docs/legal/privacy.md",
+    "termsOfServiceURL": "https://github.com/sentiolabs/claude-marketplace/blob/main/docs/legal/terms.md",
+    "defaultPrompt": [
+      "Review this diff for AI slop and idiom violations",
+      "Scan this code for low-quality AI-generated patterns",
+      "Summarize the strongest slop-review findings in this patch"
+    ],
+    "brandColor": "#B91C1C",
+    "composerIcon": "./assets/slop-review-icon.svg",
+    "logo": "./assets/slop-review-logo.svg",
+    "screenshots": []
+  }
+}

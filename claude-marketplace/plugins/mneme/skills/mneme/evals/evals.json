@@ -1,0 +1,75 @@
+{
+  "skill_name": "mneme",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Analyze the build output from cargo test and summarize any failures",
+      "expected_output": "Claude uses mneme execute to run cargo test in sandbox rather than raw Bash",
+      "expectations": [
+        "Uses mneme execute or mneme batch instead of raw Bash for running tests",
+        "Does not dump full test output into context",
+        "Provides a concise summary of test results"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Fetch the Rust documentation for the axum crate and find how to add middleware",
+      "expected_output": "Claude uses mneme fetch, WebFetch, or similar to retrieve docs, then mneme search to query",
+      "expectations": [
+        "Uses mneme fetch or WebFetch to retrieve documentation (WebFetch content is automatically indexed by mneme)",
+        "Uses mneme search to query the indexed documentation",
+        "Does not use curl or wget in any Bash command"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Parse this 500-line JSON log file and count how many error entries there are",
+      "expected_output": "Claude uses mneme exec-file or mneme execute for analysis rather than reading the entire file into context",
+      "expectations": [
+        "Uses mneme exec-file or mneme execute instead of Read + inline analysis",
+        "Only the summary count enters context, not the raw log content",
+        "Correct count is returned"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Find all TODO comments in the codebase and give me a summary",
+      "expected_output": "Claude uses mneme execute with shell grep rather than raw Grep that could flood context",
+      "expectations": [
+        "Uses mneme execute or mneme batch for the search",
+        "Provides a structured summary rather than dumping raw grep output",
+        "Does not use raw Grep for a potentially large result set"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Call the GitHub API to check the latest release of tokio-rs/tokio",
+      "expected_output": "Claude uses mneme fetch or mneme execute for the API call instead of curl in Bash",
+      "expectations": [
+        "Does not use curl or wget in Bash",
+        "Uses mneme fetch or mneme execute for the HTTP call",
+        "Returns the release version information"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Read src/main.rs and explain the command routing architecture",
+      "expected_output": "Claude uses mneme exec-file for analysis since it's reading to understand, not to edit",
+      "expectations": [
+        "Uses mneme exec-file for file analysis rather than Read",
+        "Provides architectural explanation without dumping full file content",
+        "Identifies key structures like CLI enum and command dispatch"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Run git log for the last 50 commits and identify which areas of the codebase changed most",
+      "expected_output": "Claude uses mneme execute to run git log in sandbox and analyze results",
+      "expectations": [
+        "Uses mneme execute or mneme batch instead of raw Bash for git log",
+        "Performs analysis in sandbox, not in context window",
+        "Returns a focused summary of most-changed areas"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mneme hook pretooluse --platform codex --server 127.0.0.1:7435"
+          }
+        ]
+      },
+      {
+        "matcher": "WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mneme hook pretooluse --platform codex --server 127.0.0.1:7435"
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mneme hook pretooluse --platform codex --server 127.0.0.1:7435"
+          }
+        ]
+      },
+      {
+        "matcher": "Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mneme hook pretooluse --platform codex --server 127.0.0.1:7435"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mneme hook posttooluse --platform codex --server 127.0.0.1:7435"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mneme hook sessionstart --platform codex --server 127.0.0.1:7435"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mneme hook precompact --platform codex --server 127.0.0.1:7435"
+          }
+        ]
+      }
+    ]
+  }
+}

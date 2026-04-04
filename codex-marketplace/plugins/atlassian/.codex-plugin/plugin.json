@@ -1,0 +1,45 @@
+{
+  "name": "atlassian",
+  "version": "0.1.0",
+  "description": "Codex packaging for Atlassian Rovo MCP workflows across Jira, Confluence, and Compass.",
+  "author": {
+    "name": "Atlassian",
+    "url": "https://www.atlassian.com/"
+  },
+  "homepage": "https://github.com/atlassian/atlassian-mcp-server",
+  "repository": "https://github.com/atlassian/atlassian-mcp-server",
+  "license": "Apache-2.0",
+  "keywords": [
+    "atlassian",
+    "jira",
+    "confluence",
+    "compass",
+    "mcp"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Atlassian",
+    "shortDescription": "Use Jira, Confluence, and Compass from Codex",
+    "longDescription": "A Codex-only packaging of Atlassian Rovo MCP workflows. It bundles reusable skills for searching company knowledge, turning specs or meeting notes into Jira work, querying Jira tickets by board and sprint, triaging issues, and generating status reports once the Atlassian MCP server is connected in Codex.",
+    "developerName": "Atlassian",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/atlassian/atlassian-mcp-server",
+    "privacyPolicyURL": "https://www.atlassian.com/legal/privacy-policy",
+    "termsOfServiceURL": "https://www.atlassian.com/legal/cloud-terms-of-service",
+    "defaultPrompt": [
+      "Search Confluence and Jira for onboarding docs",
+      "Turn this spec into a Jira epic and ticket breakdown",
+      "Show me my tickets for the active sprint on the mobile board",
+      "Generate a weekly status report from Jira"
+    ],
+    "brandColor": "#0052CC",
+    "composerIcon": "./assets/logo.svg",
+    "logo": "./assets/logo.svg",
+    "screenshots": []
+  }
+}

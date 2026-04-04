@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 96" role="img" aria-labelledby="worktrunk-logo-title">
+  <title id="worktrunk-logo-title">Worktrunk logo</title>
+  <rect width="256" height="96" rx="24" fill="#173329"/>
+  <rect x="12" y="12" width="72" height="72" rx="18" fill="#4A9B6E"/>
+  <path d="M48 66V44M48 44 34 30M48 44 62 30M48 44V24" fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="5"/>
+  <rect x="26" y="24" width="16" height="14" rx="3" fill="none" stroke="#FFFFFF" stroke-width="3"/>
+  <rect x="40" y="16" width="16" height="14" rx="3" fill="none" stroke="#FFFFFF" stroke-width="3"/>
+  <rect x="54" y="24" width="16" height="14" rx="3" fill="none" stroke="#FFFFFF" stroke-width="3"/>
+  <rect x="42" y="64" width="12" height="7" rx="2" fill="#FFFFFF"/>
+  <path d="M110 48H142" fill="none" stroke="#4A9B6E" stroke-linecap="round" stroke-width="8"/>
+  <path d="M142 48H196M142 48 182 24M142 48 182 72" fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"/>
+  <rect x="188" y="40" width="24" height="16" rx="4" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+  <rect x="172" y="16" width="24" height="16" rx="4" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+  <rect x="172" y="64" width="24" height="16" rx="4" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+</svg>

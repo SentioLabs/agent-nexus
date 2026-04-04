@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 96" role="img" aria-labelledby="title">
+  <title>Mneme logo</title>
+  <rect width="256" height="96" rx="24" fill="#042F2E"/>
+  <rect x="12" y="12" width="72" height="72" rx="18" fill="#0F766E"/>
+  <path d="M28 66V30h8l12 17.8L60 30h8v36h-8V44.4L48 61.6 36 44.4V66h-8Z" fill="#FFFFFF"/>
+  <text x="100" y="58" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24" font-weight="700">MNEME</text>
+</svg>

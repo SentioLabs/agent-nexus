@@ -1,0 +1,348 @@
+[
+  {
+    "eval_id": 1,
+    "eval_name": "Evaluator maintains information asymmetry — never reads diff or implementer tests",
+    "prompt": "Evaluate ARC-5.2 (OAuth token refresh). Base SHA is abc1234. Task spec says: 'Implement refresh token rotation — on each refresh, invalidate the old token and issue a new one. Return 401 if the refresh token is expired or already used.'",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output does NOT run `git diff` or read the diff of changes",
+        "type": "constraint"
+      },
+      {
+        "id": 2,
+        "text": "Output does NOT read files matching *_test.go, *.test.ts, *.spec.*, or test directories",
+        "type": "constraint"
+      },
+      {
+        "id": 3,
+        "text": "Output uses `git diff --name-only` to discover changed files (names only, not content)",
+        "type": "quality"
+      },
+      {
+        "id": 4,
+        "text": "Output reads only type definitions and function signatures from implementation files, not full function bodies",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 2,
+    "eval_name": "Evaluator writes independent acceptance tests from spec",
+    "prompt": "Evaluate ARC-5.1 (JWT token generation). Spec says: 'Generate JWT tokens with configurable expiry. Include user_id and role in claims. Return error for empty user_id.'",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output writes acceptance test files with clearly separated naming (e.g., _acceptance_test.go, .acceptance.test.ts)",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Acceptance tests cover each spec requirement: configurable expiry, user_id claim, role claim, empty user_id error",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "Acceptance tests exercise the public API only — no imports of internal/unexported packages",
+        "type": "quality"
+      },
+      {
+        "id": 4,
+        "text": "Test names reference the spec behavior (e.g., TestGenerateToken_ReturnsErrorForEmptyUserID)",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 3,
+    "eval_name": "Evaluator does not commit — worktree is ephemeral",
+    "prompt": "All acceptance tests pass for ARC-5.3. Report results.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output does NOT run git commit or git add",
+        "type": "constraint"
+      },
+      {
+        "id": 2,
+        "text": "Output does NOT attempt to clean up or delete test files (worktree handles disposal)",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "Output reports findings directly without cleanup steps",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 4,
+    "eval_name": "Evaluator reports spec-intent gap with concrete evidence",
+    "prompt": "Evaluate ARC-5.4 (rate limiter). Spec says: 'Return 429 with Retry-After header when rate limit exceeded.' Your acceptance test shows the endpoint returns 429 but no Retry-After header is present.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output reports a Spec-Intent Gap finding, not just a generic failure",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Finding includes what the spec says (429 with Retry-After header)",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "Finding includes what actually happened (429 without Retry-After header)",
+        "type": "quality"
+      },
+      {
+        "id": 4,
+        "text": "Finding is marked as Critical or Important severity, not Minor",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 5,
+    "eval_name": "Evaluator flags ambiguous spec as a finding rather than assuming",
+    "prompt": "Evaluate ARC-5.5 (user deactivation). Spec says: 'Deactivated users cannot log in.' It's unclear whether existing sessions should be invalidated immediately or allowed to expire naturally.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output identifies the ambiguity about existing session handling",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Output does NOT assume the implementation's interpretation is correct because the spec is vague",
+        "type": "constraint"
+      },
+      {
+        "id": 3,
+        "text": "Output reports the ambiguity as a finding for the orchestrator to resolve",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 6,
+    "eval_name": "Evaluator reports FAIL for missing behavior",
+    "prompt": "Evaluate ARC-5.6 (password reset). Spec says: 'Generate a one-time reset token. Token expires after 15 minutes. Return error if token is used more than once.' Your acceptance test for one-time use shows the token can be used repeatedly.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output reports a Missing Behavior or Spec-Intent Gap finding",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Overall evaluation result is FAIL (not PASS or CONCERNS)",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "Finding clearly describes: spec requires one-time use, but token was reusable in test",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 7,
+    "eval_name": "Evaluator includes edge cases beyond what spec explicitly states",
+    "prompt": "Evaluate ARC-5.7 (email validation). Spec says: 'Validate email format. Return error for invalid emails.' No specific edge cases listed.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output writes acceptance tests for the explicit spec requirement (invalid email returns error)",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Output includes 1-2 domain-implied edge cases not in the spec (e.g., empty string, nil/null input, email with unicode)",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "Edge case findings are marked as lower severity (Important or Minor) than explicit spec requirements",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 8,
+    "eval_name": "Evaluator reports untestable requirement when API surface is insufficient",
+    "prompt": "Evaluate ARC-5.8 (audit logging). Spec says: 'Log all authentication attempts with timestamp, IP, and outcome.' The public API has no method to query audit logs — only an internal write function.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Output identifies the requirement as untestable through the public API",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Output flags this as an Untestable Requirement finding, not a pass",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "Output suggests the public API may be incomplete (no way to verify audit logs externally)",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 9,
+    "eval_name": "Evaluator returns CONCERNS verdict when core behaviors pass but edge cases fail",
+    "prompt": "Evaluate ARC-5.9 (user registration). Spec says: 'Create user with email and password. Hash password before storage. Return 409 if email already exists. Return 201 with user ID on success.' Your acceptance tests show: creation works, password hashing works, duplicate email returns 409. However, registering with a 500-character email succeeds — no length validation.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Overall evaluation result is CONCERNS (not PASS or FAIL)",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Spec Coverage section shows all four explicit spec requirements as PASS",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "The email length issue is reported as an Edge Case Failure, not a Spec-Intent Gap",
+        "type": "quality"
+      },
+      {
+        "id": 4,
+        "text": "Edge case severity is Important or Minor (not Critical), since the spec does not mention email length",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 10,
+    "eval_name": "Evaluator report follows the structured template format including health checks",
+    "prompt": "Evaluate ARC-5.10 (API key generation). Spec says: 'Generate API keys with a configurable prefix. Keys must be 32 characters (excluding prefix). Revoke key by ID. Revoked keys return 403 on use.' Base SHA is def5678.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Report starts with '## Evaluation: PASS', '## Evaluation: CONCERNS', '## Evaluation: FAIL', or '## Evaluation: BLOCKED'",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Report contains an '### Implementation Health' section verifying the project builds and existing tests pass",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "Report contains an '### Evaluator Setup' section tracking the evaluator's own test compilation and dependency resolution",
+        "type": "quality"
+      },
+      {
+        "id": 4,
+        "text": "Report contains a '### Spec Coverage' section listing each spec requirement with PASS or FAIL",
+        "type": "quality"
+      },
+      {
+        "id": 5,
+        "text": "Report contains a '### Summary' section with a 2-3 sentence assessment",
+        "type": "quality"
+      },
+      {
+        "id": 6,
+        "text": "Spec Coverage lists all four requirements: configurable prefix, 32-char length, revoke by ID, revoked key returns 403",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 11,
+    "eval_name": "Evaluator handles complex spec with mixed pass, fail, and edge case results",
+    "prompt": "Evaluate ARC-5.11 (session management). Spec says: 'Create session on login with configurable TTL. Refresh session extends TTL by original duration. Concurrent sessions limited to 3 per user — oldest evicted. Session invalidated on password change. Return session metadata including created_at and last_active_at.' Base SHA is aaa1111. Your acceptance tests show: creation works, refresh works, concurrent limit is enforced but oldest is NOT evicted (returns 429 instead), password-change invalidation is not implemented at all, and metadata is returned but missing last_active_at.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Overall evaluation result is FAIL (due to missing behavior and spec-intent gap)",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Spec Coverage section lists all five requirements with individual PASS/FAIL status",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "Password-change invalidation is classified as Missing Behavior with Critical severity",
+        "type": "quality"
+      },
+      {
+        "id": 4,
+        "text": "Concurrent session eviction (429 instead of oldest-evicted) is classified as Spec-Intent Gap, not Missing Behavior",
+        "type": "quality"
+      },
+      {
+        "id": 5,
+        "text": "Missing last_active_at in metadata is reported as a finding (Spec-Intent Gap or Missing Behavior)",
+        "type": "quality"
+      },
+      {
+        "id": 6,
+        "text": "Session creation and refresh are marked as PASS in Spec Coverage",
+        "type": "quality"
+      }
+    ]
+  },
+  {
+    "eval_id": 12,
+    "eval_name": "Evaluator reports FAIL when the implementer's build is broken",
+    "prompt": "Evaluate ARC-5.12 (webhook delivery). Before writing any acceptance tests, you run the project build and it fails: 'error: cannot find crate for webhook_handler'. The existing test suite also fails with the same compilation error.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Implementation Health section shows project build as FAIL",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Overall evaluation result is FAIL (not BLOCKED) — a broken build is the implementer's fault",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "The build failure is reported as a Critical finding under Findings, not just noted in the health check",
+        "type": "quality"
+      },
+      {
+        "id": 4,
+        "text": "Output does NOT report BLOCKED — BLOCKED is reserved for the evaluator's own setup failures",
+        "type": "constraint"
+      }
+    ]
+  },
+  {
+    "eval_id": 13,
+    "eval_name": "Evaluator reports BLOCKED when its own test setup fails",
+    "prompt": "Evaluate ARC-5.13 (PDF export). The project builds fine and existing tests pass. You write acceptance tests but they fail to compile because you added a test dependency that conflicts with the project's pinned version: 'error: incompatible version of pdf-writer'.",
+    "assertions": [
+      {
+        "id": 1,
+        "text": "Implementation Health section shows project build as PASS and existing tests as PASS",
+        "type": "quality"
+      },
+      {
+        "id": 2,
+        "text": "Evaluator Setup section shows acceptance test compilation as FAIL",
+        "type": "quality"
+      },
+      {
+        "id": 3,
+        "text": "Overall evaluation result is BLOCKED (not FAIL) — the evaluator's dependency conflict is not the implementer's fault",
+        "type": "quality"
+      },
+      {
+        "id": 4,
+        "text": "Output does NOT report findings against the implementation — spec coverage is inconclusive when BLOCKED",
+        "type": "constraint"
+      }
+    ]
+  }
+]

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title>Mneme icon</title>
+  <rect width="64" height="64" rx="16" fill="#0F766E"/>
+  <path d="M15 46V18h7.5L32 32.1 41.5 18H49v28h-7V31.5l-10 14.2-10-14.2V46H15Z" fill="#FFFFFF"/>
+</svg>

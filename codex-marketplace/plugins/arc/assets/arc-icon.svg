@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title>Arc icon</title>
+  <rect width="64" height="64" rx="16" fill="#2563EB"/>
+  <path d="M18 46 32 16l14 30h-8l-2.8-6H28.8L26 46h-8Zm14.1-13h4.1L32 23.6 32.1 33Z" fill="#FFFFFF"/>
+</svg>

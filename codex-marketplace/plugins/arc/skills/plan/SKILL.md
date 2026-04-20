@@ -18,7 +18,20 @@ Plans are ephemeral review artifacts backed by filesystem markdown files:
 
 ## Granularity Rule
 
-Each task step is **ONE action, 2-5 minutes**. Assume the implementer has **zero codebase context** and fresh context without codebase familiarity. If a step says "add validation" without showing the code, it's too vague.
+Each task step is **ONE action, 2-5 minutes**. Assume the implementer has **zero codebase context**. If a step says "add validation" without showing the code, it's too vague.
+
+## No Placeholders
+
+Every step in a task description must contain the actual content an implementer needs. These are **plan failures** — never write them:
+
+- `"Add appropriate error handling"` / `"add validation"` / `"handle edge cases"` — show the actual code
+- `"Write tests for the above"` without test code — include the test code
+- `"Similar to Task N"` — repeat the content; the implementer has zero context of other tasks
+- Steps that describe what to do without showing how — code blocks required for code steps
+- References to types, functions, or methods not defined in any task or already on HEAD
+- `"TBD"`, `"TODO"`, `"implement later"`, `"fill in details"`
+
+Code blocks represent the **intent, structure, and behavior** — not a character-for-character mandate.
 
 ## Workflow
 
@@ -42,7 +55,7 @@ If shared contracts exist and parallel execution is likely:
 2. Mark all parallelizable tasks as **blocked by T0**
 3. T0 runs sequentially before any parallel batch begins
 
-This ensures parallel agents inherit shared definitions from HEAD rather than inventing them independently.
+This ensures parallel agents inherit shared definitions from HEAD rather than inventing them independently. T0 owns those shared files while establishing them; later tasks may depend on them, but any further edits to the same file must happen in an explicitly serialized follow-up task.
 
 **T0 task descriptions must be literal, not prose.** The description should contain:
 - **Exact type/interface code** to write to specific files (sourced from the brainstorm design's shared contracts)
@@ -119,9 +132,13 @@ Break the design into self-contained implementation units. Each task should:
 - Be implementable without knowledge of other tasks
 - Include exact file paths for all files to create or modify
 - Follow a logical dependency order
-- **Not overlap in file ownership with other parallelizable tasks**
+- **Not overlap in file ownership with other tasks in the same parallel batch**
 
-When identifying tasks, assign **file ownership** — each file should be owned by exactly one task. If two tasks need to modify the same file, either merge them into one task, serialize them with a dependency, or extract the shared file into the foundation task.
+When identifying tasks, assign **file ownership** per execution phase:
+- Within a parallel batch, each file must be owned by exactly one task.
+- Across serialized tasks, a later task may take ownership of a file after an earlier task completes; make that handoff explicit in the dependency order.
+
+If two tasks need to modify the same file, either merge them into one task, serialize them with a dependency, or extract the shared file work into the foundation task.
 
 ### 4. Create Epic and Tasks via arc-issue-tracker
 
@@ -210,6 +227,15 @@ EOF
 
 **IMPORTANT**: Preserve the full design content already in the description — do not replace it with a summary. The epic description is the permanent record of the design. Only append the task breakdown table at the end.
 
+### 6.5. Self-Review
+
+After writing all tasks, review the plan against the design before proceeding:
+
+1. **Spec coverage:** Skim each section/requirement in the design. Can you point to a task that implements it?
+2. **Placeholder scan:** Search all task descriptions for red flags from the No Placeholders list.
+3. **Type consistency:** Do later tasks use the same names/signatures defined earlier?
+4. **Step completeness:** Every code step has a code block. Every command step has the exact command and expected output.
+
 ### 7. Choose Execution Path
 
 **Use the AskUserQuestion tool** to let the user choose:
@@ -273,7 +299,11 @@ type Memory struct {
 1. Write failing test for <specific behavior> in `path/to/file_test.go`
 2. Run `go test ./path/to/...` — confirm it fails with <expected error>
 3. Implement <specific function> in `path/to/new_file.go`:
-   - <concrete code guidance, not just "add validation">
+   ```go
+   func specificFunction(arg Type) (Result, error) {
+       // exact implementation code — not prose descriptions
+   }
+   ```
 4. Run `go test ./path/to/...` — confirm it passes
 5. Commit: `feat(module): add <feature>`
 
@@ -283,6 +313,8 @@ go test ./path/to/...
 ## Expected Outcome
 <what should work when this task is done>
 ```
+
+**Hard rule:** Every code step requires a code block. Every command step requires the exact command and expected output.
 
 ### Design Contracts guidance
 

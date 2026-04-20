@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.1] - 2026-04-20
+
+### Fixes
+
+- sync Claude `arc` planning/review wording into the Codex `arc` runtime where the behavior is platform-neutral
+- tighten Codex `arc` task planning to reject placeholder task descriptions
+- tighten Codex `arc` implement orchestration guidance around context gaps and scope limits without changing the implementer agent's `PASS | PARTIAL` contract
+
 ## [0.7.0](https://github.com/SentioLabs/agent-nexus/compare/codex-arc-v0.6.0...codex-arc-v0.7.0) (2026-04-04)
 
 

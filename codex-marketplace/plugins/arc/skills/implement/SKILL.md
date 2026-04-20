@@ -93,8 +93,19 @@ Implement this task following TDD (RED → GREEN → REFACTOR → GATE).
 ## Task
 <paste output of: arc show <task-id>>
 
+## Context
+State the parent epic, completed prerequisite tasks, and any shared files or types that are already on HEAD.
+
 ## Project Test Command
 <project's test command, e.g., make test, go test ./...>
+
+## Scope Rules
+- Build ONLY what the task specifies. Follow code blocks' structure and behavior, adapted to project conventions.
+- Do NOT add features, flags, helpers, or improvements not in the task.
+- Do NOT modify files outside the `## Files` section.
+- If a prerequisite is missing (type, file, dependency not on HEAD), return `PARTIAL` and document it in `### Gate: Unresolved`.
+- If a step is vague, return `PARTIAL` and document the ambiguity in `### Gate: Unresolved` — do not fill in gaps with your judgment.
+- If you notice non-blocking issues outside your scope, do NOT expand scope. Note them briefly in your report after the in-scope work is complete.
 
 Commit your work when all gate checks pass.
 ```
@@ -138,6 +149,14 @@ Continue implementing this task. A previous attempt was made but the gate check 
 
 Fix the identified issues, re-run all gate checks, and commit when complete.
 ```
+
+**If `PARTIAL` is due to ambiguity or a missing prerequisite**:
+- Read the `### Gate: Unresolved` section
+- If the issue is a missing prerequisite, fix dependency ordering or provide the missing definition before re-dispatching
+- If the issue is task ambiguity, clarify the task before re-dispatching
+
+**If `PASS` includes non-blocking out-of-scope observations**:
+- Note the observation on the epic or task, then continue to evaluator/reviewer dispatch
 
 ### 5. Dispatch Evaluation and Review (Parallel)
 

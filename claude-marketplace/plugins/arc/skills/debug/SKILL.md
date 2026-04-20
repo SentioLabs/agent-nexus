@@ -28,7 +28,7 @@ Create a TodoWrite checklist with these phases and work through them:
 
 ### Phase 2: Pattern Analysis
 
-- Find working examples of similar code in the codebase — use semantic search tools (ck-search or equivalent) if available to find code by intent ("successful database connection handling") rather than keyword guessing. Use symbol-level tools (Serena or equivalent) to trace reference chains and understand call flows without reading entire files.
+- Find working examples of similar code in the codebase
 - Compare working code against broken code — what's different?
 - Check if this is a known pattern (dependency version, config issue, API change)
 - Look for similar past issues: `arc list --type=bug`

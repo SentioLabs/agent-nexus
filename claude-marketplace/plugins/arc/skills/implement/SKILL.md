@@ -93,8 +93,20 @@ Implement this task following TDD (RED → GREEN → REFACTOR → GATE).
 ## Task
 <paste output of: arc show <task-id>>
 
+## Context
+<1-2 sentences: where this task fits in the epic, what ran before it,
+any shared types/files now on HEAD from prior tasks>
+
 ## Project Test Command
 <project's test command, e.g., make test, go test ./...>
+
+## Scope Rules
+- Build ONLY what the task specifies. Follow code blocks' structure and behavior, adapted to project conventions.
+- Do NOT add features, flags, helpers, or improvements not in the task.
+- Do NOT modify files outside the ## Files section.
+- If a prerequisite is missing (type, file, dependency not on HEAD), report NEEDS_CONTEXT.
+- If you notice non-blocking issues outside your scope, report DONE_WITH_CONCERNS.
+- If a step is vague, report NEEDS_CONTEXT — do not fill in gaps with your judgment.
 
 Commit your work when all gate checks pass.
 ```
@@ -105,7 +117,7 @@ When the subagent reports back, check the **Result** and **Gate Results** in its
 
 **If `PASS`** (all gate checks passed):
 - Run the project test command fresh yourself to confirm — do NOT trust the subagent's report alone
-- If tests pass → proceed to step 5 (Dispatch Evaluation and Review)
+- If tests pass → proceed to step 5 (Spec Compliance Review)
 
 **If `PARTIAL`** (gate identified unresolved issues):
 - Read the `Gate: Unresolved` section carefully
@@ -139,23 +151,101 @@ Continue implementing this task. A previous attempt was made but the gate check 
 Fix the identified issues, re-run all gate checks, and commit when complete.
 ```
 
-### 5. Dispatch Evaluation and Review (Parallel)
+**If `NEEDS_CONTEXT`** (implementer hit ambiguity or missing prerequisite):
+- Read the `## Context Needed` section
+- If the issue is a missing prerequisite (type, file, dependency not on HEAD) → check if another task should have created it. If so, that task may need to run first (dependency ordering issue). If not, this is a planning gap — create a follow-up arc issue or provide the missing definition.
+- If the issue is ambiguity in the task description → provide clarification and re-dispatch with the original task plus the clarification.
+- Do NOT re-dispatch without addressing the context gap — the implementer will hit the same wall.
 
-After confirming tests pass, dispatch the evaluator and reviewer **simultaneously** — they examine orthogonal concerns and do not depend on each other:
+**If `DONE_WITH_CONCERNS`** (work complete, non-blocking observations):
+- Read the `## Concerns` section
+- If concerns describe potential issues in adjacent code → note in an arc comment on the epic for later triage
+- If concerns describe code quality observations (large file, repeated pattern) → note for future planning
+- Proceed to step 5 (spec compliance review) — the work itself is complete and all gates passed
+
+### 5. Spec Compliance Review
+
+After confirming tests pass, dispatch the `arc-spec-reviewer` to independently verify the implementation matches the spec:
 
 ```bash
-# Get the design context from the parent epic
-PARENT=$(arc show <task-id> --json | jq -r '.parent_id // empty')
-# Get BASE and HEAD SHAs for the reviewer
 BASE_SHA=$PRE_TASK_SHA
+```
+
+Dispatch `arc-spec-reviewer`:
+
+```
+Verify this implementation matches its specification exactly.
+
+## Task Spec
+<paste output of: arc show <task-id>>
+
+## Implementer Report
+<paste the implementer's report>
+
+## Base SHA
+<BASE_SHA> (use for: git diff --name-only <BASE_SHA>..HEAD)
+```
+
+Handle results:
+- `COMPLIANT` → proceed to Step 6
+- `ISSUES (Missing)` → re-dispatch `arc-implementer` with specific gaps listed by the spec reviewer. Re-run spec compliance review after.
+- `ISSUES (Extra)` → re-dispatch `arc-implementer` to remove the extras listed by the spec reviewer. Re-run spec compliance review after.
+- `ISSUES (Misunderstood)` → re-dispatch `arc-implementer` with clarification from the spec reviewer's findings. Re-run spec compliance review after.
+- Circuit breaker: 3 spec-review/fix cycles without resolution → escalate to user.
+
+> **Docs-only tasks**: Skip this step. The spec-reviewer is designed around code verification (file lists, function signatures, test coverage) and doesn't apply to documentation. For docs-only tasks, the orchestrator verifies formatting/completeness directly: check that all files in `## Files` were created/modified, links resolve, heading hierarchy is correct, code blocks have language tags.
+
+### 6. Code Quality Review
+
+Only dispatched after spec compliance passes. Use the `review` skill or dispatch `arc-reviewer` directly:
+
+```bash
 HEAD_SHA=$(git rev-parse HEAD)
 ```
 
-**In a single response**, dispatch both agents:
+```
+Review these changes against the task spec and project conventions.
 
-**Agent 1 — `arc-evaluator`** (adversarial spec verification, **dispatched with `isolation: "worktree"`**):
+## Task Spec
+<paste output of: arc show <task-id>>
 
-The evaluator runs in a worktree so it can freely write acceptance tests and add dependencies without dirtying the main working tree. The worktree is automatically discarded when the agent finishes.
+## Design Spec
+<excerpt from parent epic, if available>
+
+## Changes
+<git diff $PRE_TASK_SHA..$HEAD_SHA>
+
+## Evaluator Status
+not dispatched
+
+Report findings as: Critical, Important, Minor.
+If design spec provided, also report Plan Adherence.
+```
+
+Handle findings:
+
+| Finding | Action |
+|---------|--------|
+| **Critical/Important** | Re-dispatch `arc-implementer` with fixes. Re-review after. |
+| **Minor** | Note in arc comment. Proceed. |
+| **Deviation (fix)** | Re-dispatch `arc-implementer` to match the design. |
+| **Deviation (accept)** | Log as arc comment: "Accepted deviation: \<description\>. Rationale: \<why\>." Proceed. |
+
+Circuit breaker: 3 review/fix cycles on the same finding → escalate to user.
+
+> **Docs-only tasks**: Skip code quality review. For substantial documentation changes (developer-facing API docs, architecture docs), optionally dispatch `arc-reviewer` for a quality check.
+
+### 6.5. High-Risk Evaluation (Optional)
+
+The evaluator is **not dispatched by default**. Dispatch only when:
+- Task has a `high-risk` label
+- The orchestrator judges the task warrants independent verification (e.g., complex spec with multiple valid interpretations, security-sensitive code, tasks that modify shared contracts)
+
+When dispatched, use `isolation: "worktree"` and the existing `arc-evaluator` agent. The evaluator can run **in parallel with Step 6** (code quality review) since they examine orthogonal concerns:
+
+```bash
+PARENT=$(arc show <task-id> --json | jq -r '.parent_id // empty')
+```
 
 ```
 Evaluate whether this implementation faithfully satisfies the spec. Write your own acceptance tests from the spec alone — do NOT read the implementer's tests or the git diff.
@@ -171,49 +261,12 @@ If no design spec is available, omit this section entirely.
 <BASE_SHA> (use for: git diff --name-only <BASE_SHA>..HEAD to find changed files)
 
 ## Project Test Command
-<project's test command, e.g., make test, go test ./...>
+<project's test command>
 ```
 
-**Agent 2 — `arc-reviewer`** (code quality and plan adherence):
+When dispatching alongside the evaluator, update the code quality reviewer's `## Evaluator Status` to `active`.
 
-Invoke the `review` skill as before — it dispatches the `arc-reviewer` with the diff, task spec, and design spec. Pass the task ID and the PRE_TASK_SHA recorded in step 3.
-
-> **Note**: For `docs-only` tasks, skip the evaluator entirely. Review remains optional — use it only for substantial documentation changes that affect developer-facing API docs.
-
-### 6. Triage Findings
-
-Both agents report back. Triage their findings together:
-
-#### Reviewer findings (code quality)
-
-| Finding | Action |
-|---------|--------|
-| **Critical/Important** | Re-dispatch `arc-implementer` with fixes. Re-review after. |
-| **Minor** | Note in arc comment. Proceed. |
-| **Deviation (fix)** | Re-dispatch `arc-implementer` to match the design. |
-| **Deviation (accept)** | Log as arc comment: "Accepted deviation: \<description\>. Rationale: \<why\>." Proceed. |
-
-For accepted deviations, the orchestrator decides — not the reviewer. If unsure whether a deviation is an improvement, default to fixing it to match the plan.
-
-#### Evaluator findings (spec compliance)
-
-| Finding | Action |
-|---------|--------|
-| **PASS** | Evaluator confirms spec compliance independently. Proceed. |
-| **CONCERNS** (edge cases / minor gaps) | Note findings in arc comment. Decide: fix now or defer. |
-| **FAIL — Implementation Health** | The project doesn't build or existing tests fail. This is a real implementer bug — re-dispatch `arc-implementer` with the build/test failure. |
-| **FAIL — Spec-Intent Gap** | Re-dispatch `arc-implementer` with the evaluator's finding. Include what the spec says, what the evaluator expected, and what actually happened. Re-evaluate after. |
-| **FAIL — Missing Behavior** | Re-dispatch `arc-implementer` with the missing behavior. Re-evaluate after. |
-| **BLOCKED** | The evaluator's own test setup failed (compilation, dependency resolution). This is NOT an implementer problem. Do NOT re-dispatch the implementer. Note in arc comment and proceed — the evaluator's verdict is inconclusive for this task. |
-| **Untestable Requirement** | This may indicate an incomplete public API. Assess whether the interface needs expansion and re-dispatch if so. |
-
-#### Conflict resolution
-
-If the reviewer and evaluator disagree (e.g., the reviewer says the code is clean but the evaluator says it doesn't match the spec), **the evaluator's spec-intent findings take priority** — correct behavior matters more than code style. Fix spec compliance first, then address code quality in the re-review cycle.
-
-#### Circuit breaker
-
-If 3 evaluate/fix cycles on the same finding haven't resolved it, STOP. The evaluator's interpretation of the spec may differ from a valid alternative reading. Escalate to the user with both interpretations — the spec may need clarification.
+Triage evaluator findings as before — see the evaluator triage table in the design spec.
 
 ### 7. Close Task
 

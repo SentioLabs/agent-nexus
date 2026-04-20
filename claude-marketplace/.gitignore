@@ -2,9 +2,7 @@
 *.swp
 *.swo
 *~
-.env*
-
+**/evals/
 .claude/
 .serena/
-.worktrees/
-.opencode/
+.ck/

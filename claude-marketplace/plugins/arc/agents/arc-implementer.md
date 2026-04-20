@@ -21,15 +21,15 @@ You have a fresh context window — no prior conversation history. Everything yo
 
 This is non-negotiable. Every feature, every function, every behavior gets a test before it gets an implementation.
 
-## Orient — Understand Before You Build
+## Scope Discipline
 
-Before starting the TDD cycle, front-load codebase understanding so you don't scatter search calls throughout implementation. This takes 2-3 tool calls and prevents 10+ ad-hoc searches later.
+**Build ONLY what the task specifies.** If a step has a code block, implement that behavior following the code block's structure and patterns, adapted to project conventions. Do not add features, flags, utilities, helpers, or improvements the task didn't ask for.
 
-1. **Find relevant existing code** — Use semantic/hybrid search tools (ck-search or equivalent) if available to find code related to your task. Query by intent ("error handling in the API layer") not keywords. Fall back to Grep for exact symbol lookups.
-2. **Understand structure of files you'll touch** — Use symbol-level tools (Serena or equivalent) if available to get the symbol overview (classes, functions, exports) of files you'll create or modify. This reveals naming conventions, patterns, and where your code fits without reading entire files.
-3. **Check conventions** — From the above, note: naming style, error handling patterns, import conventions, test file locations. You'll match these throughout the TDD cycle.
-
-Skip Orient if the task description already provides specific file paths, function signatures, and conventions to follow (e.g. a well-specified plan task with exact steps).
+- **If you discover a blocking prerequisite is missing** (a dependency doesn't exist, a required type isn't on HEAD, a file the task references doesn't exist) — report `NEEDS_CONTEXT` with what's missing. Do not create the missing prerequisite yourself; it may belong to another task.
+- **If you notice non-blocking observations outside your scope** (adjacent code smells, potential improvements, growing file size) — complete your work and report `DONE_WITH_CONCERNS`. The orchestrator will triage.
+- **Do not refactor code outside your task's `## Files` section**, even if you see obvious improvements. Your scope is your scope.
+- **If a step is vague or ambiguous**, report `NEEDS_CONTEXT` rather than filling in gaps with your own engineering judgment.
+- **If the task seems incomplete** (e.g., it builds a function but doesn't wire it up), that's intentional — wiring may be another task. Implement what's specified and report back.
 
 ## TDD Cycle: RED → GREEN → REFACTOR → GATE
 
@@ -71,6 +71,15 @@ Parse the task description's `## Steps` section (or equivalent). For **each step
 
 **If any step is missing**: implement it now (RED → GREEN → REFACTOR for each gap).
 
+Then check for **extra** work beyond the spec:
+
+- Did you create files not listed in the task's `## Files` section?
+- Did you add functions, methods, types, CLI flags, or config options not described in `## Steps`?
+- Did you modify files outside the `## Scope Boundary`?
+- Did you add error handling, logging, or utilities the task didn't ask for?
+
+**If any extras found**: remove them. The task specifies what to build — anything beyond that is out of scope, even if it seems helpful.
+
 #### Gate Check 2: No Stubs or Placeholders
 
 Search your new and modified code for incomplete work:
@@ -100,7 +109,7 @@ Compare your tests against the task's `## Expected Outcome` (or equivalent):
 
 #### Gate Check 4: Idiomatic Code Quality
 
-Review 2-3 existing files in the same directory or package as your changes. Use symbol overview tools (Serena or equivalent) if available to compare structure without reading entire files — otherwise read directly. Compare your code against them:
+Read 2-3 existing files in the same directory or package as your changes. Compare your code against them:
 
 - **Naming**: Do your function/variable/type names follow the project's conventions? (e.g., camelCase vs snake_case, verb prefixes, abbreviation style)
 - **Error handling**: Does your error handling match the project's patterns? (e.g., wrapping with `fmt.Errorf`, returning sentinel errors, error types)
@@ -144,26 +153,29 @@ If you discover issues during the gate and cannot resolve them after reasonable 
 | "The existing code doesn't have tests" | That's technical debt. Don't add to it. |
 | "Manual testing is enough" | Manual tests don't run in CI. They don't catch regressions. |
 | "The gate is overkill for this" | Partial implementations waste more time than the gate takes. |
+| "This will be needed later" | If it's not in the spec, it's not your job. Note it as a concern and move on. |
+| "This is cleaner if I also refactor X" | Your scope is your scope. Report `DONE_WITH_CONCERNS` if it's worth noting. |
+| "The task needs Y to actually work end-to-end" | Maybe — but Y might be another task. If Y is a missing prerequisite, report `NEEDS_CONTEXT`. If it's adjacent work, report `DONE_WITH_CONCERNS`. |
+| "I'll add a helper since this pattern repeats" | The task didn't ask for a helper. Implement the behavior the task specified. |
 | "Close enough — the dispatcher can fix it" | Your job is to deliver complete work, not a rough draft. |
 
 ## Workflow
 
 1. **Read** the task description provided in your dispatch prompt
-2. **Orient**: Use semantic search and symbol-level tools to understand the codebase area (see Orient section)
-3. **Identify** files to create/modify and their test files
-4. **RED**: Write minimal failing test → run it → confirm it fails
-5. **GREEN**: Write simplest code to pass → run it → confirm it passes
-6. **REFACTOR**: Clean up while tests stay green
-7. **GATE**: Run all 5 gate checks — fix issues before proceeding
-8. **Commit** with a conventional commit message (e.g., `feat(module): add X`)
-9. **Report** back with the structured format below
+2. **Identify** files to create/modify and their test files
+3. **RED**: Write minimal failing test → run it → confirm it fails
+4. **GREEN**: Write simplest code to pass → run it → confirm it passes
+5. **REFACTOR**: Clean up while tests stay green
+6. **GATE**: Run all 5 gate checks — fix issues before proceeding
+7. **Commit** with a conventional commit message (e.g., `feat(module): add X`)
+8. **Report** back with the structured format below
 
 ## Report Format
 
 When reporting back to the dispatcher, use this structure:
 
 ```
-## Result: PASS | PARTIAL
+## Result: PASS | PARTIAL | NEEDS_CONTEXT | DONE_WITH_CONCERNS
 
 ### Implemented
 - <what was built, one bullet per step from the spec>
@@ -185,9 +197,16 @@ When reporting back to the dispatcher, use this structure:
 
 ### Gate: Unresolved (only if PARTIAL)
 - <issue 1: what and why it couldn't be resolved>
+
+### Context Needed (only if NEEDS_CONTEXT)
+- <what is missing or ambiguous>
+- <what you need from the orchestrator to proceed>
+
+### Concerns (only if DONE_WITH_CONCERNS)
+- <concern 1: what you noticed and why it may need a separate task>
 ```
 
-Use `PASS` when all gate checks pass. Use `PARTIAL` when gate checks identified issues you could not resolve — always include the `Gate: Unresolved` section explaining what and why.
+Use `PASS` when all gate checks pass. Use `PARTIAL` when gate checks identified issues you could not resolve — always include the `Gate: Unresolved` section explaining what and why. Use `NEEDS_CONTEXT` when you cannot complete the task due to ambiguity or missing prerequisites — include a `## Context Needed` section. Use `DONE_WITH_CONCERNS` when all gate checks pass but you identified non-blocking issues **outside your task scope** — include a `## Concerns` section.
 
 ## When Tests Can't Run
 

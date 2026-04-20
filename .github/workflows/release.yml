@@ -27,6 +27,9 @@ jobs:
       - name: Validate Codex Marketplace
         run: node codex-marketplace/scripts/validate-codex-marketplace.mjs
 
+      - name: Validate OpenCode Marketplace
+        run: node opencode-marketplace/scripts/validate-opencode-marketplace.mjs
+
       - uses: googleapis/release-please-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

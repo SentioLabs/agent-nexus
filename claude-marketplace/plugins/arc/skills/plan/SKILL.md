@@ -20,6 +20,19 @@ Plans are ephemeral review artifacts backed by filesystem markdown files:
 
 Each task step is **ONE action, 2-5 minutes**. Assume the implementer has **zero codebase context** and fresh context without codebase familiarity. If a step says "add validation" without showing the code, it's too vague.
 
+## No Placeholders
+
+Every step in a task description must contain the actual content an implementer needs. These are **plan failures** — never write them:
+
+- `"Add appropriate error handling"` / `"add validation"` / `"handle edge cases"` — show the actual code
+- `"Write tests for the above"` without test code — include the test code
+- `"Similar to Task N"` — repeat the content; the implementer has zero context of other tasks
+- Steps that describe what to do without showing how — code blocks required for code steps
+- References to types, functions, or methods not defined in any task or already on HEAD
+- `"TBD"`, `"TODO"`, `"implement later"`, `"fill in details"`
+
+Code blocks represent the **intent, structure, and behavior** — not a character-for-character mandate. The implementer follows the code block's signatures, logic, and patterns but adapts naming, error handling, and scaffolding to match project conventions (consistent with the implementer's Gate Check 4: Idiomatic Code Quality). Task-internal Design Contracts remain pseudocode that the implementer adapts to language idioms. The anti-placeholder rule prevents *missing* guidance, not idiomatic adaptation.
+
 ## Workflow
 
 Add tasks for each step below using `TaskCreate`. If continuing from the brainstorm skill, the brainstorm tasks will already be visible — add the planning tasks alongside them so the user sees the full brainstorm→plan progression. Mark each as `in_progress` when starting and `completed` when done.
@@ -210,6 +223,17 @@ EOF
 
 **IMPORTANT**: Preserve the full design content already in the description — do not replace it with a summary. The epic description is the permanent record of the design. Only append the task breakdown table at the end.
 
+### 6.5. Self-Review
+
+After writing all tasks, review the plan against the design before proceeding:
+
+1. **Spec coverage:** Skim each section/requirement in the design. Can you point to a task that implements it? If a gap exists, add the task.
+2. **Placeholder scan:** Search all task descriptions for red flags from the No Placeholders list. Fix them.
+3. **Type consistency:** Do the types, method signatures, and property names used in later tasks match what was defined in earlier tasks? A function called `clearLayers()` in T1 but `clearFullLayers()` in T3 is a bug.
+4. **Step completeness:** Every code step has a code block. Every command step has the exact command and expected output. No exceptions.
+
+Fix issues inline. No need to re-review — just fix and move on.
+
 ### 7. Choose Execution Path
 
 **Use the AskUserQuestion tool** to let the user choose:
@@ -273,7 +297,11 @@ type Memory struct {
 1. Write failing test for <specific behavior> in `path/to/file_test.go`
 2. Run `go test ./path/to/...` — confirm it fails with <expected error>
 3. Implement <specific function> in `path/to/new_file.go`:
-   - <concrete code guidance, not just "add validation">
+   ```go
+   func specificFunction(arg Type) (Result, error) {
+       // exact implementation code — not prose descriptions
+   }
+   ```
 4. Run `go test ./path/to/...` — confirm it passes
 5. Commit: `feat(module): add <feature>`
 
@@ -283,6 +311,8 @@ go test ./path/to/...
 ## Expected Outcome
 <what should work when this task is done>
 ```
+
+**Hard rule:** Every code step requires a code block. Every command step requires the exact command and expected output. Steps without these are plan failures — see the No Placeholders section above.
 
 ### Design Contracts guidance
 

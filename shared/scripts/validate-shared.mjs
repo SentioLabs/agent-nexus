@@ -102,6 +102,7 @@ function validateSharedLayout() {
   ensureDir("shared");
   ensureDir("claude-marketplace");
   ensureDir("codex-marketplace");
+  ensureDir("opencode-marketplace");
 
   const sharedRoot = path.join(repoRoot, "shared");
   if (!fs.existsSync(sharedRoot) || !fs.statSync(sharedRoot).isDirectory()) {
@@ -113,10 +114,17 @@ function validateSharedLayout() {
     `${path.sep}commands${path.sep}`,
     `${path.sep}agents${path.sep}`,
     `${path.sep}plugins${path.sep}`,
+    `${path.sep}.opencode${path.sep}`,
     `${path.sep}.claude-plugin${path.sep}`,
     `${path.sep}.codex-plugin${path.sep}`,
   ];
-  const runtimeFileNames = new Set(["SKILL.md", "plugin.json", "hooks.json", ".mcp.json"]);
+  const runtimeFileNames = new Set([
+    "SKILL.md",
+    "plugin.json",
+    "hooks.json",
+    ".mcp.json",
+    "opencode.fragment.json",
+  ]);
 
   for (const relativeFile of walkFiles("shared")) {
     const normalized = `${path.sep}${relativeFile.split(path.sep).join(path.sep)}${path.sep}`;

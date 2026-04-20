@@ -21,14 +21,6 @@ Create a task for each step below using `TaskCreate`. Mark each as `in_progress`
 - Review existing arc issues (`arc list`)
 - Understand what already exists and what constraints are in play
 
-**Efficient codebase exploration:** Prefer higher-level tools over raw text search to minimize exploration rounds:
-
-1. **Semantic search** (ck-search or equivalent) — for conceptual questions like "how does this codebase handle authentication?" or "where is config loaded?". One semantic or hybrid search typically surfaces the right files vs. 5-10 rounds of keyword guessing with Grep.
-2. **Symbol-level navigation** (Serena or equivalent) — once you've found relevant files, use symbol overview and reference-finding tools to understand structure without reading entire files. Get the class/function layout first, then read only the symbol bodies you need.
-3. **Grep/Glob** — for exact symbol lookups (specific function names, constants, imports) where you already know the keyword.
-
-The goal is to build a mental model of the relevant codebase areas in 2-3 targeted tool calls, not 10+ fishing expeditions.
-
 ### 2. Ask Clarifying Questions
 
 - Ask questions **one at a time** — don't dump a list

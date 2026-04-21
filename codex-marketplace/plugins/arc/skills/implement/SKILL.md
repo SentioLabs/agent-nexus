@@ -35,7 +35,7 @@ Multiple tasks dispatched simultaneously using `isolation: "worktree"`. Use this
 
 By default, use sequential dispatch. For independent tasks, see [Parallel Dispatch Protocol](#parallel-dispatch-protocol) below.
 
-**Task tracking**: At the start of implementation, create a task list using `TaskCreate` with one entry per arc issue to implement. This provides a visible progress tracker in the CLI. Update each task as you work:
+**Task tracking**: At the start of implementation, create a task list using `TaskCreate` with one entry per arc issue to implement. This provides the orchestrator's visible progress tracker in the CLI. Update each task as you work:
 - `in_progress` when dispatching the subagent
 - `completed` when the task is closed in arc
 
@@ -103,9 +103,9 @@ State the parent epic, completed prerequisite tasks, and any shared files or typ
 - Build ONLY what the task specifies. Follow code blocks' structure and behavior, adapted to project conventions.
 - Do NOT add features, flags, helpers, or improvements not in the task.
 - Do NOT modify files outside the `## Files` section.
-- If a prerequisite is missing (type, file, dependency not on HEAD), return `PARTIAL` and document it in `### Gate: Unresolved`.
-- If a step is vague, return `PARTIAL` and document the ambiguity in `### Gate: Unresolved` — do not fill in gaps with your judgment.
-- If you notice non-blocking issues outside your scope, do NOT expand scope. Note them briefly in your report after the in-scope work is complete.
+- If a prerequisite is missing (type, file, dependency not on HEAD), report `NEEDS_CONTEXT` and document it in `### Context Needed`.
+- If a step is vague, report `NEEDS_CONTEXT` and document the ambiguity in `### Context Needed` — do not fill in gaps with your judgment.
+- If you notice non-blocking issues outside your scope, report `DONE_WITH_CONCERNS` and document them in `### Concerns`.
 
 Commit your work when all gate checks pass.
 ```
@@ -114,19 +114,35 @@ Commit your work when all gate checks pass.
 
 When the subagent reports back, check the **Result** and **Gate Results** in its report:
 
+- `PASS`, `PARTIAL`, and `DONE_WITH_CONCERNS` should include gate results because the implementer reached or completed the gate.
+- `NEEDS_CONTEXT` may report `Gate Results: NOT RUN (blocked by context)` because the implementer could not reach the gate. In that case, the required follow-up section is `### Context Needed`.
+
 **If `PASS`** (all gate checks passed):
 - Run the project test command fresh yourself to confirm — do NOT trust the subagent's report alone
-- If tests pass → proceed to step 5 (Dispatch Evaluation and Review)
+- If tests pass → proceed to step 5 (Dispatch Verification)
 
-**If `PARTIAL`** (gate identified unresolved issues):
+**If `PARTIAL`** (gate identified unresolved implementation issues):
 - Read the `Gate: Unresolved` section carefully
 - Decide: is this a re-dispatch or a debug situation?
 - Handle issues before proceeding (see below)
 
-**If the subagent did not include gate results** (it skipped the gate):
+**If `NEEDS_CONTEXT`** (missing prerequisite or task ambiguity):
+- Expect `Gate Results: NOT RUN (blocked by context)` or equivalent wording
+- Read the `### Context Needed` section
+- If the issue is a missing prerequisite (type, file, dependency not on HEAD) → fix dependency ordering, provide the missing definition, or create a follow-up issue if the plan is incomplete
+- If the issue is task ambiguity → clarify the task and re-dispatch with the clarification
+- Do NOT re-dispatch without addressing the context gap — the implementer will hit the same wall again
+
+**If `DONE_WITH_CONCERNS`** (work complete, all gate checks passed, but out-of-scope concerns were noted):
+- Read the `### Concerns` section
+- Note the concerns on the task or epic for follow-up without expanding current scope
+- Run the project test command fresh yourself to confirm
+- If tests pass → proceed to step 5 (Dispatch Verification)
+
+**If a `PASS`, `PARTIAL`, or `DONE_WITH_CONCERNS` report did not include gate results** (it skipped the gate):
 - Treat this as a failed result — re-dispatch with explicit reminder to complete all gate checks
 
-**Handling issues from PARTIAL results**:
+**Handling issues from `PARTIAL` results**:
 
 - **Subagent reports `PARTIAL` with clear gaps** — re-dispatch `arc-implementer` with the specific gaps listed in `Gate: Unresolved`, plus the original task description
 - **Subagent reports test failures it can't resolve** — invoke the `debug` skill
@@ -150,29 +166,35 @@ Continue implementing this task. A previous attempt was made but the gate check 
 Fix the identified issues, re-run all gate checks, and commit when complete.
 ```
 
-**If `PARTIAL` is due to ambiguity or a missing prerequisite**:
-- Read the `### Gate: Unresolved` section
-- If the issue is a missing prerequisite, fix dependency ordering or provide the missing definition before re-dispatching
-- If the issue is task ambiguity, clarify the task before re-dispatching
+### 5. Dispatch Verification (Parallel)
 
-**If `PASS` includes non-blocking out-of-scope observations**:
-- Note the observation on the epic or task, then continue to evaluator/reviewer dispatch
-
-### 5. Dispatch Evaluation and Review (Parallel)
-
-After confirming tests pass, dispatch the evaluator and reviewer **simultaneously** — they examine orthogonal concerns and do not depend on each other:
+After confirming tests pass, collect shared review context once:
 
 ```bash
-# Get the design context from the parent epic
 PARENT=$(arc show <task-id> --json | jq -r '.parent_id // empty')
-# Get BASE and HEAD SHAs for the reviewer
 BASE_SHA=$PRE_TASK_SHA
 HEAD_SHA=$(git rev-parse HEAD)
 ```
 
-**In a single response**, dispatch both agents:
+**Normal code tasks**: In a single response, dispatch all three verification agents in parallel:
 
-**Agent 1 — `arc-evaluator`** (adversarial spec verification, **dispatched with `isolation: "worktree"`**):
+- `arc-reviewer` for code quality and conventions. Use the `review` skill or dispatch `arc-reviewer` directly with `## Evaluator Status` set to `active`.
+- `arc-spec-reviewer` for exact task compliance and scope-boundary checking:
+
+```
+Verify this implementation matches its specification exactly.
+
+## Task Spec
+<paste output of: arc show <task-id>>
+
+## Implementer Report
+<paste the implementer's report>
+
+## Base SHA
+<BASE_SHA> (use for: git diff --name-only <BASE_SHA>..HEAD)
+```
+
+- `arc-evaluator` for adversarial spec-intent verification, **dispatched with `isolation: "worktree"`**:
 
 The evaluator runs in a worktree so it can freely write acceptance tests and add dependencies without dirtying the main working tree. The worktree is automatically discarded when the agent finishes.
 
@@ -193,15 +215,34 @@ If no design spec is available, omit this section entirely.
 <project's test command, e.g., make test, go test ./...>
 ```
 
-**Agent 2 — `arc-reviewer`** (code quality and plan adherence):
+**Docs-only tasks**:
+- Skip the evaluator entirely.
+- Dispatch `arc-reviewer` and `arc-spec-reviewer` only when the task changes developer-facing workflow docs, command docs, or other documentation that materially affects how `arc` is used.
+- When dispatching `arc-spec-reviewer` for docs-only work, use a docs-specific handoff that matches `arc-doc-writer` output and the changed documentation paths:
 
-Invoke the `review` skill as before — it dispatches the `arc-reviewer` with the diff, task spec, and design spec. Pass the task ID and the PRE_TASK_SHA recorded in step 3.
+```
+Verify this documentation change matches its specification exactly.
 
-> **Note**: For `docs-only` tasks, skip the evaluator entirely. Review remains optional — use it only for substantial documentation changes that affect developer-facing API docs.
+## Task Spec
+<paste output of: arc show <task-id>>
+
+## Doc Writer Report
+<paste the arc-doc-writer report, if available>
+If no report is available, say so and rely on the changed doc paths plus diff.
+
+## Changed Doc Paths
+<paste output of: git diff --name-only <BASE_SHA>..HEAD>
+
+## Documentation Diff
+<paste output of: git diff <BASE_SHA>..<HEAD_SHA> -- <doc-paths>>
+```
+
+- For docs-only tasks that do **not** materially affect how `arc` is used, verify formatting/completeness directly and proceed without reviewer/spec-reviewer dispatch.
+- When reviewing a docs-only task, set the review skill's `## Evaluator Status` to `not dispatched`.
 
 ### 6. Triage Findings
 
-Both agents report back. Triage their findings together:
+Reviewer, spec reviewer, and evaluator report back independently. Triage their findings together. Any fix that changes code should send you back to step 5 so the full verification set runs again. For docs-only tasks, re-run only the checks that were actually dispatched.
 
 #### Reviewer findings (code quality)
 
@@ -213,8 +254,20 @@ Both agents report back. Triage their findings together:
 | **Deviation (accept)** | Log as arc comment: "Accepted deviation: \<description\>. Rationale: \<why\>." Proceed. |
 
 For accepted deviations, the orchestrator decides — not the reviewer. If unsure whether a deviation is an improvement, default to fixing it to match the plan.
+For docs-only tasks, route reviewer-requested fixes to `arc-doc-writer` instead of `arc-implementer`, then re-run only the dispatched docs checks from step 5.
 
-#### Evaluator findings (spec compliance)
+#### Spec reviewer findings
+
+| Finding | Action |
+|---------|--------|
+| **COMPLIANT** | Exact task compliance confirmed. Proceed. |
+| **ISSUES (Missing)** | Re-dispatch `arc-implementer` with the missing requirements called out by the spec reviewer. Re-run step 5 after the fix. |
+| **ISSUES (Extra)** | Re-dispatch `arc-implementer` to remove the extra work and restore scope discipline. Re-run step 5 after the fix. |
+| **ISSUES (Misunderstood)** | Re-dispatch `arc-implementer` with the misread requirement plus the corrected interpretation. Re-run step 5 after the fix. |
+
+For docs-only tasks, route spec-reviewer-requested fixes to `arc-doc-writer` instead of `arc-implementer`, then re-run only the dispatched docs checks from step 5.
+
+#### Evaluator findings
 
 | Finding | Action |
 |---------|--------|
@@ -228,11 +281,17 @@ For accepted deviations, the orchestrator decides — not the reviewer. If unsur
 
 #### Conflict resolution
 
-If the reviewer and evaluator disagree (e.g., the reviewer says the code is clean but the evaluator says it doesn't match the spec), **the evaluator's spec-intent findings take priority** — correct behavior matters more than code style. Fix spec compliance first, then address code quality in the re-review cycle.
+If the checks disagree on the same question, resolve them in this order:
+
+1. **Evaluator** for spec-intent behavior
+2. **Spec reviewer** for exact task compliance
+3. **Reviewer** for code quality and conventions
+
+Use the highest-ranked source that speaks directly to the disputed issue, then keep the lower-ranked findings in their own domain.
 
 #### Circuit breaker
 
-If 3 evaluate/fix cycles on the same finding haven't resolved it, STOP. The evaluator's interpretation of the spec may differ from a valid alternative reading. Escalate to the user with both interpretations — the spec may need clarification.
+If 3 verify/fix cycles on the same finding haven't resolved it, STOP. The evaluator or spec reviewer may be exposing a real ambiguity in the task. Escalate to the user with the competing interpretations and the evidence behind them.
 
 ### 7. Close Task
 

@@ -9,7 +9,7 @@ Dispatch the `arc-reviewer` subagent to review implementation work, then triage 
 
 ## Workflow
 
-Create a TodoWrite checklist with these steps:
+Create a `TodoWrite` checklist with these steps for standalone review work. If this review is running inside the implement skill's verification fan-out, reuse the implement orchestrator's existing `TaskCreate` item instead of creating parallel tracking.
 
 ### 1. Get Git SHAs
 
@@ -60,6 +60,9 @@ If no design spec is available, omit this section entirely.
 ## Changes
 <paste output of: git diff <BASE_SHA>..<HEAD_SHA>>
 
+## Evaluator Status
+<active | not dispatched>
+
 Report findings as: Critical (must fix), Important (should fix), Minor (note for later).
 If a design spec was provided, also report Plan Adherence (ADHERENT or DEVIATION with fix/accept recommendation).
 ```
@@ -85,10 +88,13 @@ If fixes are needed:
 
 **Circuit breaker**: If 3 review/fix cycles on the same task haven't resolved all findings, STOP. Escalate to the user with a summary of what keeps recurring — the reviewer and implementer may disagree on the approach, or the task spec may be ambiguous.
 
-### 6. Proceed
+### 6. Return Findings
 
-- If all tasks are done → invoke `finish`
-- If more tasks remain → return to `implement` for the next task
+Return the reviewer findings, severity, and any re-review recommendation to the caller or orchestrator.
+
+- If Critical or Important findings remain, say they require implementer follow-up plus re-review.
+- If only Minor findings or accepted deviations remain, say review is complete and the caller can decide the next orchestration step.
+- Do not invoke `finish` from this skill and do not decide whether to return to `implement` — that belongs to the caller coordinating the wider workflow.
 
 ## Response Discipline
 
@@ -96,12 +102,16 @@ When receiving review feedback from the `arc-reviewer`:
 
 - **Evaluate technically.** Don't agree performatively. If a finding is wrong, explain why with evidence.
 - **If it's right, fix it.** Don't negotiate or defer valid Critical/Important findings.
-- **If it's ambiguous, test it.** Write a test that proves or disproves the concern.
+- **If it's ambiguous, flag the ambiguity.** Recommend evaluator escalation or an implementer follow-up test when that would resolve the uncertainty.
 - **No ego.** The reviewer is checking the subagent's work, not yours personally.
 
 ## Relationship to the Evaluator
 
-When dispatched from the `implement` skill, the reviewer runs **in parallel** with the `arc-evaluator`. Their concerns are complementary, not overlapping:
+The evaluator is **not always present**. Your dispatch prompt includes an `## Evaluator Status` line that tells you whether the evaluator is running for this task.
+
+**When Evaluator Status is `active`** (high-risk tasks):
+
+The evaluator runs in parallel with you. Your concerns are complementary:
 
 | | Reviewer (you) | Evaluator |
 |---|---|---|
@@ -109,7 +119,13 @@ When dispatched from the `implement` skill, the reviewer runs **in parallel** wi
 | **Input** | Git diff + spec | Spec only (no diff) |
 | **Modifies code?** | No | Writes ephemeral acceptance tests, then deletes them |
 
-The reviewer should focus on what it does best — code quality, naming, structure, conventions, and plan adherence. Do not attempt behavioral verification (e.g., "this function probably handles empty input correctly") — the evaluator handles that with actual tests. If you notice a code path that looks like it might not match the spec, flag it as a finding with your reasoning, but defer to the evaluator's test results for behavioral confirmation.
+Focus on code quality, naming, structure, conventions, and plan adherence. Defer behavioral verification to the evaluator's actual tests.
+
+**When Evaluator Status is `not dispatched`** (default path):
+
+You are the only reviewer. In addition to code quality and plan adherence, **flag behavioral concerns** — code paths that look like they might not match the spec, edge cases that appear unhandled, logic that seems inconsistent with the task's `## Expected Outcome`. Describe the suspected behavior gap and the code path involved so the orchestrator can decide whether to escalate to the evaluator.
+
+You are not expected to write or run tests — that's still the evaluator's job if escalated. But you should flag what you see.
 
 ## Contexts
 
@@ -126,5 +142,5 @@ This skill works in both execution models:
 - Re-review after fixes — don't assume fixes are correct
 - The reviewer reports; you decide what to do with the findings
 - Never make code changes in the review skill — dispatch the implementer for fixes
-- Focus on code quality — leave behavioral verification to the evaluator
+- Focus on code quality and conventions. Flag behavioral concerns when no evaluator is present.
 - Format all arc content (descriptions, plans, comments) per `skills/arc/_formatting.md`

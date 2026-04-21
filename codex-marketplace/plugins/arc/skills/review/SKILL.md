@@ -109,7 +109,7 @@ When receiving review feedback from the `arc-reviewer`:
 
 The evaluator is **not always present**. Your dispatch prompt includes an `## Evaluator Status` line that tells you whether the evaluator is running for this task.
 
-**When Evaluator Status is `active`** (high-risk tasks):
+**When Evaluator Status is `active`** (normal code-task path from `implement`, plus any other review flow where the evaluator was dispatched):
 
 The evaluator runs in parallel with you. Your concerns are complementary:
 
@@ -121,7 +121,7 @@ The evaluator runs in parallel with you. Your concerns are complementary:
 
 Focus on code quality, naming, structure, conventions, and plan adherence. Defer behavioral verification to the evaluator's actual tests.
 
-**When Evaluator Status is `not dispatched`** (default path):
+**When Evaluator Status is `not dispatched`** (docs-only reviews, standalone review flows, or any path where the evaluator was intentionally skipped):
 
 You are the only reviewer. In addition to code quality and plan adherence, **flag behavioral concerns** — code paths that look like they might not match the spec, edge cases that appear unhandled, logic that seems inconsistent with the task's `## Expected Outcome`. Describe the suspected behavior gap and the code path involved so the orchestrator can decide whether to escalate to the evaluator.
 

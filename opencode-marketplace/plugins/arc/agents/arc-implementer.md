@@ -1,12 +1,10 @@
 ---
 description: Use this agent for implementing a single task using TDD. Dispatched by the implement skill with a task description from arc. Receives task context, implements following RED → GREEN → REFACTOR → GATE, commits results, and reports back.
+mode: subagent
 tools:
-  - Bash
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
+  webfetch: false
+  task: false
+  todowrite: false
 ---
 
 # Arc Implementer Agent
@@ -206,7 +204,7 @@ When reporting back to the dispatcher, use this structure:
 - <concern 1: what you noticed and why it may need a separate task>
 ```
 
-Use `PASS` when all gate checks pass. Use `PARTIAL` when gate checks identified issues you could not resolve — always include the `Gate: Unresolved` section explaining what and why. Use `NEEDS_CONTEXT` when you cannot complete the task due to ambiguity or missing prerequisites — include a `### Context Needed` section. Use `DONE_WITH_CONCERNS` when all gate checks pass but you identified non-blocking issues **outside your task scope** — include a `### Concerns` section.
+Use `PASS` when all gate checks pass. Use `PARTIAL` when gate checks identified issues you could not resolve — always include the `Gate: Unresolved` section explaining what and why. Use `NEEDS_CONTEXT` when you cannot complete the task due to ambiguity or missing prerequisites — include a `## Context Needed` section. Use `DONE_WITH_CONCERNS` when all gate checks pass but you identified non-blocking issues **outside your task scope** — include a `## Concerns` section.
 
 ## When Tests Can't Run
 

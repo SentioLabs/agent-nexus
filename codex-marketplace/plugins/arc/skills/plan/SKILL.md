@@ -31,7 +31,7 @@ Every step in a task description must contain the actual content an implementer 
 - References to types, functions, or methods not defined in any task or already on HEAD
 - `"TBD"`, `"TODO"`, `"implement later"`, `"fill in details"`
 
-Code blocks represent the **intent, structure, and behavior** — not a character-for-character mandate.
+Code blocks represent the **intent, structure, and behavior** — not a character-for-character mandate. The implementer follows the code block's signatures, logic, and patterns but adapts naming, error handling, and scaffolding to match project conventions (consistent with the implementer's Gate Check 4: Idiomatic Code Quality). Task-internal Design Contracts remain pseudocode that the implementer adapts to language idioms. The anti-placeholder rule prevents *missing* guidance, not idiomatic adaptation.
 
 ## Workflow
 
@@ -231,10 +231,12 @@ EOF
 
 After writing all tasks, review the plan against the design before proceeding:
 
-1. **Spec coverage:** Skim each section/requirement in the design. Can you point to a task that implements it?
-2. **Placeholder scan:** Search all task descriptions for red flags from the No Placeholders list.
-3. **Type consistency:** Do later tasks use the same names/signatures defined earlier?
-4. **Step completeness:** Every code step has a code block. Every command step has the exact command and expected output.
+1. **Spec coverage:** Skim each section/requirement in the design. Can you point to a task that implements it? If a gap exists, add the task.
+2. **Placeholder scan:** Search all task descriptions for red flags from the No Placeholders list. Fix them.
+3. **Type consistency:** Do the types, method signatures, and property names used in later tasks match what was defined in earlier tasks? A function called `clearLayers()` in T1 but `clearFullLayers()` in T3 is a bug.
+4. **Step completeness:** Every code step has a code block. Every command step has the exact command and expected output. No exceptions.
+
+Fix issues inline. No need to re-review — just fix and move on.
 
 ### 7. Choose Execution Path
 
@@ -314,7 +316,7 @@ go test ./path/to/...
 <what should work when this task is done>
 ```
 
-**Hard rule:** Every code step requires a code block. Every command step requires the exact command and expected output.
+**Hard rule:** Every code step requires a code block. Every command step requires the exact command and expected output. Steps without these are plan failures — see the No Placeholders section above.
 
 ### Design Contracts guidance
 

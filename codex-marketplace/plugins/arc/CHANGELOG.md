@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.0](https://github.com/SentioLabs/agent-nexus/compare/codex-arc-v0.7.0...codex-arc-v0.8.0) (2026-04-23)
+
+
+### Features
+
+* **codex:** reset versions to 0.1.0 for codex ([64d9134](https://github.com/SentioLabs/agent-nexus/commit/64d91348b103e69a8d47d35d0796f2fbad81f05b))
+* **marketplace:** expand opencode support and defer arc honestly ([c03bb56](https://github.com/SentioLabs/agent-nexus/commit/c03bb5614deb9f28d62e20728a006cc024ca9988))
+
 ## [0.7.1] - 2026-04-21
 
 ### Features

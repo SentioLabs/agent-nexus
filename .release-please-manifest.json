@@ -2,9 +2,9 @@
   "claude-marketplace/plugins/arc": "0.7.0",
   "claude-marketplace/plugins/mneme": "0.10.0",
   "claude-marketplace/plugins/slop-review": "0.3.0",
-  "codex-marketplace/plugins/arc": "0.7.0",
-  "codex-marketplace/plugins/atlassian": "0.2.0",
-  "codex-marketplace/plugins/mneme": "0.10.0",
-  "codex-marketplace/plugins/slop-review": "0.3.0",
-  "codex-marketplace/plugins/worktrunk": "0.2.0"
+  "codex-marketplace/plugins/arc": "0.8.0",
+  "codex-marketplace/plugins/atlassian": "0.3.0",
+  "codex-marketplace/plugins/mneme": "0.11.0",
+  "codex-marketplace/plugins/slop-review": "0.4.0",
+  "codex-marketplace/plugins/worktrunk": "0.3.0"
 }

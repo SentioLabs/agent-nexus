@@ -67,15 +67,11 @@
       "release-type": "simple",
       "component": "codex-arc",
       "bump-minor-pre-major": true,
+      "version-file": "version.txt",
       "extra-files": [
         {
           "type": "json",
           "path": ".codex-plugin/plugin.json",
-          "jsonpath": "$.version"
-        },
-        {
-          "type": "json",
-          "path": ".claude-plugin/plugin.json",
           "jsonpath": "$.version"
         }
       ],
@@ -93,15 +89,11 @@
       "release-type": "simple",
       "component": "codex-mneme",
       "bump-minor-pre-major": true,
+      "version-file": "version.txt",
       "extra-files": [
         {
           "type": "json",
           "path": ".codex-plugin/plugin.json",
-          "jsonpath": "$.version"
-        },
-        {
-          "type": "json",
-          "path": ".claude-plugin/plugin.json",
           "jsonpath": "$.version"
         }
       ],
@@ -119,15 +111,11 @@
       "release-type": "simple",
       "component": "codex-slop-review",
       "bump-minor-pre-major": true,
+      "version-file": "version.txt",
       "extra-files": [
         {
           "type": "json",
           "path": ".codex-plugin/plugin.json",
-          "jsonpath": "$.version"
-        },
-        {
-          "type": "json",
-          "path": ".claude-plugin/plugin.json",
           "jsonpath": "$.version"
         }
       ],
@@ -145,6 +133,7 @@
       "release-type": "simple",
       "component": "codex-atlassian",
       "bump-minor-pre-major": true,
+      "version-file": "version.txt",
       "extra-files": [
         {
           "type": "json",
@@ -166,6 +155,7 @@
       "release-type": "simple",
       "component": "codex-worktrunk",
       "bump-minor-pre-major": true,
+      "version-file": "version.txt",
       "extra-files": [
         {
           "type": "json",

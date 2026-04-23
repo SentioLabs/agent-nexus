@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/SentioLabs/agent-nexus/compare/codex-slop-review-v0.3.0...codex-slop-review-v0.4.0) (2026-04-23)
+
+
+### Features
+
+* **codex:** reset versions to 0.1.0 for codex ([64d9134](https://github.com/SentioLabs/agent-nexus/commit/64d91348b103e69a8d47d35d0796f2fbad81f05b))
+
 ## [0.3.0](https://github.com/SentioLabs/agent-nexus/compare/codex-slop-review-v0.2.0...codex-slop-review-v0.3.0) (2026-04-04)
 
 

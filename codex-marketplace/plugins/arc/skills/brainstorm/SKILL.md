@@ -1,6 +1,6 @@
 ---
 name: brainstorm
-description: You MUST use this skill for any design exploration, architecture decision, or trade-off analysis before implementation begins — especially when the user says "brainstorm", "explore the design", "think through", "what approach should we take", or describes a feature with multiple valid strategies. This is the arc-native brainstorming skill that writes designs to docs/plans/ and registers them for review via arc plan. Always prefer this over generic brainstorming when the project uses arc issue tracking.
+description: Use this skill only when the user explicitly asks for the arc brainstorm workflow, such as "/arc:brainstorm", "arc:brainstorm", "arc brainstorm", or "use the arc brainstorm skill". Do not trigger for generic brainstorming, design exploration, architecture trade-off analysis, or phrases like "think through" unless the user names arc brainstorm. This skill writes designs to docs/plans/ and registers them for review via arc plan.
 ---
 
 # Brainstorm — Design Discovery

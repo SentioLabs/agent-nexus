@@ -4,22 +4,40 @@
     "_target": "arc:brainstorm"
   },
   {
-    "query": "I want to add OAuth support to our Go API server. We currently have JWT auth in internal/api/middleware.go but I'm not sure whether to use authorization code flow or PKCE, and we need to decide on a token storage strategy — database vs Redis vs in-memory. There are security trade-offs I want to think through before writing any code. Can we brainstorm the design?",
+    "query": "Use the arc brainstorm skill for OAuth support in our Go API server. We currently have JWT auth in internal/api/middleware.go but I'm not sure whether to use authorization code flow or PKCE, and we need to decide on a token storage strategy — database vs Redis vs in-memory.",
     "should_trigger": true,
     "target_skill": "arc:brainstorm",
-    "note": "Rich design exploration with multiple architectural decisions and explicit brainstorm request"
+    "note": "Explicitly asks for the arc brainstorm skill"
+  },
+  {
+    "query": "/arc:brainstorm We need a caching layer for our API but I'm torn between Redis and an in-memory LRU cache. Our server runs as a single instance right now but we might scale to multiple replicas in Q3. The hot path is in internal/storage/sqlite/issues.go where GetIssue is called ~500 times per dashboard load.",
+    "should_trigger": true,
+    "target_skill": "arc:brainstorm",
+    "note": "Slash-style arc brainstorm invocation"
+  },
+  {
+    "query": "I want arc brainstorm for a big notification system feature that needs to support email, Slack, and webhooks. Each channel has different retry semantics, rate limits, and failure modes, so I want the arc workflow to help shape the design.",
+    "should_trigger": true,
+    "target_skill": "arc:brainstorm",
+    "note": "Natural-language arc brainstorm invocation"
   },
   {
     "query": "We need a caching layer for our API but I'm torn between Redis and an in-memory LRU cache. Our server runs as a single instance right now but we might scale to multiple replicas in Q3. The hot path is in internal/storage/sqlite/issues.go where GetIssue is called ~500 times per dashboard load. I want to explore the architecture trade-offs before committing to an approach.",
-    "should_trigger": true,
+    "should_trigger": false,
     "target_skill": "arc:brainstorm",
-    "note": "Architecture decision with concrete context, metrics, and future constraints"
+    "note": "Generic architecture trade-off analysis should not trigger without an explicit arc brainstorm request"
   },
   {
     "query": "I'm starting a big new feature — a notification system that needs to support email, Slack, and webhooks. Each channel has different retry semantics, rate limits, and failure modes. I haven't designed the architecture yet and I want to explore options for the message queue, channel abstraction, and delivery guarantees before anyone writes code. This will probably become an epic with 6+ tasks.",
-    "should_trigger": true,
+    "should_trigger": false,
     "target_skill": "arc:brainstorm",
-    "note": "Significant multi-component feature needing design discovery before implementation"
+    "note": "Significant design discovery should stay generic unless the user asks for arc brainstorm"
+  },
+  {
+    "query": "I need to think through whether we should use GraphQL or REST for the new API.",
+    "should_trigger": false,
+    "target_skill": "arc:brainstorm",
+    "note": "The phrase \"think through\" is intentionally no longer enough to trigger arc brainstorm"
   },
   {
     "query": "Fix the typo in README.md on line 42",
@@ -66,7 +84,7 @@
     "query": "I need to think about whether we should use GraphQL or REST for the new API.",
     "should_trigger": false,
     "target_skill": "arc:plan",
-    "note": "Still in design exploration — should trigger brainstorm, not plan"
+    "note": "Still in design exploration, and does not explicitly ask for arc planning"
   },
   {
     "query": "Start implementing the login endpoint from the plan",

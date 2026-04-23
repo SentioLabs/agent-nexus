@@ -38,6 +38,8 @@ prompt in a scratch repo or temp directory instead.
 - `atlassian`: installs the Atlassian skills and merges the Atlassian MCP server into
   `opencode.json`
 - `mneme`: installs the local runtime plugin, `mneme` skill, and `/mneme-*` commands
+- `arc`: installs the local runtime plugin, `arc` workflow skills, `/arc-*` commands,
+  and Arc helper agents
 
 ## Install Behavior
 
@@ -107,6 +109,7 @@ For a remote install, fetch from the raw GitHub URLs listed below.
 - `worktrunk`
 - `atlassian`
 - `mneme`
+- `arc`
 
 ## Config Fragment Contract
 
@@ -340,6 +343,136 @@ When installing locally from this repo, use these source paths instead:
 - `opencode-marketplace/plugins/mneme/commands/mneme-stats.md`
 - `opencode-marketplace/plugins/mneme/skills/mneme/SKILL.md`
 
+### arc
+
+Source plugin root:
+
+- Local: `opencode-marketplace/plugins/arc/`
+- Remote: `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/`
+
+Create these relative paths under the selected target root:
+
+- `agents/arc-doc-writer.md`
+- `agents/arc-evaluator.md`
+- `agents/arc-implementer.md`
+- `agents/arc-issue-tracker.md`
+- `agents/arc-reviewer.md`
+- `commands/arc-blocked.md`
+- `commands/arc-close.md`
+- `commands/arc-create.md`
+- `commands/arc-db.md`
+- `commands/arc-dep.md`
+- `commands/arc-docs.md`
+- `commands/arc-init.md`
+- `commands/arc-list.md`
+- `commands/arc-migrate-paths.md`
+- `commands/arc-onboard.md`
+- `commands/arc-paths.md`
+- `commands/arc-plugin.md`
+- `commands/arc-prime.md`
+- `commands/arc-project.md`
+- `commands/arc-quickstart.md`
+- `commands/arc-ready.md`
+- `commands/arc-self.md`
+- `commands/arc-server.md`
+- `commands/arc-show.md`
+- `commands/arc-stats.md`
+- `commands/arc-team.md`
+- `commands/arc-update.md`
+- `commands/arc-which.md`
+- `plugins/arc.js`
+- `skills/arc-brainstorm/SKILL.md`
+- `skills/arc-debug/SKILL.md`
+- `skills/arc-finish/SKILL.md`
+- `skills/arc-implement/SKILL.md`
+- `skills/arc-plan/SKILL.md`
+- `skills/arc-review/SKILL.md`
+- `skills/arc-verify/SKILL.md`
+- `skills/arc/SKILL.md`
+- `skills/arc/_formatting.md`
+
+Fetch them from:
+
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/agents/arc-doc-writer.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/agents/arc-evaluator.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/agents/arc-implementer.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/agents/arc-issue-tracker.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/agents/arc-reviewer.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-blocked.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-close.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-create.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-db.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-dep.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-docs.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-init.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-list.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-migrate-paths.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-onboard.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-paths.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-plugin.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-prime.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-project.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-quickstart.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-ready.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-self.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-server.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-show.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-stats.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-team.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-update.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/commands/arc-which.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/plugins/arc.js`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/skills/arc-brainstorm/SKILL.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/skills/arc-debug/SKILL.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/skills/arc-finish/SKILL.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/skills/arc-implement/SKILL.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/skills/arc-plan/SKILL.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/skills/arc-review/SKILL.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/skills/arc-verify/SKILL.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/skills/arc/SKILL.md`
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/arc/skills/arc/_formatting.md`
+
+When installing locally from this repo, use these source paths instead:
+
+- `opencode-marketplace/plugins/arc/agents/arc-doc-writer.md`
+- `opencode-marketplace/plugins/arc/agents/arc-evaluator.md`
+- `opencode-marketplace/plugins/arc/agents/arc-implementer.md`
+- `opencode-marketplace/plugins/arc/agents/arc-issue-tracker.md`
+- `opencode-marketplace/plugins/arc/agents/arc-reviewer.md`
+- `opencode-marketplace/plugins/arc/commands/arc-blocked.md`
+- `opencode-marketplace/plugins/arc/commands/arc-close.md`
+- `opencode-marketplace/plugins/arc/commands/arc-create.md`
+- `opencode-marketplace/plugins/arc/commands/arc-db.md`
+- `opencode-marketplace/plugins/arc/commands/arc-dep.md`
+- `opencode-marketplace/plugins/arc/commands/arc-docs.md`
+- `opencode-marketplace/plugins/arc/commands/arc-init.md`
+- `opencode-marketplace/plugins/arc/commands/arc-list.md`
+- `opencode-marketplace/plugins/arc/commands/arc-migrate-paths.md`
+- `opencode-marketplace/plugins/arc/commands/arc-onboard.md`
+- `opencode-marketplace/plugins/arc/commands/arc-paths.md`
+- `opencode-marketplace/plugins/arc/commands/arc-plugin.md`
+- `opencode-marketplace/plugins/arc/commands/arc-prime.md`
+- `opencode-marketplace/plugins/arc/commands/arc-project.md`
+- `opencode-marketplace/plugins/arc/commands/arc-quickstart.md`
+- `opencode-marketplace/plugins/arc/commands/arc-ready.md`
+- `opencode-marketplace/plugins/arc/commands/arc-self.md`
+- `opencode-marketplace/plugins/arc/commands/arc-server.md`
+- `opencode-marketplace/plugins/arc/commands/arc-show.md`
+- `opencode-marketplace/plugins/arc/commands/arc-stats.md`
+- `opencode-marketplace/plugins/arc/commands/arc-team.md`
+- `opencode-marketplace/plugins/arc/commands/arc-update.md`
+- `opencode-marketplace/plugins/arc/commands/arc-which.md`
+- `opencode-marketplace/plugins/arc/plugins/arc.js`
+- `opencode-marketplace/plugins/arc/skills/arc-brainstorm/SKILL.md`
+- `opencode-marketplace/plugins/arc/skills/arc-debug/SKILL.md`
+- `opencode-marketplace/plugins/arc/skills/arc-finish/SKILL.md`
+- `opencode-marketplace/plugins/arc/skills/arc-implement/SKILL.md`
+- `opencode-marketplace/plugins/arc/skills/arc-plan/SKILL.md`
+- `opencode-marketplace/plugins/arc/skills/arc-review/SKILL.md`
+- `opencode-marketplace/plugins/arc/skills/arc-verify/SKILL.md`
+- `opencode-marketplace/plugins/arc/skills/arc/SKILL.md`
+- `opencode-marketplace/plugins/arc/skills/arc/_formatting.md`
+
 ## Verification
 
 After installation:
@@ -376,6 +509,19 @@ For `mneme`, report:
   - run `mneme doctor --json`
   - if needed, start the daemon with `mneme server start`
   - then use the installed `/mneme-*` commands or the `mneme` skill
+
+For `arc`, report:
+
+- Runtime plugin: `plugins/arc.js`
+- Skills: `arc`, `arc-brainstorm`, `arc-debug`, `arc-finish`, `arc-implement`,
+  `arc-plan`, `arc-review`, `arc-verify`
+- Commands: `/arc-blocked`, `/arc-close`, `/arc-create`, `/arc-db`, `/arc-dep`,
+  `/arc-docs`, `/arc-init`, `/arc-list`, `/arc-migrate-paths`, `/arc-onboard`,
+  `/arc-paths`, `/arc-plugin`, `/arc-prime`, `/arc-project`, `/arc-quickstart`,
+  `/arc-ready`, `/arc-self`, `/arc-server`, `/arc-show`, `/arc-stats`, `/arc-team`,
+  `/arc-update`, `/arc-which`
+- Agents: `arc-doc-writer`, `arc-evaluator`, `arc-implementer`, `arc-issue-tracker`,
+  `arc-reviewer`
 
 ## Notes
 
@@ -441,4 +587,47 @@ For `mneme`, report:
 - After installing `mneme`, restart OpenCode or begin a fresh session before expecting the local runtime plugin, commands, and skill to be available.
 - After reload, run `mneme doctor --json`; if the daemon is not reachable, start it with `mneme server start`.
 - A successful global install of `mneme` should leave the same relative files under
+  `~/.config/opencode/`.
+- A successful local install of `arc` should leave these files present:
+  - `.opencode/agents/arc-doc-writer.md`
+  - `.opencode/agents/arc-evaluator.md`
+  - `.opencode/agents/arc-implementer.md`
+  - `.opencode/agents/arc-issue-tracker.md`
+  - `.opencode/agents/arc-reviewer.md`
+  - `.opencode/commands/arc-blocked.md`
+  - `.opencode/commands/arc-close.md`
+  - `.opencode/commands/arc-create.md`
+  - `.opencode/commands/arc-db.md`
+  - `.opencode/commands/arc-dep.md`
+  - `.opencode/commands/arc-docs.md`
+  - `.opencode/commands/arc-init.md`
+  - `.opencode/commands/arc-list.md`
+  - `.opencode/commands/arc-migrate-paths.md`
+  - `.opencode/commands/arc-onboard.md`
+  - `.opencode/commands/arc-paths.md`
+  - `.opencode/commands/arc-plugin.md`
+  - `.opencode/commands/arc-prime.md`
+  - `.opencode/commands/arc-project.md`
+  - `.opencode/commands/arc-quickstart.md`
+  - `.opencode/commands/arc-ready.md`
+  - `.opencode/commands/arc-self.md`
+  - `.opencode/commands/arc-server.md`
+  - `.opencode/commands/arc-show.md`
+  - `.opencode/commands/arc-stats.md`
+  - `.opencode/commands/arc-team.md`
+  - `.opencode/commands/arc-update.md`
+  - `.opencode/commands/arc-which.md`
+  - `.opencode/plugins/arc.js`
+  - `.opencode/skills/arc-brainstorm/SKILL.md`
+  - `.opencode/skills/arc-debug/SKILL.md`
+  - `.opencode/skills/arc-finish/SKILL.md`
+  - `.opencode/skills/arc-implement/SKILL.md`
+  - `.opencode/skills/arc-plan/SKILL.md`
+  - `.opencode/skills/arc-review/SKILL.md`
+  - `.opencode/skills/arc-verify/SKILL.md`
+  - `.opencode/skills/arc/SKILL.md`
+  - `.opencode/skills/arc/_formatting.md`
+- After installing `arc`, restart OpenCode or begin a fresh session before expecting the
+  local runtime plugin, agents, commands, and skills to be available.
+- A successful global install of `arc` should leave the same relative files under
   `~/.config/opencode/`.

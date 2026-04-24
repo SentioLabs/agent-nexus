@@ -100,40 +100,11 @@ arc show <task-id> --json | jq -e '.labels[] | select(. == "docs-only")' > /dev/
 
 **If `docs-only`** (exit code 0) — spawn an `arc-doc-writer` subagent:
 
-```
-Write/update the documentation described in this task.
-
-## Task
-<paste output of: arc show <task-id>>
-
-Verify formatting quality and commit your work.
-```
+Use the template at `./doc-writer-prompt.md`. Fill placeholder `{TASK_ID}`. For docs-only work, the agent default (`haiku`) is correct — omit `model:` unless the docs task is unusually complex.
 
 **Otherwise** — spawn an `arc-implementer` subagent:
 
-```
-Implement this task following TDD (RED → GREEN → REFACTOR → GATE).
-
-## Task
-<paste output of: arc show <task-id>>
-
-## Context
-<1-2 sentences: where this task fits in the epic, what ran before it,
-any shared types/files now on HEAD from prior tasks>
-
-## Project Test Command
-<project's test command, e.g., make test, go test ./...>
-
-## Scope Rules
-- Build ONLY what the task specifies. Follow code blocks' structure and behavior, adapted to project conventions.
-- Do NOT add features, flags, helpers, or improvements not in the task.
-- Do NOT modify files outside the ## Files section.
-- If a prerequisite is missing (type, file, dependency not on HEAD), report NEEDS_CONTEXT.
-- If you notice non-blocking issues outside your scope, report DONE_WITH_CONCERNS.
-- If a step is vague, report NEEDS_CONTEXT — do not fill in gaps with your judgment.
-
-Commit your work when all gate checks pass.
-```
+Use the template at `./implementer-prompt.md`. Fill placeholders (`{TASK_ID}`, `{PRE_TASK_SHA}`, `{DESIGN_EXCERPT}`) and apply Model Selection guidance (see `## Model Selection` above) for the dispatch `model:`.
 
 ### 4. Evaluate Result
 
@@ -177,18 +148,7 @@ BASE_SHA=$PRE_TASK_SHA
 
 Dispatch `arc-spec-reviewer`:
 
-```
-Verify this implementation matches its specification exactly.
-
-## Task Spec
-<paste output of: arc show <task-id>>
-
-## Implementer Report
-<paste the implementer's report>
-
-## Base SHA
-<BASE_SHA> (use for: git diff --name-only <BASE_SHA>..HEAD)
-```
+Use the template at `./spec-reviewer-prompt.md`. Fill placeholders (`{TASK_ID}`, `{BASE_SHA}`, `{HEAD_SHA}`). Spec review is a focused comparison task — the agent default is appropriate; omit `model:` unless the spec is unusually large or ambiguous.
 
 Handle results:
 - `COMPLIANT` → proceed to Step 6
@@ -251,22 +211,7 @@ When dispatched, use `isolation: "worktree"` and the existing `arc-evaluator` ag
 PARENT=$(arc show <task-id> --json | jq -r '.parent_id // empty')
 ```
 
-```
-Evaluate whether this implementation faithfully satisfies the spec. Write your own acceptance tests from the spec alone — do NOT read the implementer's tests or the git diff.
-
-## Task Spec
-<paste output of: arc show <task-id>>
-
-## Design Spec
-<paste the design excerpt relevant to this task — from the epic's plan>
-If no design spec is available, omit this section entirely.
-
-## Base SHA
-<BASE_SHA> (use for: git diff --name-only <BASE_SHA>..HEAD to find changed files)
-
-## Project Test Command
-<project's test command>
-```
+Use the template at `./evaluator-prompt.md`. Fill placeholder `{TASK_ID}`. Because evaluation is adversarial verification on high-risk tasks, escalate one tier from the agent default (typically to `opus`) — set `model: "opus"` on the dispatch unless the task is narrow.
 
 When dispatching alongside the evaluator, update the code quality reviewer's `## Evaluator Status` to `active`.
 

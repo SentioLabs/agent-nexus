@@ -1,6 +1,6 @@
 # Implementer Prompt Template
 
-Use this template when dispatching `arc-implementer` for a task.
+Use this template when dispatching `builder` for a task.
 
 **Placeholders:**
 - `{TASK_ID}` — arc issue ID (e.g., `task.abc123`)

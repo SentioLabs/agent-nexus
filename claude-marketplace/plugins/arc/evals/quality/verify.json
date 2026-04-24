@@ -85,7 +85,7 @@
   {
     "eval_id": 5,
     "eval_name": "Verify does not trust subagent report alone",
-    "prompt": "The arc-implementer subagent reported all tests pass. Should we close ARC-5.3?",
+    "prompt": "The builder subagent reported all tests pass. Should we close ARC-5.3?",
     "assertions": [
       {
         "id": 1,

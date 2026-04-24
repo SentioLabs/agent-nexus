@@ -5,7 +5,7 @@ description: You MUST use this skill to execute implementation tasks from an arc
 
 # Implement — Subagent-Driven TDD Execution
 
-Orchestrate task implementation by dispatching fresh `arc-implementer` subagents per task. Each subagent gets a clean context window with just the task description.
+Orchestrate task implementation by dispatching fresh `builder` subagents per task. Each subagent gets a clean context window with just the task description.
 
 ## Core Rule
 
@@ -26,9 +26,9 @@ Every Agent dispatch can override the subagent's frontmatter model via the `mode
 Examples:
 
 ```text
-Agent(subagent_type="arc-implementer", model="haiku", prompt="...")       # mechanical
-Agent(subagent_type="arc-implementer", prompt="...")                      # standard (sonnet)
-Agent(subagent_type="arc-implementer", model="opus", prompt="...")        # complex
+Agent(subagent_type="arc:builder", model="haiku", prompt="...")       # mechanical
+Agent(subagent_type="arc:builder", prompt="...")                      # standard (sonnet)
+Agent(subagent_type="arc:builder", model="opus", prompt="...")        # complex
 ```
 
 **When unsure, omit `model:`** — the agent's frontmatter floor is calibrated for the typical case.
@@ -102,9 +102,9 @@ arc show <task-id> --json | jq -e '.labels[] | select(. == "docs-only")' > /dev/
 
 Use the template at `./doc-writer-prompt.md`. Fill placeholder `{TASK_ID}`. For docs-only work, the agent default (`haiku`) is correct — omit `model:` unless the docs task is unusually complex.
 
-**Otherwise** — spawn an `arc-implementer` subagent:
+**Otherwise** — spawn an `builder` subagent:
 
-Use the template at `./implementer-prompt.md`. Fill placeholders (`{TASK_ID}`, `{PRE_TASK_SHA}`, `{DESIGN_EXCERPT}`) and apply Model Selection guidance (see `## Model Selection` above) for the dispatch `model:`.
+Use the template at `./builder-prompt.md`. Fill placeholders (`{TASK_ID}`, `{PRE_TASK_SHA}`, `{DESIGN_EXCERPT}`) and apply Model Selection guidance (see `## Model Selection` above) for the dispatch `model:`.
 
 ### 4. Evaluate Result
 
@@ -152,9 +152,9 @@ Use the template at `./spec-reviewer-prompt.md`. Fill placeholders (`{TASK_ID}`,
 
 Handle results:
 - `COMPLIANT` → proceed to Step 6
-- `ISSUES (Missing)` → re-dispatch `arc-implementer` with specific gaps listed by the spec reviewer. Re-run spec compliance review after.
-- `ISSUES (Extra)` → re-dispatch `arc-implementer` to remove the extras listed by the spec reviewer. Re-run spec compliance review after.
-- `ISSUES (Misunderstood)` → re-dispatch `arc-implementer` with clarification from the spec reviewer's findings. Re-run spec compliance review after.
+- `ISSUES (Missing)` → re-dispatch `builder` with specific gaps listed by the spec reviewer. Re-run spec compliance review after.
+- `ISSUES (Extra)` → re-dispatch `builder` to remove the extras listed by the spec reviewer. Re-run spec compliance review after.
+- `ISSUES (Misunderstood)` → re-dispatch `builder` with clarification from the spec reviewer's findings. Re-run spec compliance review after.
 - Circuit breaker: 3 spec-review/fix cycles without resolution → escalate to user.
 
 > **Docs-only tasks**: Skip this step. The spec-reviewer is designed around code verification (file lists, function signatures, test coverage) and doesn't apply to documentation. For docs-only tasks, the orchestrator verifies formatting/completeness directly: check that all files in `## Files` were created/modified, links resolve, heading hierarchy is correct, code blocks have language tags.
@@ -175,9 +175,9 @@ Handle findings:
 
 | Finding | Action |
 |---------|--------|
-| **Critical/Important** | Re-dispatch `arc-implementer` with fixes. Re-review after. |
+| **Critical/Important** | Re-dispatch `builder` with fixes. Re-review after. |
 | **Minor** | Note in arc comment. Proceed. |
-| **Deviation (fix)** | Re-dispatch `arc-implementer` to match the design. |
+| **Deviation (fix)** | Re-dispatch `builder` to match the design. |
 | **Deviation (accept)** | Log as arc comment: "Accepted deviation: \<description\>. Rationale: \<why\>." Proceed. |
 
 Circuit breaker: 3 review/fix cycles on the same finding → escalate to user.
@@ -205,9 +205,9 @@ Triage evaluator findings:
 | Evaluator verdict | Orchestrator action |
 |---|---|
 | `PASS` | No action — evaluator confirms the spec intent is satisfied. |
-| `CONCERNS` | Read the concerns. Re-dispatch `arc-implementer` if the concerns describe substantive behavior gaps. Otherwise note as arc comments and proceed. |
-| `FAIL — Spec-Intent Gap` | Re-dispatch `arc-implementer` with the evaluator's quoted spec text and the failing behavior description. |
-| `FAIL — Missing Behavior` | Re-dispatch `arc-implementer` — the spec requires behavior that wasn't built. |
+| `CONCERNS` | Read the concerns. Re-dispatch `builder` if the concerns describe substantive behavior gaps. Otherwise note as arc comments and proceed. |
+| `FAIL — Spec-Intent Gap` | Re-dispatch `builder` with the evaluator's quoted spec text and the failing behavior description. |
+| `FAIL — Missing Behavior` | Re-dispatch `builder` — the spec requires behavior that wasn't built. |
 | `FAIL — Edge Case` | Lower-severity. Re-dispatch if the spec clearly implies the edge case; otherwise record as a known limitation. |
 | `ERROR — Cannot Test` | The public API is insufficient. Re-dispatch with a request to expose the needed surface. |
 | `BLOCKED` | Evaluator itself is blocked. Escalate per the Model Selection rules or involve the human. |
@@ -230,7 +230,7 @@ This catches cross-task regressions that individual implementer gate checks won'
 
 If integration tests fail:
 - Identify which task's changes caused the failure
-- Re-dispatch `arc-implementer` with the failing test details and the relevant task context
+- Re-dispatch `builder` with the failing test details and the relevant task context
 - If the failure spans multiple tasks, invoke the `debug` skill
 
 ### 9. Repeat
@@ -239,7 +239,7 @@ Go to step 1 for the next task. Continue until all tasks in the epic are closed.
 
 ## Handle Implementer Status
 
-Every `arc-implementer` and `arc-doc-writer` dispatch returns one of four terminal statuses. Handle each explicitly:
+Every `builder` and `arc-doc-writer` dispatch returns one of four terminal statuses. Handle each explicitly:
 
 | Status | Orchestrator action |
 |---|---|
@@ -296,9 +296,9 @@ All parallel Agent tool calls with `isolation: "worktree"` **must happen in the 
 
 ```
 # In a single response, dispatch all parallel tasks:
-Agent(subagent_type="arc-implementer", isolation="worktree", prompt="Task 1...")
-Agent(subagent_type="arc-implementer", isolation="worktree", prompt="Task 2...")
-Agent(subagent_type="arc-implementer", isolation="worktree", prompt="Task 3...")
+Agent(subagent_type="arc:builder", isolation="worktree", prompt="Task 1...")
+Agent(subagent_type="arc:builder", isolation="worktree", prompt="Task 2...")
+Agent(subagent_type="arc:builder", isolation="worktree", prompt="Task 3...")
 ```
 
 **Never** dispatch worktree agents across multiple turns — HEAD may move between turns, causing stale branches.

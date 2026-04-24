@@ -51,7 +51,7 @@
     "note": "Post-brainstorm transition to task breakdown with specific output requirements"
   },
   {
-    "query": "I have epic ARC-5 with the approved design for the auth system. I need to create 5-6 implementation tasks with dependencies between them — JWT generation first, then middleware, then OAuth endpoints. Each task needs file paths, steps, test commands, and scope boundaries so the arc-implementer subagent can work on them without additional context.",
+    "query": "I have epic ARC-5 with the approved design for the auth system. I need to create 5-6 implementation tasks with dependencies between them — JWT generation first, then middleware, then OAuth endpoints. Each task needs file paths, steps, test commands, and scope boundaries so the builder subagent can work on them without additional context.",
     "should_trigger": true,
     "target_skill": "arc:plan",
     "note": "Explicit task decomposition request with dependency mapping and self-contained task requirements"
@@ -86,13 +86,13 @@
     "note": "Full orchestration request — dispatch subagents, verify, integration checkpoints"
   },
   {
-    "query": "I need to execute the implementation plan we created for the notification system. There are 6 tasks: a T0 foundation task (shared interfaces), then 3 parallel channel tasks (email, Slack, webhook), then integration and docs. Use arc-implementer subagents for each task and arc-doc-writer for the docs-only task. Tasks ARC-7.2, 7.3, 7.4 can run in parallel with worktree isolation.",
+    "query": "I need to execute the implementation plan we created for the notification system. There are 6 tasks: a T0 foundation task (shared interfaces), then 3 parallel channel tasks (email, Slack, webhook), then integration and docs. Use builder subagents for each task and arc-doc-writer for the docs-only task. Tasks ARC-7.2, 7.3, 7.4 can run in parallel with worktree isolation.",
     "should_trigger": true,
     "target_skill": "arc:implement",
     "note": "Complex multi-task execution with parallel dispatch, agent routing, and worktree isolation"
   },
   {
-    "query": "The tasks are all created in arc. Run `arc ready` to find what's available, claim the first task, dispatch an arc-implementer subagent with the task spec and test command, and verify the result independently before closing. Then move to the next task.",
+    "query": "The tasks are all created in arc. Run `arc ready` to find what's available, claim the first task, dispatch an builder subagent with the task spec and test command, and verify the result independently before closing. Then move to the next task.",
     "should_trigger": true,
     "target_skill": "arc:implement",
     "note": "Step-by-step implementation workflow matching the skill's protocol"
@@ -156,7 +156,7 @@
     "note": "Explicit evidence-based verification request before closing an arc issue"
   },
   {
-    "query": "The arc-implementer subagent reported PASS on all gate checks for ARC-5.2 (OAuth endpoints). But I don't trust subagent self-reports — run `go test ./internal/api/...` yourself, check the output for any failures or warnings, and verify independently before we close this task.",
+    "query": "The builder subagent reported PASS on all gate checks for ARC-5.2 (OAuth endpoints). But I don't trust subagent self-reports — run `go test ./internal/api/...` yourself, check the output for any failures or warnings, and verify independently before we close this task.",
     "should_trigger": true,
     "target_skill": "arc:verify",
     "note": "Trust-but-verify pattern — independent verification of subagent results"
@@ -179,7 +179,7 @@
     "_target": "arc:review"
   },
   {
-    "query": "The arc-implementer just finished task ARC-5.2 (OAuth endpoint implementation). PRE_TASK_SHA is abc1234. I need a code review before we close this task — dispatch the arc-reviewer to check the diff from abc1234 to HEAD against the task spec. Look for critical issues, security concerns in the OAuth flow, test coverage gaps, and adherence to project conventions.",
+    "query": "The builder just finished task ARC-5.2 (OAuth endpoint implementation). PRE_TASK_SHA is abc1234. I need a code review before we close this task — dispatch the arc-reviewer to check the diff from abc1234 to HEAD against the task spec. Look for critical issues, security concerns in the OAuth flow, test coverage gaps, and adherence to project conventions.",
     "should_trigger": true,
     "target_skill": "arc:review",
     "note": "Post-implementation review dispatch with SHAs and specific review criteria"

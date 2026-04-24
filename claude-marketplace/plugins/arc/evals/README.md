@@ -56,7 +56,7 @@ Each entry is a user query with a `should_trigger` boolean and a target. The eva
 **Target fields** vary by what's being tested:
 - `target_skill` — for skill routing (`arc:brainstorm`, `arc:plan`, etc.)
 - `target_command` — for command routing (`arc:ready`, `arc:create`, etc.)
-- `target_agent` — for agent dispatch (`arc:arc-implementer`, `arc:arc-evaluator`, etc.)
+- `target_agent` — for agent dispatch (`arc:builder`, `arc:arc-evaluator`, etc.)
 
 **Section headers** are organizational markers, not test cases:
 ```json
@@ -196,7 +196,7 @@ The `implement.json` evals 10-16 test the orchestrator's integration with the ev
 
 ### General principles
 
-- **Be concrete**: Include project names, issue IDs, file paths, error messages. "Implement the task" is bad. "The arc-implementer just reported PASS on all gate checks for ARC-5.1" is good.
+- **Be concrete**: Include project names, issue IDs, file paths, error messages. "Implement the task" is bad. "The builder just reported PASS on all gate checks for ARC-5.1" is good.
 - **Add backstory**: Context makes the scenario realistic. "This is the 3rd review/fix cycle" triggers different behavior than "review this."
 - **Test boundaries**: Include queries that are *close* to triggering but shouldn't. These catch over-broad descriptions.
 - **Mix positive and negative**: ~60% should-trigger, ~40% should-not for trigger evals.

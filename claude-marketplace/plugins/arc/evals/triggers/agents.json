@@ -42,30 +42,30 @@
 
   {
     "_comment": "=== ARC-IMPLEMENTER AGENT ===",
-    "_target": "arc:arc-implementer"
+    "_target": "arc:builder"
   },
   {
     "query": "Implement task ARC-5.1 using TDD. Here's the task spec: [task details]. Test command: make test.",
     "should_trigger": true,
-    "target_agent": "arc:arc-implementer",
+    "target_agent": "arc:builder",
     "note": "Direct implementer dispatch with task spec — typically from implement skill"
   },
   {
     "query": "Continue implementing ARC-5.2. The previous attempt had gate failures: spec compliance missed step 3 and no test for error handling.",
     "should_trigger": true,
-    "target_agent": "arc:arc-implementer",
+    "target_agent": "arc:builder",
     "note": "Re-dispatch after PARTIAL result with gate feedback"
   },
   {
     "query": "Review the code changes in the last commit",
     "should_trigger": false,
-    "target_agent": "arc:arc-implementer",
+    "target_agent": "arc:builder",
     "note": "Code review — should dispatch arc-reviewer, not implementer"
   },
   {
     "query": "Write documentation for the new API endpoints",
     "should_trigger": false,
-    "target_agent": "arc:arc-implementer",
+    "target_agent": "arc:builder",
     "note": "Docs-only task — should dispatch arc-doc-writer"
   },
 
@@ -147,6 +147,6 @@
     "query": "Implement the missing behavior that the evaluator identified",
     "should_trigger": false,
     "target_agent": "arc:arc-evaluator",
-    "note": "Implementation request — should dispatch arc-implementer"
+    "note": "Implementation request — should dispatch builder"
   }
 ]

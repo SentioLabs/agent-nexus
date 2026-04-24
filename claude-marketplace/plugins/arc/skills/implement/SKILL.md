@@ -137,55 +137,35 @@ Commit your work when all gate checks pass.
 
 ### 4. Evaluate Result
 
-When the subagent reports back, check the **Result** and **Gate Results** in its report:
+When the subagent reports back, check its **Status** (one of `DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT`) and **Gate Results**. Follow the `## Handle Implementer Status` table below for the status-specific action. In all cases, run the project test command fresh yourself — do NOT trust the subagent's report alone.
 
-**If `PASS`** (all gate checks passed):
-- Run the project test command fresh yourself to confirm — do NOT trust the subagent's report alone
-- If tests pass → proceed to step 5 (Spec Compliance Review)
+**On `DONE`:**
+- Run the project tests. If they pass → proceed to step 5 (Spec Compliance Review).
+- If tests fail despite a `DONE` report, treat as `BLOCKED`: re-dispatch with the failure output.
 
-**If `PARTIAL`** (gate identified unresolved issues):
-- Read the `Gate: Unresolved` section carefully
-- Decide: is this a re-dispatch or a debug situation?
-- Handle issues before proceeding (see below)
+**On `DONE_WITH_CONCERNS`:**
+- Read the concerns carefully.
+- If the concerns touch correctness or scope (e.g., "I think this edge case isn't handled", "I modified a file outside the spec") — address before review by re-dispatching with specific guidance, or tightening the review prompt.
+- If the concerns are observations (e.g., "this file is getting large") — note them as arc comments on the task and proceed to step 5.
 
-**If the subagent did not include gate results** (it skipped the gate):
-- Treat this as a failed result — re-dispatch with explicit reminder to complete all gate checks
+**On `BLOCKED` or `NEEDS_CONTEXT`:**
+- Do NOT proceed to review. Do NOT close the task.
+- For `NEEDS_CONTEXT`: gather the requested information, re-dispatch with it.
+- For `BLOCKED`: assess the blocker per the Handle Implementer Status table. Escalate one model tier (haiku → sonnet → opus) per the Model Selection escalation rule, or invoke the `debug` skill if the blocker is a persistent test failure, or split the task if too large, or escalate to the human.
+- After 3 re-dispatches on the same task without clean `DONE`, invoke the `debug` skill.
 
-**Handling issues from PARTIAL results**:
+**If the subagent did not include a Status field** (malformed report):
+- Treat as `BLOCKED`. Re-dispatch with an explicit reminder to use the four-status Report Format.
 
-- **Subagent reports `PARTIAL` with clear gaps** — re-dispatch `arc-implementer` with the specific gaps listed in `Gate: Unresolved`, plus the original task description
-- **Subagent reports test failures it can't resolve** — invoke the `debug` skill
-- **3+ implementation attempts fail on same issue** — invoke the `debug` skill
-- **Approach was wrong** — re-dispatch the appropriate agent with corrected guidance
-
-When re-dispatching, include the previous gate feedback so the implementer knows exactly what to fix:
+When re-dispatching, include the previous report's concerns / blockers so the implementer knows exactly what to fix:
 
 ```
-Continue implementing this task. A previous attempt was made but the gate check identified issues.
+Continue implementing this task. A previous attempt reported <status> with these concerns:
 
-## Task
-<paste output of: arc show <task-id>>
+<paste concerns>
 
-## Previous Gate Feedback
-<paste the Gate: Unresolved section from the previous report>
-
-## Project Test Command
-<project's test command>
-
-Fix the identified issues, re-run all gate checks, and commit when complete.
+Address each concern and re-report.
 ```
-
-**If `NEEDS_CONTEXT`** (implementer hit ambiguity or missing prerequisite):
-- Read the `## Context Needed` section
-- If the issue is a missing prerequisite (type, file, dependency not on HEAD) → check if another task should have created it. If so, that task may need to run first (dependency ordering issue). If not, this is a planning gap — create a follow-up arc issue or provide the missing definition.
-- If the issue is ambiguity in the task description → provide clarification and re-dispatch with the original task plus the clarification.
-- Do NOT re-dispatch without addressing the context gap — the implementer will hit the same wall.
-
-**If `DONE_WITH_CONCERNS`** (work complete, non-blocking observations):
-- Read the `## Concerns` section
-- If concerns describe potential issues in adjacent code → note in an arc comment on the epic for later triage
-- If concerns describe code quality observations (large file, repeated pattern) → note for future planning
-- Proceed to step 5 (spec compliance review) — the work itself is complete and all gates passed
 
 ### 5. Spec Compliance Review
 

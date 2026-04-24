@@ -21,6 +21,8 @@ Create a task for each step below using `TaskCreate`. Mark each as `in_progress`
 - Review existing arc issues (`arc list`)
 - Understand what already exists and what constraints are in play
 
+**Scope check before proceeding:** Before asking detailed clarifying questions, assess whether the request describes multiple independent subsystems (e.g., "build a platform with chat, storage, billing, and analytics"). If so, help the user decompose into sub-projects first — each sub-project gets its own brainstorm → plan → implement cycle. Don't spend questions refining details of a project that needs to be split. A decomposition sketch (what are the independent pieces, how do they relate, what order should they be built) is more valuable than a half-specified monolith.
+
 ### 2. Ask Clarifying Questions
 
 - Ask questions **one at a time** — don't dump a list
@@ -54,11 +56,17 @@ Options:
   - "Approach C: ..." (trade-offs...)
 ```
 
+**Capability-aware hint:** When comparing approaches, surface which imply heavier subagent model tiers during implementation. Approaches with more cross-cutting concerns, more files touched, or tighter coupling between components will likely need `opus`-tier dispatches and more review cycles. Approaches that decompose cleanly into single-file, mechanical tasks will run on `haiku`/`sonnet` and iterate faster. This is a soft consideration, not a deciding factor — but the user should see it.
+
 ### 4. Present Design Section by Section
 
 - Break the design into logical sections (data model, API, UI, etc.)
 - Present each section and get user approval before moving to the next
 - Iterate on sections as needed based on feedback
+
+**Design for isolation and clarity:** Break the system into smaller units that each have one clear purpose, communicate through well-defined interfaces, and can be understood and tested independently. For each unit, you should be able to answer three questions: what does it do, how do you use it, and what does it depend on. Smaller, well-bounded units are also easier for subagents to work with — they reason better about code they can hold in context at once, and their edits are more reliable when files are focused. If a file in the design is projected to grow large, that's often a signal that it's doing too much — consider splitting the responsibility at design time.
+
+**In existing codebases:** Follow existing patterns. Where existing code has problems that affect the work (e.g., a file that's grown too large, unclear boundaries, tangled responsibilities), include targeted improvements as part of the design — the way a good developer improves code they're working in. Don't propose unrelated refactoring. Stay focused on what serves the current goal.
 
 ### 5. Identify Shared Contracts (Parallel Readiness)
 

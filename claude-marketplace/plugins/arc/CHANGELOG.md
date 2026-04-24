@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://github.com/SentioLabs/agent-nexus/compare/claude-arc-v0.7.0...claude-arc-v0.8.0) (2026-04-24)
+
+
+### Features
+
+* **arc:** pull superpowers 5.0.7 improvements into arc plugin ([#5](https://github.com/SentioLabs/agent-nexus/issues/5)) ([5af8b44](https://github.com/SentioLabs/agent-nexus/commit/5af8b44dc9cf94ac7c732fccc2c9a08ab80d9490))
+
+
+### Refactoring
+
+* **arc:** rename agents and skills for clarity (drop arc- prefix) ([#7](https://github.com/SentioLabs/agent-nexus/issues/7)) ([4698b4e](https://github.com/SentioLabs/agent-nexus/commit/4698b4e8cc072426cda3eff48f405af2f1c61cc7))
+
 ## [0.6.0](https://github.com/SentioLabs/claude-marketplace/compare/arc-v0.5.0...arc-v0.6.0) (2026-04-02)
 
 

@@ -1,5 +1,5 @@
 ---
-name: arc-team-deploy
+name: team-dispatch
 description: Deploy an agent team from arc's issue graph. Use when the user wants to parallelize work across multiple agents, parallelize epic tasks, says "deploy team", "spawn teammates", or wants to distribute arc epic tasks by role using teammate labels.
 ---
 

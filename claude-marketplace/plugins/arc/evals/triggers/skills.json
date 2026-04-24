@@ -246,30 +246,30 @@
 
   {
     "_comment": "=== ARC-TEAM-DEPLOY SKILL ===",
-    "_target": "arc:arc-team-deploy"
+    "_target": "arc:team-dispatch"
   },
   {
     "query": "Deploy a team for epic ARC-5. I've labeled the tasks with teammate:frontend and teammate:backend. The frontend agent should work on ARC-5.3 and ARC-5.4 (React components) while the backend agent handles ARC-5.1 and ARC-5.2 (Go API). They share no files so they can work in parallel with worktree isolation.",
     "should_trigger": true,
-    "target_skill": "arc:arc-team-deploy",
+    "target_skill": "arc:team-dispatch",
     "note": "Explicit team deploy request with teammate labels and parallel work plan"
   },
   {
     "query": "I have 6 tasks in epic ARC-7 that I want to distribute across 3 parallel agents — one for each notification channel (email, Slack, webhook). Each agent should work in its own worktree, implement using TDD, and report back. Spawn the team from the arc issue graph.",
     "should_trigger": true,
-    "target_skill": "arc:arc-team-deploy",
+    "target_skill": "arc:team-dispatch",
     "note": "Multi-agent parallel dispatch from issue graph with worktree isolation"
   },
   {
     "query": "Create a team to distribute the auth epic tasks across multiple agents. I want a frontend teammate and a backend teammate working simultaneously. Use the teammate labels I set on the issues to assign work.",
     "should_trigger": true,
-    "target_skill": "arc:arc-team-deploy",
+    "target_skill": "arc:team-dispatch",
     "note": "Team creation for task distribution with role-based agent assignment"
   },
   {
     "query": "Implement the next task from the plan sequentially.",
     "should_trigger": false,
-    "target_skill": "arc:arc-team-deploy",
+    "target_skill": "arc:team-dispatch",
     "note": "Sequential execution — should trigger implement, not team-deploy"
   },
 

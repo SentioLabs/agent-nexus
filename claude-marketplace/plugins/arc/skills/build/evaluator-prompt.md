@@ -1,6 +1,6 @@
 # Evaluator Prompt Template
 
-Use this template when dispatching `arc-evaluator` for adversarial verification of a high-risk task.
+Use this template when dispatching `evaluator` for adversarial verification of a high-risk task.
 
 **Placeholders:**
 - `{TASK_ID}` — arc issue ID

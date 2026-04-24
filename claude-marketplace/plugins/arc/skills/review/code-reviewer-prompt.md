@@ -1,6 +1,6 @@
 # Reviewer Prompt Template
 
-Use this template when dispatching `arc-reviewer` for code review.
+Use this template when dispatching `code-reviewer` for code review.
 
 **Placeholders:**
 - `{TASK_ID}` — arc issue ID

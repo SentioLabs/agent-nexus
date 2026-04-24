@@ -1,11 +1,11 @@
 ---
 name: review
-description: You MUST use this skill after implementing a task to get code review — especially when the user says "review this", "check my code", "review the changes", or after any implementation task completes. Dispatches the arc-reviewer agent with git diff and task spec, then triages feedback by severity. Always prefer this over generic code review when the project uses arc issue tracking.
+description: You MUST use this skill after implementing a task to get code review — especially when the user says "review this", "check my code", "review the changes", or after any implementation task completes. Dispatches the code-reviewer agent with git diff and task spec, then triages feedback by severity. Always prefer this over generic code review when the project uses arc issue tracking.
 ---
 
 # Review — Code Review Dispatch
 
-Dispatch the `arc-reviewer` subagent to review implementation work, then triage findings.
+Dispatch the `code-reviewer` subagent to review implementation work, then triage findings.
 
 ## Workflow
 
@@ -45,9 +45,9 @@ Extract the design excerpt relevant to this task — typically the sections cove
 
 ### 3. Dispatch Reviewer
 
-Use the Agent tool to spawn an `arc-reviewer` subagent. Fill the template at `./reviewer-prompt.md` with the gathered placeholders (`{TASK_ID}`, `{BASE_SHA}`, `{HEAD_SHA}`, `{DESIGN_EXCERPT}`, `{EVALUATOR_STATUS}`).
+Use the Agent tool to spawn an `code-reviewer` subagent. Fill the template at `./code-reviewer-prompt.md` with the gathered placeholders (`{TASK_ID}`, `{BASE_SHA}`, `{HEAD_SHA}`, `{DESIGN_EXCERPT}`, `{EVALUATOR_STATUS}`).
 
-**Model tier:** Follow the Model Selection table in `../implement/SKILL.md`. For most reviews, omit `model:` (use the agent's sonnet default). Escalate to `opus` when the diff is large (10+ files), crosses multiple architectural layers, or involves security-sensitive changes.
+**Model tier:** Follow the Model Selection table in `../build/SKILL.md`. For most reviews, omit `model:` (use the agent's sonnet default). Escalate to `opus` when the diff is large (10+ files), crosses multiple architectural layers, or involves security-sensitive changes.
 
 ### 4. Triage Feedback
 
@@ -55,16 +55,16 @@ When the reviewer reports back:
 
 | Severity | Action |
 |----------|--------|
-| **Critical** | Fix immediately — re-dispatch `arc-implementer` with the specific fix. Then re-review. |
-| **Important** | Fix before moving to next task — re-dispatch `arc-implementer`. Then re-review. |
+| **Critical** | Fix immediately — re-dispatch `builder` with the specific fix. Then re-review. |
+| **Important** | Fix before moving to next task — re-dispatch `builder`. Then re-review. |
 | **Minor** | Note in arc issue comment for later. Proceed. |
-| **Deviation (fix)** | Re-dispatch `arc-implementer` with the specific deviation to correct. |
+| **Deviation (fix)** | Re-dispatch `builder` with the specific deviation to correct. |
 | **Deviation (accept)** | Note the deviation as an arc comment on the task for traceability. Proceed. |
 
 ### 5. Handle Fixes
 
 If fixes are needed:
-1. Re-dispatch `arc-implementer` with the specific findings to address
+1. Re-dispatch `builder` with the specific findings to address
 2. After the implementer reports back, re-review (go to step 1 with updated SHAs)
 3. Continue until the review is clean (no Critical or Important findings)
 
@@ -110,14 +110,14 @@ Apply this pattern to every finding:
 
 ### Triage by Severity
 
-When the `arc-reviewer` reports findings, triage by severity:
+When the `code-reviewer` reports findings, triage by severity:
 
 | Severity | Action |
 |----------|--------|
-| **Critical** | Fix immediately — re-dispatch `arc-implementer` with the specific fix. Then re-review. |
-| **Important** | Fix before moving to next task — re-dispatch `arc-implementer`. Then re-review. |
+| **Critical** | Fix immediately — re-dispatch `builder` with the specific fix. Then re-review. |
+| **Important** | Fix before moving to next task — re-dispatch `builder`. Then re-review. |
 | **Minor** | Note in arc issue comment for later. Proceed. |
-| **Deviation (fix)** | Re-dispatch `arc-implementer` with the specific deviation to correct. |
+| **Deviation (fix)** | Re-dispatch `builder` with the specific deviation to correct. |
 | **Deviation (accept)** | Note the deviation as an arc comment on the task for traceability. Proceed. |
 
 Never agree performatively to Critical or Important findings. Never dismiss them without technical reasoning. If a finding is wrong, show *why* with evidence from the codebase.
@@ -150,8 +150,8 @@ This skill works in both execution models:
 
 | Context | How review works |
 |---------|-----------------|
-| **Single-agent** | Main agent dispatches `arc-reviewer` subagent |
-| **Team mode** | Team lead dispatches QA teammate or `arc-reviewer` subagent |
+| **Single-agent** | Main agent dispatches `code-reviewer` subagent |
+| **Team mode** | Team lead dispatches QA teammate or `code-reviewer` subagent |
 
 ## Rules
 

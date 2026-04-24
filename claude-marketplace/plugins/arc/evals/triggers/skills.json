@@ -51,7 +51,7 @@
     "note": "Post-brainstorm transition to task breakdown with specific output requirements"
   },
   {
-    "query": "I have epic ARC-5 with the approved design for the auth system. I need to create 5-6 implementation tasks with dependencies between them — JWT generation first, then middleware, then OAuth endpoints. Each task needs file paths, steps, test commands, and scope boundaries so the arc-implementer subagent can work on them without additional context.",
+    "query": "I have epic ARC-5 with the approved design for the auth system. I need to create 5-6 implementation tasks with dependencies between them — JWT generation first, then middleware, then OAuth endpoints. Each task needs file paths, steps, test commands, and scope boundaries so the builder subagent can work on them without additional context.",
     "should_trigger": true,
     "target_skill": "arc:plan",
     "note": "Explicit task decomposition request with dependency mapping and self-contained task requirements"
@@ -77,36 +77,36 @@
 
   {
     "_comment": "=== IMPLEMENT SKILL ===",
-    "_target": "arc:implement"
+    "_target": "arc:build"
   },
   {
     "query": "The plan for epic ARC-5 is ready with 5 tasks. ARC-5.1 through ARC-5.5 are created in arc with dependencies set up. Start implementing them — dispatch subagents for each task using TDD, verify each one passes independently, and run integration tests every 2-3 tasks. Start with ARC-5.1 (JWT token generation).",
     "should_trigger": true,
-    "target_skill": "arc:implement",
+    "target_skill": "arc:build",
     "note": "Full orchestration request — dispatch subagents, verify, integration checkpoints"
   },
   {
-    "query": "I need to execute the implementation plan we created for the notification system. There are 6 tasks: a T0 foundation task (shared interfaces), then 3 parallel channel tasks (email, Slack, webhook), then integration and docs. Use arc-implementer subagents for each task and arc-doc-writer for the docs-only task. Tasks ARC-7.2, 7.3, 7.4 can run in parallel with worktree isolation.",
+    "query": "I need to execute the implementation plan we created for the notification system. There are 6 tasks: a T0 foundation task (shared interfaces), then 3 parallel channel tasks (email, Slack, webhook), then integration and docs. Use builder subagents for each task and doc-writer for the docs-only task. Tasks ARC-7.2, 7.3, 7.4 can run in parallel with worktree isolation.",
     "should_trigger": true,
-    "target_skill": "arc:implement",
+    "target_skill": "arc:build",
     "note": "Complex multi-task execution with parallel dispatch, agent routing, and worktree isolation"
   },
   {
-    "query": "The tasks are all created in arc. Run `arc ready` to find what's available, claim the first task, dispatch an arc-implementer subagent with the task spec and test command, and verify the result independently before closing. Then move to the next task.",
+    "query": "The tasks are all created in arc. Run `arc ready` to find what's available, claim the first task, dispatch a builder subagent with the task spec and test command, and verify the result independently before closing. Then move to the next task.",
     "should_trigger": true,
-    "target_skill": "arc:implement",
+    "target_skill": "arc:build",
     "note": "Step-by-step implementation workflow matching the skill's protocol"
   },
   {
     "query": "Just quickly fix this one-liner in utils.go — change the timeout from 30s to 60s",
     "should_trigger": false,
-    "target_skill": "arc:implement",
+    "target_skill": "arc:build",
     "note": "Trivial change — doesn't need subagent dispatch orchestration"
   },
   {
     "query": "What tasks are available to work on?",
     "should_trigger": false,
-    "target_skill": "arc:implement",
+    "target_skill": "arc:build",
     "note": "Query about tasks — should trigger arc:ready, not implement"
   },
 
@@ -156,7 +156,7 @@
     "note": "Explicit evidence-based verification request before closing an arc issue"
   },
   {
-    "query": "The arc-implementer subagent reported PASS on all gate checks for ARC-5.2 (OAuth endpoints). But I don't trust subagent self-reports — run `go test ./internal/api/...` yourself, check the output for any failures or warnings, and verify independently before we close this task.",
+    "query": "The builder subagent reported PASS on all gate checks for ARC-5.2 (OAuth endpoints). But I don't trust subagent self-reports — run `go test ./internal/api/...` yourself, check the output for any failures or warnings, and verify independently before we close this task.",
     "should_trigger": true,
     "target_skill": "arc:verify",
     "note": "Trust-but-verify pattern — independent verification of subagent results"
@@ -179,19 +179,19 @@
     "_target": "arc:review"
   },
   {
-    "query": "The arc-implementer just finished task ARC-5.2 (OAuth endpoint implementation). PRE_TASK_SHA is abc1234. I need a code review before we close this task — dispatch the arc-reviewer to check the diff from abc1234 to HEAD against the task spec. Look for critical issues, security concerns in the OAuth flow, test coverage gaps, and adherence to project conventions.",
+    "query": "The builder just finished task ARC-5.2 (OAuth endpoint implementation). PRE_TASK_SHA is abc1234. I need a code review before we close this task — dispatch the code-reviewer to check the diff from abc1234 to HEAD against the task spec. Look for critical issues, security concerns in the OAuth flow, test coverage gaps, and adherence to project conventions.",
     "should_trigger": true,
     "target_skill": "arc:review",
     "note": "Post-implementation review dispatch with SHAs and specific review criteria"
   },
   {
-    "query": "I want a thorough code review of the changes since the last commit. We modified internal/api/server.go, internal/api/middleware.go, and added 3 new test files. Check for security issues in the auth handling, proper error propagation, and make sure the tests actually cover the edge cases. Dispatch the arc-reviewer agent with the diff.",
+    "query": "I want a thorough code review of the changes since the last commit. We modified internal/api/server.go, internal/api/middleware.go, and added 3 new test files. Check for security issues in the auth handling, proper error propagation, and make sure the tests actually cover the edge cases. Dispatch the code-reviewer agent with the diff.",
     "should_trigger": true,
     "target_skill": "arc:review",
     "note": "Detailed code review request with specific files and review focus areas"
   },
   {
-    "query": "Before we close out the session, I want to review all the code changes from today's work. We implemented 3 tasks (ARC-5.1, 5.2, 5.3) and I want to make sure nothing was missed — run the arc-reviewer agent against the full diff from this morning's baseline to HEAD, and triage any findings by severity.",
+    "query": "Before we close out the session, I want to review all the code changes from today's work. We implemented 3 tasks (ARC-5.1, 5.2, 5.3) and I want to make sure nothing was missed — run the code-reviewer agent against the full diff from this morning's baseline to HEAD, and triage any findings by severity.",
     "should_trigger": true,
     "target_skill": "arc:review",
     "note": "End-of-session review with multi-task scope and severity triage"
@@ -246,30 +246,30 @@
 
   {
     "_comment": "=== ARC-TEAM-DEPLOY SKILL ===",
-    "_target": "arc:arc-team-deploy"
+    "_target": "arc:team-dispatch"
   },
   {
     "query": "Deploy a team for epic ARC-5. I've labeled the tasks with teammate:frontend and teammate:backend. The frontend agent should work on ARC-5.3 and ARC-5.4 (React components) while the backend agent handles ARC-5.1 and ARC-5.2 (Go API). They share no files so they can work in parallel with worktree isolation.",
     "should_trigger": true,
-    "target_skill": "arc:arc-team-deploy",
+    "target_skill": "arc:team-dispatch",
     "note": "Explicit team deploy request with teammate labels and parallel work plan"
   },
   {
     "query": "I have 6 tasks in epic ARC-7 that I want to distribute across 3 parallel agents — one for each notification channel (email, Slack, webhook). Each agent should work in its own worktree, implement using TDD, and report back. Spawn the team from the arc issue graph.",
     "should_trigger": true,
-    "target_skill": "arc:arc-team-deploy",
+    "target_skill": "arc:team-dispatch",
     "note": "Multi-agent parallel dispatch from issue graph with worktree isolation"
   },
   {
     "query": "Create a team to distribute the auth epic tasks across multiple agents. I want a frontend teammate and a backend teammate working simultaneously. Use the teammate labels I set on the issues to assign work.",
     "should_trigger": true,
-    "target_skill": "arc:arc-team-deploy",
+    "target_skill": "arc:team-dispatch",
     "note": "Team creation for task distribution with role-based agent assignment"
   },
   {
     "query": "Implement the next task from the plan sequentially.",
     "should_trigger": false,
-    "target_skill": "arc:arc-team-deploy",
+    "target_skill": "arc:team-dispatch",
     "note": "Sequential execution — should trigger implement, not team-deploy"
   },
 

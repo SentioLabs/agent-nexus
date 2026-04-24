@@ -136,11 +136,11 @@ Break the design into self-contained implementation units. Each task should:
 
 When identifying tasks, assign **file ownership** — each file should be owned by exactly one task. If two tasks need to modify the same file, either merge them into one task, serialize them with a dependency, or extract the shared file into the foundation task.
 
-### 4. Create Epic and Tasks via arc-issue-tracker
+### 4. Create Epic and Tasks via issue-manager
 
-**Model tier:** `arc-issue-tracker` defaults to `haiku` — the right tier for CLI formatting and bulk issue creation. For this dispatch, omit `model:`. See the Model Selection table in `../implement/SKILL.md` for the full guidance.
+**Model tier:** `issue-manager` defaults to `haiku` — the right tier for CLI formatting and bulk issue creation. For this dispatch, omit `model:`. See the Model Selection table in `../build/SKILL.md` for the full guidance.
 
-**Never run `arc create` directly** — always delegate to the `arc-issue-tracker` agent. This keeps bulk CLI output in a disposable subagent context.
+**Never run `arc create` directly** — always delegate to the `issue-manager` agent. This keeps bulk CLI output in a disposable subagent context.
 
 Read the full plan content first (`arc plan show <plan-id>`), then build a task manifest that includes:
 1. **The epic** — its description will be populated by the agent from the plan file (see below)
@@ -151,7 +151,7 @@ Read the full plan content first (`arc plan show <plan-id>`), then build a task 
 Get the plan file path from the `arc plan show` output (the `file_path` field), then dispatch the manifest:
 
 ```
-Use the Agent tool with subagent_type="arc:arc-issue-tracker":
+Use the Agent tool with subagent_type="arc:issue-manager":
 
 Create the following epic and tasks.
 After creation, set dependencies and labels as listed.
@@ -197,7 +197,7 @@ Description:
 
 **IMPORTANT**: The epic description MUST contain the complete approved design. The agent reads the plan file directly to avoid any summarization or content loss. The plan file is ephemeral; the epic description is the permanent record.
 
-For each task, check whether **all** files in its `## Files` section are documentation (`.md`, `.txt`, `README`, `CHANGELOG`, or anything under `docs/`). If so, include it in the `## Labels` section with `docs-only`. Doc-only tasks skip TDD — the `implement` skill routes them to `arc-doc-writer` instead of `arc-implementer`.
+For each task, check whether **all** files in its `## Files` section are documentation (`.md`, `.txt`, `README`, `CHANGELOG`, or anything under `docs/`). If so, include it in the `## Labels` section with `docs-only`. Doc-only tasks skip TDD — the `implement` skill routes them to `doc-writer` instead of `builder`.
 
 ### 5. Validate Returned Results
 
@@ -243,7 +243,7 @@ Fix issues inline. No need to re-review — just fix and move on.
 ```
 Question: "Epic and tasks created. How should we proceed with implementation?"
 Options:
-  - "Start implementing now" (invoke /arc:implement in this session — subagents handle TDD per task)
+  - "Start implementing now" (invoke /arc:build in this session — subagents handle TDD per task)
   - "Implement in a new session" (provides the exact prompt to use)
   - "Done for now" (tasks are tracked in arc — implement manually or later)
 ```
@@ -256,12 +256,12 @@ After the user chooses:
 ```
 Run this in a new Claude Code session:
 
-  /arc:implement <epic-id>
+  /arc:build <epic-id>
 
 ```
 Replace `<epic-id>` with the actual epic ID.
 
-**Done for now**: Confirm the epic and tasks are saved in arc. The user can run `/arc:implement <epic-id>` whenever they're ready.
+**Done for now**: Confirm the epic and tasks are saved in arc. The user can run `/arc:build <epic-id>` whenever they're ready.
 
 ## Task Description Format
 
@@ -341,7 +341,7 @@ For `docs-only` tasks, omit `## Test Command` and use `## Verification` instead:
 - Task descriptions must include actual code guidance, not vague instructions
 - Team preparation (teammate labels) is optional — only if user chooses team execution
 - The plan skill creates tasks; it does not implement them
-- The plan skill never runs `arc create` directly — always delegate to `arc-issue-tracker`
+- The plan skill never runs `arc create` directly — always delegate to `issue-manager`
 - Every task must include a `## Scope Boundary` section — no file modifications outside the `## Files` list
 - No two parallelizable tasks may own the same file — resolve overlaps via foundation task, merging, or serialization
 - Format all arc content (descriptions, plans, comments) per `skills/arc/_formatting.md`

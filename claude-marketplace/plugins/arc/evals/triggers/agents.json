@@ -1,152 +1,152 @@
 [
   {
     "_comment": "=== ARC-ISSUE-TRACKER AGENT ===",
-    "_target": "arc:arc-issue-tracker"
+    "_target": "arc:issue-manager"
   },
   {
     "query": "Create an epic called 'Auth System' with 5 child tasks for login, registration, password reset, session management, and OAuth. Set up dependencies between them.",
     "should_trigger": true,
-    "target_agent": "arc:arc-issue-tracker",
+    "target_agent": "arc:issue-manager",
     "note": "Bulk issue creation with dependencies — classic issue-tracker dispatch"
   },
   {
     "query": "Close all the completed tasks under epic ARC-5: ARC-5.1, ARC-5.2, ARC-5.3, and ARC-5.4.",
     "should_trigger": true,
-    "target_agent": "arc:arc-issue-tracker",
+    "target_agent": "arc:issue-manager",
     "note": "Batch close operation"
   },
   {
     "query": "Triage these 10 open issues — set priorities based on the descriptions and mark the UI polish ones as backlog.",
     "should_trigger": true,
-    "target_agent": "arc:arc-issue-tracker",
+    "target_agent": "arc:issue-manager",
     "note": "Bulk triage operation"
   },
   {
     "query": "Create the tasks from the plan we just designed. Here's the task manifest with 8 tasks and their dependencies.",
     "should_trigger": true,
-    "target_agent": "arc:arc-issue-tracker",
+    "target_agent": "arc:issue-manager",
     "note": "Task manifest processing from plan skill"
   },
   {
     "query": "Create a single bug for the login timeout issue",
     "should_trigger": false,
-    "target_agent": "arc:arc-issue-tracker",
+    "target_agent": "arc:issue-manager",
     "note": "Single issue creation — use /arc:create directly, no agent needed"
   },
   {
     "query": "Show me the details of issue ARC-5.1",
     "should_trigger": false,
-    "target_agent": "arc:arc-issue-tracker",
+    "target_agent": "arc:issue-manager",
     "note": "Single show — use /arc:show directly"
   },
 
   {
     "_comment": "=== ARC-IMPLEMENTER AGENT ===",
-    "_target": "arc:arc-implementer"
+    "_target": "arc:builder"
   },
   {
     "query": "Implement task ARC-5.1 using TDD. Here's the task spec: [task details]. Test command: make test.",
     "should_trigger": true,
-    "target_agent": "arc:arc-implementer",
+    "target_agent": "arc:builder",
     "note": "Direct implementer dispatch with task spec — typically from implement skill"
   },
   {
     "query": "Continue implementing ARC-5.2. The previous attempt had gate failures: spec compliance missed step 3 and no test for error handling.",
     "should_trigger": true,
-    "target_agent": "arc:arc-implementer",
+    "target_agent": "arc:builder",
     "note": "Re-dispatch after PARTIAL result with gate feedback"
   },
   {
     "query": "Review the code changes in the last commit",
     "should_trigger": false,
-    "target_agent": "arc:arc-implementer",
-    "note": "Code review — should dispatch arc-reviewer, not implementer"
+    "target_agent": "arc:builder",
+    "note": "Code review — should dispatch code-reviewer, not implementer"
   },
   {
     "query": "Write documentation for the new API endpoints",
     "should_trigger": false,
-    "target_agent": "arc:arc-implementer",
-    "note": "Docs-only task — should dispatch arc-doc-writer"
+    "target_agent": "arc:builder",
+    "note": "Docs-only task — should dispatch doc-writer"
   },
 
   {
     "_comment": "=== ARC-REVIEWER AGENT ===",
-    "_target": "arc:arc-reviewer"
+    "_target": "arc:code-reviewer"
   },
   {
     "query": "Review the diff from commit abc123 to HEAD against the spec for task ARC-5.2. Check for critical issues, code quality, and test coverage.",
     "should_trigger": true,
-    "target_agent": "arc:arc-reviewer",
+    "target_agent": "arc:code-reviewer",
     "note": "Post-implementation review dispatch"
   },
   {
     "query": "Do a code review of the changes the implementer just made for the session middleware task.",
     "should_trigger": true,
-    "target_agent": "arc:arc-reviewer",
+    "target_agent": "arc:code-reviewer",
     "note": "Review after implementer completes"
   },
   {
     "query": "Implement the fix that the reviewer identified in finding #2",
     "should_trigger": false,
-    "target_agent": "arc:arc-reviewer",
+    "target_agent": "arc:code-reviewer",
     "note": "Implementation request — should dispatch implementer, not reviewer"
   },
 
   {
     "_comment": "=== ARC-DOC-WRITER AGENT ===",
-    "_target": "arc:arc-doc-writer"
+    "_target": "arc:doc-writer"
   },
   {
     "query": "Write the API documentation for the new endpoints. This is a docs-only task — no code changes needed.",
     "should_trigger": true,
-    "target_agent": "arc:arc-doc-writer",
+    "target_agent": "arc:doc-writer",
     "note": "Documentation-only task"
   },
   {
     "query": "Update CHANGELOG.md and README.md with the new features from this release.",
     "should_trigger": true,
-    "target_agent": "arc:arc-doc-writer",
+    "target_agent": "arc:doc-writer",
     "note": "Pure documentation update"
   },
   {
     "query": "Add unit tests for the new validation functions",
     "should_trigger": false,
-    "target_agent": "arc:arc-doc-writer",
+    "target_agent": "arc:doc-writer",
     "note": "Code task, not docs — should dispatch implementer"
   },
 
   {
     "_comment": "=== ARC-EVALUATOR AGENT ===",
-    "_target": "arc:arc-evaluator"
+    "_target": "arc:evaluator"
   },
   {
     "query": "Evaluate whether the implementation of ARC-5.2 satisfies the spec. Write your own acceptance tests from the spec. Base SHA is abc1234. Do NOT read the diff or the implementer's tests.",
     "should_trigger": true,
-    "target_agent": "arc:arc-evaluator",
+    "target_agent": "arc:evaluator",
     "note": "Adversarial spec evaluation — dispatched from implement skill step 5"
   },
   {
     "query": "The implementation looks done. Independently verify it matches the spec by writing acceptance tests from the task description alone.",
     "should_trigger": true,
-    "target_agent": "arc:arc-evaluator",
+    "target_agent": "arc:evaluator",
     "note": "Independent spec verification request"
   },
   {
     "query": "Review the code changes in the last commit for code quality and conventions",
     "should_trigger": false,
-    "target_agent": "arc:arc-evaluator",
-    "note": "Code quality review — should dispatch arc-reviewer, not evaluator"
+    "target_agent": "arc:evaluator",
+    "note": "Code quality review — should dispatch code-reviewer, not evaluator"
   },
   {
     "query": "Check the git diff for any issues with the implementation",
     "should_trigger": false,
-    "target_agent": "arc:arc-evaluator",
-    "note": "Diff-based review — evaluator never reads diffs, should dispatch arc-reviewer"
+    "target_agent": "arc:evaluator",
+    "note": "Diff-based review — evaluator never reads diffs, should dispatch code-reviewer"
   },
   {
     "query": "Implement the missing behavior that the evaluator identified",
     "should_trigger": false,
-    "target_agent": "arc:arc-evaluator",
-    "note": "Implementation request — should dispatch arc-implementer"
+    "target_agent": "arc:evaluator",
+    "note": "Implementation request — should dispatch builder"
   }
 ]

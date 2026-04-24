@@ -210,13 +210,13 @@ Layers crossed:   [storage, API, CLI, ...]
 Risk areas:       [migrations, breaking changes, none, ...]
 Scale:            Small / Medium / Large
 
-➤ Recommendation: /arc:plan | /arc:implement
+➤ Recommendation: /arc:plan | /arc:build
   Reason: <1-2 sentence justification based on the factors above>
 ```
 
 **Routing rules** (use these to drive the recommendation):
 - **→ arc:plan** when ANY of: 2+ work items, shared contracts exist, multiple layers crossed, migrations or breaking changes present, medium/large scale
-- **→ arc:implement** when ALL of: single work item, no shared contracts, single layer, no risk areas, small scale
+- **→ arc:build** when ALL of: single work item, no shared contracts, single layer, no risk areas, small scale
 - When borderline, recommend `arc:plan` — the overhead of planning is low, but the cost of a disorganized multi-task implementation is high
 
 After the analysis, use the **AskUserQuestion tool** — mark the recommended option:
@@ -224,11 +224,11 @@ After the analysis, use the **AskUserQuestion tool** — mark the recommended op
 Question: "Design approved! What's next?"
 Options:
   - "Break into tasks with /arc:plan" (recommended — <brief reason from analysis>)
-  - "Implement directly with /arc:implement" (for small, single-task work)
+  - "Implement directly with /arc:build" (for small, single-task work)
   - "Done for now" (design is saved — continue in a new session)
 ```
 
-If `/arc:implement` is recommended instead, swap which option gets the "(recommended)" tag.
+If `/arc:build` is recommended instead, swap which option gets the "(recommended)" tag.
 
 - **Break into tasks**: invoke the `plan` skill, passing the plan ID
 - **Implement directly**: invoke the `implement` skill

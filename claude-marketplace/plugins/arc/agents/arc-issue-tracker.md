@@ -5,6 +5,7 @@ tools:
   - Read
   - Glob
   - Grep
+model: haiku
 ---
 
 # Arc Issue Tracker Agent

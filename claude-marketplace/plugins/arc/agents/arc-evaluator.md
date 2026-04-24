@@ -6,6 +6,7 @@ tools:
   - Write
   - Glob
   - Grep
+model: sonnet
 ---
 
 # Arc Evaluator Agent

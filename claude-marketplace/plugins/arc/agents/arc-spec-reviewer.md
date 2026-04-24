@@ -5,6 +5,7 @@ tools:
   - Read
   - Glob
   - Grep
+model: sonnet
 ---
 
 # Arc Spec Reviewer Agent

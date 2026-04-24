@@ -59,8 +59,14 @@ Your report should include:
 
 1. **Status:** one of `DONE` / `DONE_WITH_CONCERNS` / `BLOCKED` / `NEEDS_CONTEXT`
 2. **Summary:** one paragraph describing what you wrote or updated
-3. **Files changed:** list of paths
-4. **Verification:** what formatting / link / hierarchy checks you ran and their outcome
-5. **Concerns / Blockers / Missing context:** only for the three non-DONE statuses
+3. **Files changed:** list of paths, one bullet per file with a short note on what changed
+4. **Verification Results:** per-check status from the Quality Checklist above — do NOT skip any line, report each as `PASS` / `FAIL` / `NOT RUN`
+   - Heading hierarchy: `PASS` / `FAIL` / `NOT RUN`
+   - Code block language tags: `PASS` / `FAIL` / `NOT RUN`
+   - Relative link validity: `PASS` / `FAIL` / `NOT RUN`
+   - No orphaned sections: `PASS` / `FAIL` / `NOT RUN`
+   - Consistent formatting: `PASS` / `FAIL` / `NOT RUN`
+   - Cross-file consistency: `PASS` / `FAIL` / `NOT RUN` / `N/A` (single-file task)
+5. **Concerns / Blockers / Missing context / Verification: Unresolved** — only for the three non-DONE statuses. Use `Verification: Unresolved` when one or more Verification Results are `FAIL` and you could not resolve them — list each unresolved item and what you tried.
 
-Never silently produce docs you're unsure about. If in doubt between `DONE` and `DONE_WITH_CONCERNS`, choose `DONE_WITH_CONCERNS`.
+Never silently produce docs you're unsure about. If any Verification Result is `FAIL`, your status must be `DONE_WITH_CONCERNS` (if non-blocking) or `BLOCKED` (if you cannot proceed) — never `DONE`. If in doubt between `DONE` and `DONE_WITH_CONCERNS`, choose `DONE_WITH_CONCERNS`.

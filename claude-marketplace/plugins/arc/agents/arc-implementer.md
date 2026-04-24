@@ -204,9 +204,15 @@ Your report should include:
 
 1. **Status:** one of `DONE` / `DONE_WITH_CONCERNS` / `BLOCKED` / `NEEDS_CONTEXT`
 2. **Summary:** one paragraph describing what you did (or attempted)
-3. **Files changed:** list of paths
-4. **Tests:** what you ran and the pass/fail outcome
-5. **Self-review findings:** anything you noticed during self-review
-6. **Concerns / Blockers / Missing context:** only for the three non-DONE statuses
+3. **Files changed:** list of paths, one bullet per file with a short note on what changed
+4. **Test Results:** full-suite command you ran and pass/fail counts (e.g., `make test` — `42 passed, 0 failed`)
+5. **Gate Results:** per-check status from § 4 GATE — do NOT skip any line, report each as `PASS` / `FAIL` / `NOT RUN`
+   - Spec compliance: `PASS` / `FAIL` / `NOT RUN`
+   - No stubs/placeholders: `PASS` / `FAIL` / `NOT RUN`
+   - Test coverage: `PASS` / `FAIL` / `NOT RUN`
+   - Idiomatic quality: `PASS` / `FAIL` / `NOT RUN`
+   - Full test suite: `PASS` / `FAIL` / `NOT RUN` / `SETUP ERROR`
+6. **Self-review findings:** anything you noticed during self-review
+7. **Concerns / Blockers / Missing context / Gate: Unresolved** — only for the three non-DONE statuses. Use `Gate: Unresolved` when one or more Gate Results above are `FAIL` and you could not resolve them within 2 attempts — list each unresolved item and what you tried.
 
-Never silently produce work you're unsure about. If in doubt between `DONE` and `DONE_WITH_CONCERNS`, choose `DONE_WITH_CONCERNS`.
+Never silently produce work you're unsure about. If any Gate Result is `FAIL`, your status must be `DONE_WITH_CONCERNS` (if non-blocking) or `BLOCKED` (if you cannot proceed) — never `DONE`. If in doubt between `DONE` and `DONE_WITH_CONCERNS`, choose `DONE_WITH_CONCERNS`.

@@ -1,42 +1,42 @@
 [
   {
     "_comment": "=== ARC-ISSUE-TRACKER AGENT ===",
-    "_target": "arc:arc-issue-tracker"
+    "_target": "arc:issue-manager"
   },
   {
     "query": "Create an epic called 'Auth System' with 5 child tasks for login, registration, password reset, session management, and OAuth. Set up dependencies between them.",
     "should_trigger": true,
-    "target_agent": "arc:arc-issue-tracker",
+    "target_agent": "arc:issue-manager",
     "note": "Bulk issue creation with dependencies — classic issue-tracker dispatch"
   },
   {
     "query": "Close all the completed tasks under epic ARC-5: ARC-5.1, ARC-5.2, ARC-5.3, and ARC-5.4.",
     "should_trigger": true,
-    "target_agent": "arc:arc-issue-tracker",
+    "target_agent": "arc:issue-manager",
     "note": "Batch close operation"
   },
   {
     "query": "Triage these 10 open issues — set priorities based on the descriptions and mark the UI polish ones as backlog.",
     "should_trigger": true,
-    "target_agent": "arc:arc-issue-tracker",
+    "target_agent": "arc:issue-manager",
     "note": "Bulk triage operation"
   },
   {
     "query": "Create the tasks from the plan we just designed. Here's the task manifest with 8 tasks and their dependencies.",
     "should_trigger": true,
-    "target_agent": "arc:arc-issue-tracker",
+    "target_agent": "arc:issue-manager",
     "note": "Task manifest processing from plan skill"
   },
   {
     "query": "Create a single bug for the login timeout issue",
     "should_trigger": false,
-    "target_agent": "arc:arc-issue-tracker",
+    "target_agent": "arc:issue-manager",
     "note": "Single issue creation — use /arc:create directly, no agent needed"
   },
   {
     "query": "Show me the details of issue ARC-5.1",
     "should_trigger": false,
-    "target_agent": "arc:arc-issue-tracker",
+    "target_agent": "arc:issue-manager",
     "note": "Single show — use /arc:show directly"
   },
 

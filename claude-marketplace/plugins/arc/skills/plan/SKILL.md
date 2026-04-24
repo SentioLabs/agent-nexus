@@ -136,11 +136,11 @@ Break the design into self-contained implementation units. Each task should:
 
 When identifying tasks, assign **file ownership** — each file should be owned by exactly one task. If two tasks need to modify the same file, either merge them into one task, serialize them with a dependency, or extract the shared file into the foundation task.
 
-### 4. Create Epic and Tasks via arc-issue-tracker
+### 4. Create Epic and Tasks via issue-manager
 
-**Model tier:** `arc-issue-tracker` defaults to `haiku` — the right tier for CLI formatting and bulk issue creation. For this dispatch, omit `model:`. See the Model Selection table in `../implement/SKILL.md` for the full guidance.
+**Model tier:** `issue-manager` defaults to `haiku` — the right tier for CLI formatting and bulk issue creation. For this dispatch, omit `model:`. See the Model Selection table in `../implement/SKILL.md` for the full guidance.
 
-**Never run `arc create` directly** — always delegate to the `arc-issue-tracker` agent. This keeps bulk CLI output in a disposable subagent context.
+**Never run `arc create` directly** — always delegate to the `issue-manager` agent. This keeps bulk CLI output in a disposable subagent context.
 
 Read the full plan content first (`arc plan show <plan-id>`), then build a task manifest that includes:
 1. **The epic** — its description will be populated by the agent from the plan file (see below)
@@ -151,7 +151,7 @@ Read the full plan content first (`arc plan show <plan-id>`), then build a task 
 Get the plan file path from the `arc plan show` output (the `file_path` field), then dispatch the manifest:
 
 ```
-Use the Agent tool with subagent_type="arc:arc-issue-tracker":
+Use the Agent tool with subagent_type="arc:issue-manager":
 
 Create the following epic and tasks.
 After creation, set dependencies and labels as listed.
@@ -341,7 +341,7 @@ For `docs-only` tasks, omit `## Test Command` and use `## Verification` instead:
 - Task descriptions must include actual code guidance, not vague instructions
 - Team preparation (teammate labels) is optional — only if user chooses team execution
 - The plan skill creates tasks; it does not implement them
-- The plan skill never runs `arc create` directly — always delegate to `arc-issue-tracker`
+- The plan skill never runs `arc create` directly — always delegate to `issue-manager`
 - Every task must include a `## Scope Boundary` section — no file modifications outside the `## Files` list
 - No two parallelizable tasks may own the same file — resolve overlaps via foundation task, merging, or serialization
 - Format all arc content (descriptions, plans, comments) per `skills/arc/_formatting.md`

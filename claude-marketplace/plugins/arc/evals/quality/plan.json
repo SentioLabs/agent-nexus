@@ -38,12 +38,12 @@
   },
   {
     "eval_id": 2,
-    "eval_name": "Plan delegates to arc-issue-tracker agent",
+    "eval_name": "Plan delegates to issue-manager agent",
     "prompt": "Create the implementation tasks for the notification system epic ARC-7. There are 6 tasks with dependencies.",
     "assertions": [
       {
         "id": 1,
-        "text": "Output dispatches arc-issue-tracker agent via Agent tool (does NOT run arc create directly)",
+        "text": "Output dispatches issue-manager agent via Agent tool (does NOT run arc create directly)",
         "type": "constraint"
       },
       {
@@ -120,7 +120,7 @@
   {
     "eval_id": 5,
     "eval_name": "Plan validates returned agent results",
-    "prompt": "The arc-issue-tracker agent returned 4 task IDs but we sent 5 tasks. Handle this.",
+    "prompt": "The issue-manager agent returned 4 task IDs but we sent 5 tasks. Handle this.",
     "assertions": [
       {
         "id": 1,

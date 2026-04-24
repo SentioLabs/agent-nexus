@@ -124,7 +124,7 @@ Run `arc docs` without a topic to see an overview.
 
 ## Agent Mode
 
-For bulk operations (creating epics with tasks, batch updates), use the **arc-issue-tracker** agent via the Task tool. This runs arc commands without consuming main conversation context.
+For bulk operations (creating epics with tasks, batch updates), use the **issue-manager** agent via the Task tool. This runs arc commands without consuming main conversation context.
 
 ## Dependency Types
 

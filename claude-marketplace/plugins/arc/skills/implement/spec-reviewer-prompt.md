@@ -1,6 +1,6 @@
 # Spec Reviewer Prompt Template
 
-Use this template when dispatching `arc-spec-reviewer` after an implementer reports `DONE`.
+Use this template when dispatching `spec-reviewer` after an implementer reports `DONE`.
 
 **Placeholders:**
 - `{TASK_ID}` — arc issue ID

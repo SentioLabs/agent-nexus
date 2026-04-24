@@ -140,13 +140,13 @@ Address each concern and re-report.
 
 ### 5. Spec Compliance Review
 
-After confirming tests pass, dispatch the `arc-spec-reviewer` to independently verify the implementation matches the spec:
+After confirming tests pass, dispatch the `spec-reviewer` to independently verify the implementation matches the spec:
 
 ```bash
 BASE_SHA=$PRE_TASK_SHA
 ```
 
-Dispatch `arc-spec-reviewer`:
+Dispatch `spec-reviewer`:
 
 Use the template at `./spec-reviewer-prompt.md`. Fill placeholders (`{TASK_ID}`, `{BASE_SHA}`, `{HEAD_SHA}`). Spec review is a focused comparison task — the agent default is appropriate; omit `model:` unless the spec is unusually large or ambiguous.
 

@@ -86,7 +86,7 @@
     "note": "Full orchestration request — dispatch subagents, verify, integration checkpoints"
   },
   {
-    "query": "I need to execute the implementation plan we created for the notification system. There are 6 tasks: a T0 foundation task (shared interfaces), then 3 parallel channel tasks (email, Slack, webhook), then integration and docs. Use builder subagents for each task and arc-doc-writer for the docs-only task. Tasks ARC-7.2, 7.3, 7.4 can run in parallel with worktree isolation.",
+    "query": "I need to execute the implementation plan we created for the notification system. There are 6 tasks: a T0 foundation task (shared interfaces), then 3 parallel channel tasks (email, Slack, webhook), then integration and docs. Use builder subagents for each task and doc-writer for the docs-only task. Tasks ARC-7.2, 7.3, 7.4 can run in parallel with worktree isolation.",
     "should_trigger": true,
     "target_skill": "arc:implement",
     "note": "Complex multi-task execution with parallel dispatch, agent routing, and worktree isolation"

@@ -114,7 +114,7 @@
       },
       {
         "id": 2,
-        "text": "Output dispatches arc-doc-writer subagent (NOT builder)",
+        "text": "Output dispatches doc-writer subagent (NOT builder)",
         "type": "quality"
       }
     ]
@@ -281,7 +281,7 @@
   {
     "eval_id": 13,
     "eval_name": "Implement skips evaluator for docs-only tasks",
-    "prompt": "The arc-doc-writer just completed ARC-5.9, a docs-only task for updating API reference docs.",
+    "prompt": "The doc-writer just completed ARC-5.9, a docs-only task for updating API reference docs.",
     "assertions": [
       {
         "id": 1,

@@ -98,7 +98,7 @@ Check whether the task has a `docs-only` label:
 arc show <task-id> --json | jq -e '.labels[] | select(. == "docs-only")' > /dev/null 2>&1
 ```
 
-**If `docs-only`** (exit code 0) — spawn an `arc-doc-writer` subagent:
+**If `docs-only`** (exit code 0) — spawn an `doc-writer` subagent:
 
 Use the template at `./doc-writer-prompt.md`. Fill placeholder `{TASK_ID}`. For docs-only work, the agent default (`haiku`) is correct — omit `model:` unless the docs task is unusually complex.
 
@@ -239,7 +239,7 @@ Go to step 1 for the next task. Continue until all tasks in the epic are closed.
 
 ## Handle Implementer Status
 
-Every `builder` and `arc-doc-writer` dispatch returns one of four terminal statuses. Handle each explicitly:
+Every `builder` and `doc-writer` dispatch returns one of four terminal statuses. Handle each explicitly:
 
 | Status | Orchestrator action |
 |---|---|

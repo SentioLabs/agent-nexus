@@ -45,27 +45,9 @@ Extract the design excerpt relevant to this task — typically the sections cove
 
 ### 3. Dispatch Reviewer
 
-Use the Agent tool to spawn an `arc-reviewer` subagent with this prompt:
+Use the Agent tool to spawn an `arc-reviewer` subagent. Fill the template at `./reviewer-prompt.md` with the gathered placeholders (`{TASK_ID}`, `{BASE_SHA}`, `{HEAD_SHA}`, `{DESIGN_EXCERPT}`, `{EVALUATOR_STATUS}`).
 
-```text
-Review these changes against the task spec and project conventions.
-
-## Task Spec
-<paste output of: arc show <task-id>>
-
-## Design Spec
-<paste the design excerpt relevant to this task — from the epic's plan or the task's ## Design Contracts section>
-If no design spec is available, omit this section entirely.
-
-## Changes
-<paste output of: git diff <BASE_SHA>..<HEAD_SHA>>
-
-## Evaluator Status
-<active | not dispatched>
-
-Report findings as: Critical (must fix), Important (should fix), Minor (note for later).
-If a design spec was provided, also report Plan Adherence (ADHERENT or DEVIATION with fix/accept recommendation).
-```
+**Model tier:** Follow the Model Selection table in `../implement/SKILL.md`. For most reviews, omit `model:` (use the agent's sonnet default). Escalate to `opus` when the diff is large (10+ files), crosses multiple architectural layers, or involves security-sensitive changes.
 
 ### 4. Triage Feedback
 
@@ -95,12 +77,50 @@ If fixes are needed:
 
 ## Response Discipline
 
-When receiving review feedback from the `arc-reviewer`:
+Receiving review feedback requires technical evaluation, not emotional performance. Verify before implementing. Ask before assuming.
 
-- **Evaluate technically.** Don't agree performatively. If a finding is wrong, explain why with evidence.
-- **If it's right, fix it.** Don't negotiate or defer valid Critical/Important findings.
-- **If it's ambiguous, test it.** Write a test that proves or disproves the concern.
-- **No ego.** The reviewer is checking the subagent's work, not yours personally.
+### Forbidden Responses
+
+Never write:
+
+- "You're absolutely right!"
+- "Great point!"
+- "Excellent feedback!"
+- "Let me implement that now" (before verification)
+
+These are performative and explicitly violate project discipline. They signal acceptance before understanding.
+
+### Instead
+
+- **Restate** the technical requirement in your own words
+- **Ask** clarifying questions when the feedback is unclear
+- **Push back** with technical reasoning when the feedback is wrong
+- **Just start working** — actions beat performative agreement
+
+### The Verification Pattern
+
+Apply this pattern to every finding:
+
+1. **READ** — Read the complete feedback without reacting
+2. **UNDERSTAND** — Restate the requirement in your own words (or ask for clarification)
+3. **VERIFY** — Check the claim against the actual codebase
+4. **EVALUATE** — Is the feedback technically sound for *this* codebase's conventions?
+5. **RESPOND** — Technical acknowledgment ("Confirmed, file X line Y has the issue") OR reasoned pushback ("Disagree: file X line Y actually does handle this case — test Z covers it")
+6. **IMPLEMENT** — Fix one finding at a time, verify each before moving to the next
+
+### Triage by Severity
+
+When the `arc-reviewer` reports findings, triage by severity:
+
+| Severity | Action |
+|----------|--------|
+| **Critical** | Fix immediately — re-dispatch `arc-implementer` with the specific fix. Then re-review. |
+| **Important** | Fix before moving to next task — re-dispatch `arc-implementer`. Then re-review. |
+| **Minor** | Note in arc issue comment for later. Proceed. |
+| **Deviation (fix)** | Re-dispatch `arc-implementer` with the specific deviation to correct. |
+| **Deviation (accept)** | Note the deviation as an arc comment on the task for traceability. Proceed. |
+
+Never agree performatively to Critical or Important findings. Never dismiss them without technical reasoning. If a finding is wrong, show *why* with evidence from the codebase.
 
 ## Relationship to the Evaluator
 

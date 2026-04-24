@@ -138,6 +138,8 @@ When identifying tasks, assign **file ownership** — each file should be owned 
 
 ### 4. Create Epic and Tasks via arc-issue-tracker
 
+**Model tier:** `arc-issue-tracker` defaults to `haiku` — the right tier for CLI formatting and bulk issue creation. For this dispatch, omit `model:`. See the Model Selection table in `../implement/SKILL.md` for the full guidance.
+
 **Never run `arc create` directly** — always delegate to the `arc-issue-tracker` agent. This keeps bulk CLI output in a disposable subagent context.
 
 Read the full plan content first (`arc plan show <plan-id>`), then build a task manifest that includes:

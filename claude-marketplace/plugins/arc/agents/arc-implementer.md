@@ -7,6 +7,7 @@ tools:
   - Edit
   - Glob
   - Grep
+model: sonnet
 ---
 
 # Arc Implementer Agent
@@ -170,44 +171,6 @@ If you discover issues during the gate and cannot resolve them after reasonable 
 7. **Commit** with a conventional commit message (e.g., `feat(module): add X`)
 8. **Report** back with the structured format below
 
-## Report Format
-
-When reporting back to the dispatcher, use this structure:
-
-```
-## Result: PASS | PARTIAL | NEEDS_CONTEXT | DONE_WITH_CONCERNS
-
-### Implemented
-- <what was built, one bullet per step from the spec>
-
-### Files Changed
-- `path/to/file.go` — <what changed>
-- `path/to/file_test.go` — <what's tested>
-
-### Test Results
-- Full suite: <pass count> passed, <fail count> failed
-- Test command: `<command used>`
-
-### Gate Results
-- Spec compliance: PASS
-- No stubs/placeholders: PASS
-- Test coverage: PASS
-- Idiomatic quality: PASS
-- Full test suite: PASS
-
-### Gate: Unresolved (only if PARTIAL)
-- <issue 1: what and why it couldn't be resolved>
-
-### Context Needed (only if NEEDS_CONTEXT)
-- <what is missing or ambiguous>
-- <what you need from the orchestrator to proceed>
-
-### Concerns (only if DONE_WITH_CONCERNS)
-- <concern 1: what you noticed and why it may need a separate task>
-```
-
-Use `PASS` when all gate checks pass. Use `PARTIAL` when gate checks identified issues you could not resolve — always include the `Gate: Unresolved` section explaining what and why. Use `NEEDS_CONTEXT` when you cannot complete the task due to ambiguity or missing prerequisites — include a `## Context Needed` section. Use `DONE_WITH_CONCERNS` when all gate checks pass but you identified non-blocking issues **outside your task scope** — include a `## Concerns` section.
-
 ## When Tests Can't Run
 
 If the project's test command fails with a **setup error** (not a test failure):
@@ -227,3 +190,29 @@ If the project's test command fails with a **setup error** (not a test failure):
 - Never commit until the gate passes (or you've documented unresolved issues)
 - Never assume you are on a specific branch — commit to whatever branch you find yourself on
 - Format all arc content (descriptions, comments, commit messages) using GFM: fenced code blocks with language tags, headings for structure, lists for organization, inline code for paths/commands
+
+## Report Format
+
+When you finish — whether successfully or not — report back with one of these four terminal statuses:
+
+- **DONE** — Work complete, self-review clean. Tests pass. Ready for review.
+- **DONE_WITH_CONCERNS** — Work complete, but you flagged doubts about correctness, scope, or architectural fit. The orchestrator reads your concerns before dispatching review. Use this when you finished the task but you're not fully confident the implementation is right.
+- **BLOCKED** — You cannot complete the task. Describe what you tried, what you need, and what kind of help would unblock you (more context, a more capable model, a smaller task, or human escalation).
+- **NEEDS_CONTEXT** — You identified specific missing information. State exactly what context you need; the orchestrator will re-dispatch with it.
+
+Your report should include:
+
+1. **Status:** one of `DONE` / `DONE_WITH_CONCERNS` / `BLOCKED` / `NEEDS_CONTEXT`
+2. **Summary:** one paragraph describing what you did (or attempted)
+3. **Files changed:** list of paths, one bullet per file with a short note on what changed
+4. **Test Results:** full-suite command you ran and pass/fail counts (e.g., `make test` — `42 passed, 0 failed`)
+5. **Gate Results:** per-check status from § 4 GATE — do NOT skip any line, report each as `PASS` / `FAIL` / `NOT RUN`
+   - Spec compliance: `PASS` / `FAIL` / `NOT RUN`
+   - No stubs/placeholders: `PASS` / `FAIL` / `NOT RUN`
+   - Test coverage: `PASS` / `FAIL` / `NOT RUN`
+   - Idiomatic quality: `PASS` / `FAIL` / `NOT RUN`
+   - Full test suite: `PASS` / `FAIL` / `NOT RUN` / `SETUP ERROR`
+6. **Self-review findings:** anything you noticed during self-review
+7. **Concerns / Blockers / Missing context / Gate: Unresolved** — only for the three non-DONE statuses. Use `Gate: Unresolved` when one or more Gate Results above are `FAIL` and you could not resolve them within 2 attempts — list each unresolved item and what you tried.
+
+Never silently produce work you're unsure about. If any Gate Result is `FAIL`, your status must be `DONE_WITH_CONCERNS` (if non-blocking) or `BLOCKED` (if you cannot proceed) — never `DONE`. If in doubt between `DONE` and `DONE_WITH_CONCERNS`, choose `DONE_WITH_CONCERNS`.

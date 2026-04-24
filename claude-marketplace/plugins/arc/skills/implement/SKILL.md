@@ -11,6 +11,30 @@ Orchestrate task implementation by dispatching fresh `arc-implementer` subagents
 
 **The main agent NEVER writes implementation code.** It orchestrates, dispatches, and reviews. If you're tempted to "just quickly fix this" — dispatch a subagent instead.
 
+## Model Selection
+
+Every Agent dispatch can override the subagent's frontmatter model via the `model:` parameter. Use this to match model tier to task complexity. The default floor per agent is set in frontmatter — use these overrides to downgrade for trivial tasks or escalate for complex ones.
+
+| Task signal | Dispatch `model:` |
+|---|---|
+| Mechanical: 1-2 files, spec unambiguous, no cross-cutting concerns | `haiku` (downgrade from sonnet floor) |
+| Standard: integration work, multi-file but contained, unambiguous | omit `model:` (use agent default) |
+| Complex: 3+ files, cross-layer, design judgment required, migrations, breaking changes | `opus` |
+| Re-dispatch after `BLOCKED` | escalate one tier (haiku → sonnet → opus); stop at opus |
+| Re-dispatch after `NEEDS_CONTEXT` | same tier, richer context |
+
+Examples:
+
+```text
+Agent(subagent_type="arc-implementer", model="haiku", prompt="...")       # mechanical
+Agent(subagent_type="arc-implementer", prompt="...")                      # standard (sonnet)
+Agent(subagent_type="arc-implementer", model="opus", prompt="...")        # complex
+```
+
+**When unsure, omit `model:`** — the agent's frontmatter floor is calibrated for the typical case.
+
+**Escalation rule:** If a subagent returns `BLOCKED` with a reasoning or capability complaint, re-dispatch with the next tier up before asking the human. Stop escalating at opus — if opus also returns `BLOCKED`, escalate to the human with the subagent's blocker summary.
+
 ## Dispatch Modes
 
 ### Sequential (default)
@@ -76,92 +100,43 @@ arc show <task-id> --json | jq -e '.labels[] | select(. == "docs-only")' > /dev/
 
 **If `docs-only`** (exit code 0) — spawn an `arc-doc-writer` subagent:
 
-```
-Write/update the documentation described in this task.
-
-## Task
-<paste output of: arc show <task-id>>
-
-Verify formatting quality and commit your work.
-```
+Use the template at `./doc-writer-prompt.md`. Fill placeholder `{TASK_ID}`. For docs-only work, the agent default (`haiku`) is correct — omit `model:` unless the docs task is unusually complex.
 
 **Otherwise** — spawn an `arc-implementer` subagent:
 
-```
-Implement this task following TDD (RED → GREEN → REFACTOR → GATE).
-
-## Task
-<paste output of: arc show <task-id>>
-
-## Context
-<1-2 sentences: where this task fits in the epic, what ran before it,
-any shared types/files now on HEAD from prior tasks>
-
-## Project Test Command
-<project's test command, e.g., make test, go test ./...>
-
-## Scope Rules
-- Build ONLY what the task specifies. Follow code blocks' structure and behavior, adapted to project conventions.
-- Do NOT add features, flags, helpers, or improvements not in the task.
-- Do NOT modify files outside the ## Files section.
-- If a prerequisite is missing (type, file, dependency not on HEAD), report NEEDS_CONTEXT.
-- If you notice non-blocking issues outside your scope, report DONE_WITH_CONCERNS.
-- If a step is vague, report NEEDS_CONTEXT — do not fill in gaps with your judgment.
-
-Commit your work when all gate checks pass.
-```
+Use the template at `./implementer-prompt.md`. Fill placeholders (`{TASK_ID}`, `{PRE_TASK_SHA}`, `{DESIGN_EXCERPT}`) and apply Model Selection guidance (see `## Model Selection` above) for the dispatch `model:`.
 
 ### 4. Evaluate Result
 
-When the subagent reports back, check the **Result** and **Gate Results** in its report:
+When the subagent reports back, check its **Status** (one of `DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT`) and **Gate Results**. Follow the `## Handle Implementer Status` table below for the status-specific action. In all cases, run the project test command fresh yourself — do NOT trust the subagent's report alone.
 
-**If `PASS`** (all gate checks passed):
-- Run the project test command fresh yourself to confirm — do NOT trust the subagent's report alone
-- If tests pass → proceed to step 5 (Spec Compliance Review)
+**On `DONE`:**
+- Run the project tests. If they pass → proceed to step 5 (Spec Compliance Review).
+- If tests fail despite a `DONE` report, treat as `BLOCKED`: re-dispatch with the failure output.
 
-**If `PARTIAL`** (gate identified unresolved issues):
-- Read the `Gate: Unresolved` section carefully
-- Decide: is this a re-dispatch or a debug situation?
-- Handle issues before proceeding (see below)
+**On `DONE_WITH_CONCERNS`:**
+- Read the concerns carefully.
+- If the concerns touch correctness or scope (e.g., "I think this edge case isn't handled", "I modified a file outside the spec") — address before review by re-dispatching with specific guidance, or tightening the review prompt.
+- If the concerns are observations (e.g., "this file is getting large") — note them as arc comments on the task and proceed to step 5.
 
-**If the subagent did not include gate results** (it skipped the gate):
-- Treat this as a failed result — re-dispatch with explicit reminder to complete all gate checks
+**On `BLOCKED` or `NEEDS_CONTEXT`:**
+- Do NOT proceed to review. Do NOT close the task.
+- For `NEEDS_CONTEXT`: gather the requested information, re-dispatch with it.
+- For `BLOCKED`: assess the blocker per the Handle Implementer Status table. Escalate one model tier (haiku → sonnet → opus) per the Model Selection escalation rule, or invoke the `debug` skill if the blocker is a persistent test failure, or split the task if too large, or escalate to the human.
+- After 3 re-dispatches on the same task without clean `DONE`, invoke the `debug` skill.
 
-**Handling issues from PARTIAL results**:
+**If the subagent did not include a Status field** (malformed report):
+- Treat as `BLOCKED`. Re-dispatch with an explicit reminder to use the four-status Report Format.
 
-- **Subagent reports `PARTIAL` with clear gaps** — re-dispatch `arc-implementer` with the specific gaps listed in `Gate: Unresolved`, plus the original task description
-- **Subagent reports test failures it can't resolve** — invoke the `debug` skill
-- **3+ implementation attempts fail on same issue** — invoke the `debug` skill
-- **Approach was wrong** — re-dispatch the appropriate agent with corrected guidance
-
-When re-dispatching, include the previous gate feedback so the implementer knows exactly what to fix:
+When re-dispatching, include the previous report's concerns / blockers so the implementer knows exactly what to fix:
 
 ```
-Continue implementing this task. A previous attempt was made but the gate check identified issues.
+Continue implementing this task. A previous attempt reported <status> with these concerns:
 
-## Task
-<paste output of: arc show <task-id>>
+<paste concerns>
 
-## Previous Gate Feedback
-<paste the Gate: Unresolved section from the previous report>
-
-## Project Test Command
-<project's test command>
-
-Fix the identified issues, re-run all gate checks, and commit when complete.
+Address each concern and re-report.
 ```
-
-**If `NEEDS_CONTEXT`** (implementer hit ambiguity or missing prerequisite):
-- Read the `## Context Needed` section
-- If the issue is a missing prerequisite (type, file, dependency not on HEAD) → check if another task should have created it. If so, that task may need to run first (dependency ordering issue). If not, this is a planning gap — create a follow-up arc issue or provide the missing definition.
-- If the issue is ambiguity in the task description → provide clarification and re-dispatch with the original task plus the clarification.
-- Do NOT re-dispatch without addressing the context gap — the implementer will hit the same wall.
-
-**If `DONE_WITH_CONCERNS`** (work complete, non-blocking observations):
-- Read the `## Concerns` section
-- If concerns describe potential issues in adjacent code → note in an arc comment on the epic for later triage
-- If concerns describe code quality observations (large file, repeated pattern) → note for future planning
-- Proceed to step 5 (spec compliance review) — the work itself is complete and all gates passed
 
 ### 5. Spec Compliance Review
 
@@ -173,18 +148,7 @@ BASE_SHA=$PRE_TASK_SHA
 
 Dispatch `arc-spec-reviewer`:
 
-```
-Verify this implementation matches its specification exactly.
-
-## Task Spec
-<paste output of: arc show <task-id>>
-
-## Implementer Report
-<paste the implementer's report>
-
-## Base SHA
-<BASE_SHA> (use for: git diff --name-only <BASE_SHA>..HEAD)
-```
+Use the template at `./spec-reviewer-prompt.md`. Fill placeholders (`{TASK_ID}`, `{BASE_SHA}`, `{HEAD_SHA}`). Spec review is a focused comparison task — the agent default is appropriate; omit `model:` unless the spec is unusually large or ambiguous.
 
 Handle results:
 - `COMPLIANT` → proceed to Step 6
@@ -203,24 +167,9 @@ Only dispatched after spec compliance passes. Use the `review` skill or dispatch
 HEAD_SHA=$(git rev-parse HEAD)
 ```
 
-```
-Review these changes against the task spec and project conventions.
+Use the template at `../review/reviewer-prompt.md`. Fill placeholders (`{TASK_ID}`, `{BASE_SHA}` = PRE_TASK_SHA recorded earlier, `{HEAD_SHA}` = current HEAD, `{DESIGN_EXCERPT}` from parent epic or "none", `{EVALUATOR_STATUS}` = "active" if evaluator was dispatched, else "not dispatched"). Follow Model Selection above for the dispatch `model:` — sonnet default is appropriate for most reviews.
 
-## Task Spec
-<paste output of: arc show <task-id>>
-
-## Design Spec
-<excerpt from parent epic, if available>
-
-## Changes
-<git diff $PRE_TASK_SHA..$HEAD_SHA>
-
-## Evaluator Status
-not dispatched
-
-Report findings as: Critical, Important, Minor.
-If design spec provided, also report Plan Adherence.
-```
+**On `{EVALUATOR_STATUS}`:** Decide whether to dispatch the evaluator (step 6.5) BEFORE filling this placeholder. If you plan to run step 6.5 in parallel with step 6, set `{EVALUATOR_STATUS}="active"`. Otherwise set `"not dispatched"`. Step 6.5 has the decision criteria for when to dispatch the evaluator.
 
 Handle findings:
 
@@ -247,26 +196,21 @@ When dispatched, use `isolation: "worktree"` and the existing `arc-evaluator` ag
 PARENT=$(arc show <task-id> --json | jq -r '.parent_id // empty')
 ```
 
-```
-Evaluate whether this implementation faithfully satisfies the spec. Write your own acceptance tests from the spec alone — do NOT read the implementer's tests or the git diff.
-
-## Task Spec
-<paste output of: arc show <task-id>>
-
-## Design Spec
-<paste the design excerpt relevant to this task — from the epic's plan>
-If no design spec is available, omit this section entirely.
-
-## Base SHA
-<BASE_SHA> (use for: git diff --name-only <BASE_SHA>..HEAD to find changed files)
-
-## Project Test Command
-<project's test command>
-```
+Use the template at `./evaluator-prompt.md`. Fill placeholder `{TASK_ID}`. Because evaluation is adversarial verification on high-risk tasks, escalate one tier from the agent default (typically to `opus`) — set `model: "opus"` on the dispatch unless the task is narrow.
 
 When dispatching alongside the evaluator, update the code quality reviewer's `## Evaluator Status` to `active`.
 
-Triage evaluator findings as before — see the evaluator triage table in the design spec.
+Triage evaluator findings:
+
+| Evaluator verdict | Orchestrator action |
+|---|---|
+| `PASS` | No action — evaluator confirms the spec intent is satisfied. |
+| `CONCERNS` | Read the concerns. Re-dispatch `arc-implementer` if the concerns describe substantive behavior gaps. Otherwise note as arc comments and proceed. |
+| `FAIL — Spec-Intent Gap` | Re-dispatch `arc-implementer` with the evaluator's quoted spec text and the failing behavior description. |
+| `FAIL — Missing Behavior` | Re-dispatch `arc-implementer` — the spec requires behavior that wasn't built. |
+| `FAIL — Edge Case` | Lower-severity. Re-dispatch if the spec clearly implies the edge case; otherwise record as a known limitation. |
+| `ERROR — Cannot Test` | The public API is insufficient. Re-dispatch with a request to expose the needed surface. |
+| `BLOCKED` | Evaluator itself is blocked. Escalate per the Model Selection rules or involve the human. |
 
 ### 7. Close Task
 
@@ -292,6 +236,19 @@ If integration tests fail:
 ### 9. Repeat
 
 Go to step 1 for the next task. Continue until all tasks in the epic are closed.
+
+## Handle Implementer Status
+
+Every `arc-implementer` and `arc-doc-writer` dispatch returns one of four terminal statuses. Handle each explicitly:
+
+| Status | Orchestrator action |
+|---|---|
+| `DONE` | Proceed to spec review, then code review. |
+| `DONE_WITH_CONCERNS` | Read the concerns. If they're about correctness or scope, address before review (re-dispatch or tighten review prompt). If they're observations (file getting large, naming doubt), note them as arc comments on the task and proceed to review — close only after a later dispatch yields a clean `DONE`. |
+| `BLOCKED` | Assess the blocker: (1) context problem → provide missing context, re-dispatch same tier; (2) reasoning limit → re-dispatch one tier up per the Model Selection escalation rule; (3) task too large → split and re-plan; (4) plan is wrong → escalate to human. Never retry the same dispatch unchanged. |
+| `NEEDS_CONTEXT` | Gather the specific missing information. Re-dispatch with it in the prompt. |
+
+**Never close a task** whose last report was `BLOCKED`, `NEEDS_CONTEXT`, or `DONE_WITH_CONCERNS` unresolved. Re-dispatch until you have a clean `DONE` — then close.
 
 ## Parallel Dispatch Protocol
 
@@ -392,7 +349,8 @@ arc close <id> -r "reason"            # Close completed task
 
 - Never write implementation code as the main agent — always dispatch
 - Never close a task without confirming tests pass yourself (fresh run)
-- Never close a task if the implementer reported `PARTIAL` without re-dispatching
+- Never close a task if the implementer reported `BLOCKED`, `NEEDS_CONTEXT`, or unresolved `DONE_WITH_CONCERNS` without re-dispatching
+- When re-dispatching after `BLOCKED`, escalate one model tier per the Model Selection table — never retry the same dispatch unchanged
 - If in doubt about the result, re-dispatch rather than fixing manually
 - Never dispatch parallel agents without committing and pushing all sequential work first
 - Never dispatch parallel agents on tasks that share files

@@ -47,7 +47,7 @@ Extract the design excerpt relevant to this task — typically the sections cove
 
 Use the Agent tool to spawn an `code-reviewer` subagent. Fill the template at `./code-reviewer-prompt.md` with the gathered placeholders (`{TASK_ID}`, `{BASE_SHA}`, `{HEAD_SHA}`, `{DESIGN_EXCERPT}`, `{EVALUATOR_STATUS}`).
 
-**Model tier:** Follow the Model Selection table in `../implement/SKILL.md`. For most reviews, omit `model:` (use the agent's sonnet default). Escalate to `opus` when the diff is large (10+ files), crosses multiple architectural layers, or involves security-sensitive changes.
+**Model tier:** Follow the Model Selection table in `../build/SKILL.md`. For most reviews, omit `model:` (use the agent's sonnet default). Escalate to `opus` when the diff is large (10+ files), crosses multiple architectural layers, or involves security-sensitive changes.
 
 ### 4. Triage Feedback
 

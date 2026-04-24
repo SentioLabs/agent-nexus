@@ -138,7 +138,7 @@ When identifying tasks, assign **file ownership** — each file should be owned 
 
 ### 4. Create Epic and Tasks via issue-manager
 
-**Model tier:** `issue-manager` defaults to `haiku` — the right tier for CLI formatting and bulk issue creation. For this dispatch, omit `model:`. See the Model Selection table in `../implement/SKILL.md` for the full guidance.
+**Model tier:** `issue-manager` defaults to `haiku` — the right tier for CLI formatting and bulk issue creation. For this dispatch, omit `model:`. See the Model Selection table in `../build/SKILL.md` for the full guidance.
 
 **Never run `arc create` directly** — always delegate to the `issue-manager` agent. This keeps bulk CLI output in a disposable subagent context.
 
@@ -243,7 +243,7 @@ Fix issues inline. No need to re-review — just fix and move on.
 ```
 Question: "Epic and tasks created. How should we proceed with implementation?"
 Options:
-  - "Start implementing now" (invoke /arc:implement in this session — subagents handle TDD per task)
+  - "Start implementing now" (invoke /arc:build in this session — subagents handle TDD per task)
   - "Implement in a new session" (provides the exact prompt to use)
   - "Done for now" (tasks are tracked in arc — implement manually or later)
 ```
@@ -256,12 +256,12 @@ After the user chooses:
 ```
 Run this in a new Claude Code session:
 
-  /arc:implement <epic-id>
+  /arc:build <epic-id>
 
 ```
 Replace `<epic-id>` with the actual epic ID.
 
-**Done for now**: Confirm the epic and tasks are saved in arc. The user can run `/arc:implement <epic-id>` whenever they're ready.
+**Done for now**: Confirm the epic and tasks are saved in arc. The user can run `/arc:build <epic-id>` whenever they're ready.
 
 ## Task Description Format
 

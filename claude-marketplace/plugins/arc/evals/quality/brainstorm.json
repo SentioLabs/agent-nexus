@@ -148,7 +148,7 @@
   },
   {
     "eval_id": 7,
-    "eval_name": "Routing analysis recommends arc:implement for single-task work",
+    "eval_name": "Routing analysis recommends arc:build for single-task work",
     "prompt": "I want to add a --json flag to the `arc list` command so it outputs JSON instead of the table format. [After brief Q&A, user approves the simple design — single task, CLI layer only, no migrations.]",
     "assertions": [
       {
@@ -163,12 +163,12 @@
       },
       {
         "id": 3,
-        "text": "Routing analysis recommends /arc:implement with a justification referencing the small, single-task scope",
+        "text": "Routing analysis recommends /arc:build with a justification referencing the small, single-task scope",
         "type": "quality"
       },
       {
         "id": 4,
-        "text": "The 'Implement directly with /arc:implement' option is tagged as recommended in the AskUserQuestion",
+        "text": "The 'Implement directly with /arc:build' option is tagged as recommended in the AskUserQuestion",
         "type": "quality"
       }
     ]

@@ -1,5 +1,5 @@
 ---
-name: implement
+name: build
 description: You MUST use this skill to execute implementation tasks from an arc plan — especially when the user says "implement this", "build this", "execute the plan", "start coding", or wants to dispatch subagents for TDD execution of arc issues. The main agent orchestrates; it never writes implementation code directly. Always prefer this over generic implementation when the project uses arc issue tracking.
 ---
 

@@ -77,36 +77,36 @@
 
   {
     "_comment": "=== IMPLEMENT SKILL ===",
-    "_target": "arc:implement"
+    "_target": "arc:build"
   },
   {
     "query": "The plan for epic ARC-5 is ready with 5 tasks. ARC-5.1 through ARC-5.5 are created in arc with dependencies set up. Start implementing them — dispatch subagents for each task using TDD, verify each one passes independently, and run integration tests every 2-3 tasks. Start with ARC-5.1 (JWT token generation).",
     "should_trigger": true,
-    "target_skill": "arc:implement",
+    "target_skill": "arc:build",
     "note": "Full orchestration request — dispatch subagents, verify, integration checkpoints"
   },
   {
     "query": "I need to execute the implementation plan we created for the notification system. There are 6 tasks: a T0 foundation task (shared interfaces), then 3 parallel channel tasks (email, Slack, webhook), then integration and docs. Use builder subagents for each task and doc-writer for the docs-only task. Tasks ARC-7.2, 7.3, 7.4 can run in parallel with worktree isolation.",
     "should_trigger": true,
-    "target_skill": "arc:implement",
+    "target_skill": "arc:build",
     "note": "Complex multi-task execution with parallel dispatch, agent routing, and worktree isolation"
   },
   {
-    "query": "The tasks are all created in arc. Run `arc ready` to find what's available, claim the first task, dispatch an builder subagent with the task spec and test command, and verify the result independently before closing. Then move to the next task.",
+    "query": "The tasks are all created in arc. Run `arc ready` to find what's available, claim the first task, dispatch a builder subagent with the task spec and test command, and verify the result independently before closing. Then move to the next task.",
     "should_trigger": true,
-    "target_skill": "arc:implement",
+    "target_skill": "arc:build",
     "note": "Step-by-step implementation workflow matching the skill's protocol"
   },
   {
     "query": "Just quickly fix this one-liner in utils.go — change the timeout from 30s to 60s",
     "should_trigger": false,
-    "target_skill": "arc:implement",
+    "target_skill": "arc:build",
     "note": "Trivial change — doesn't need subagent dispatch orchestration"
   },
   {
     "query": "What tasks are available to work on?",
     "should_trigger": false,
-    "target_skill": "arc:implement",
+    "target_skill": "arc:build",
     "note": "Query about tasks — should trigger arc:ready, not implement"
   },
 

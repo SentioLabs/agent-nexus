@@ -190,7 +190,7 @@ The evaluator is **not dispatched by default**. Dispatch only when:
 - Task has a `high-risk` label
 - The orchestrator judges the task warrants independent verification (e.g., complex spec with multiple valid interpretations, security-sensitive code, tasks that modify shared contracts)
 
-When dispatched, use `isolation: "worktree"` and the existing `arc-evaluator` agent. The evaluator can run **in parallel with Step 6** (code quality review) since they examine orthogonal concerns:
+When dispatched, use `isolation: "worktree"` and the existing `evaluator` agent. The evaluator can run **in parallel with Step 6** (code quality review) since they examine orthogonal concerns:
 
 ```bash
 PARENT=$(arc show <task-id> --json | jq -r '.parent_id // empty')

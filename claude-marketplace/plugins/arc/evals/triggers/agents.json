@@ -117,36 +117,36 @@
 
   {
     "_comment": "=== ARC-EVALUATOR AGENT ===",
-    "_target": "arc:arc-evaluator"
+    "_target": "arc:evaluator"
   },
   {
     "query": "Evaluate whether the implementation of ARC-5.2 satisfies the spec. Write your own acceptance tests from the spec. Base SHA is abc1234. Do NOT read the diff or the implementer's tests.",
     "should_trigger": true,
-    "target_agent": "arc:arc-evaluator",
+    "target_agent": "arc:evaluator",
     "note": "Adversarial spec evaluation — dispatched from implement skill step 5"
   },
   {
     "query": "The implementation looks done. Independently verify it matches the spec by writing acceptance tests from the task description alone.",
     "should_trigger": true,
-    "target_agent": "arc:arc-evaluator",
+    "target_agent": "arc:evaluator",
     "note": "Independent spec verification request"
   },
   {
     "query": "Review the code changes in the last commit for code quality and conventions",
     "should_trigger": false,
-    "target_agent": "arc:arc-evaluator",
+    "target_agent": "arc:evaluator",
     "note": "Code quality review — should dispatch code-reviewer, not evaluator"
   },
   {
     "query": "Check the git diff for any issues with the implementation",
     "should_trigger": false,
-    "target_agent": "arc:arc-evaluator",
+    "target_agent": "arc:evaluator",
     "note": "Diff-based review — evaluator never reads diffs, should dispatch code-reviewer"
   },
   {
     "query": "Implement the missing behavior that the evaluator identified",
     "should_trigger": false,
-    "target_agent": "arc:arc-evaluator",
+    "target_agent": "arc:evaluator",
     "note": "Implementation request — should dispatch builder"
   }
 ]

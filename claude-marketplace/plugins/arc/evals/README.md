@@ -56,13 +56,13 @@ Each entry is a user query with a `should_trigger` boolean and a target. The eva
 **Target fields** vary by what's being tested:
 - `target_skill` — for skill routing (`arc:brainstorm`, `arc:plan`, etc.)
 - `target_command` — for command routing (`arc:ready`, `arc:create`, etc.)
-- `target_agent` — for agent dispatch (`arc:builder`, `arc:arc-evaluator`, etc.)
+- `target_agent` — for agent dispatch (`arc:builder`, `arc:evaluator`, etc.)
 
 **Section headers** are organizational markers, not test cases:
 ```json
 {
   "_comment": "=== ARC-EVALUATOR AGENT ===",
-  "_target": "arc:arc-evaluator"
+  "_target": "arc:evaluator"
 }
 ```
 
@@ -117,7 +117,7 @@ The `skill-creator` skill has built-in eval and benchmark capabilities. Run thes
 /skill-creator Eval my arc evaluate quality evals
 
 # Eval a specific skill's triggers
-/skill-creator Eval my arc agent trigger evals for arc-evaluator
+/skill-creator Eval my arc agent trigger evals for evaluator
 
 # Eval all arc skills
 /skill-creator Eval my arc skills
@@ -166,7 +166,7 @@ A quality failure means one of:
 
 ### The evaluator's evals specifically
 
-The `evaluate.json` quality evals test the arc-evaluator agent's core properties:
+The `evaluate.json` quality evals test the evaluator agent's core properties:
 
 | Eval cluster | What it tests | What failure means |
 |---|---|---|

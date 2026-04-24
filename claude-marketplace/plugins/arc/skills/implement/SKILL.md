@@ -169,6 +169,8 @@ HEAD_SHA=$(git rev-parse HEAD)
 
 Use the template at `../review/reviewer-prompt.md`. Fill placeholders (`{TASK_ID}`, `{BASE_SHA}` = PRE_TASK_SHA recorded earlier, `{HEAD_SHA}` = current HEAD, `{DESIGN_EXCERPT}` from parent epic or "none", `{EVALUATOR_STATUS}` = "active" if evaluator was dispatched, else "not dispatched"). Follow Model Selection above for the dispatch `model:` — sonnet default is appropriate for most reviews.
 
+**On `{EVALUATOR_STATUS}`:** Decide whether to dispatch the evaluator (step 6.5) BEFORE filling this placeholder. If you plan to run step 6.5 in parallel with step 6, set `{EVALUATOR_STATUS}="active"`. Otherwise set `"not dispatched"`. Step 6.5 has the decision criteria for when to dispatch the evaluator.
+
 Handle findings:
 
 | Finding | Action |
@@ -198,7 +200,17 @@ Use the template at `./evaluator-prompt.md`. Fill placeholder `{TASK_ID}`. Becau
 
 When dispatching alongside the evaluator, update the code quality reviewer's `## Evaluator Status` to `active`.
 
-Triage evaluator findings as before — see the evaluator triage table in the design spec.
+Triage evaluator findings:
+
+| Evaluator verdict | Orchestrator action |
+|---|---|
+| `PASS` | No action — evaluator confirms the spec intent is satisfied. |
+| `CONCERNS` | Read the concerns. Re-dispatch `arc-implementer` if the concerns describe substantive behavior gaps. Otherwise note as arc comments and proceed. |
+| `FAIL — Spec-Intent Gap` | Re-dispatch `arc-implementer` with the evaluator's quoted spec text and the failing behavior description. |
+| `FAIL — Missing Behavior` | Re-dispatch `arc-implementer` — the spec requires behavior that wasn't built. |
+| `FAIL — Edge Case` | Lower-severity. Re-dispatch if the spec clearly implies the edge case; otherwise record as a known limitation. |
+| `ERROR — Cannot Test` | The public API is insufficient. Re-dispatch with a request to expose the needed surface. |
+| `BLOCKED` | Evaluator itself is blocked. Escalate per the Model Selection rules or involve the human. |
 
 ### 7. Close Task
 
@@ -232,7 +244,7 @@ Every `arc-implementer` and `arc-doc-writer` dispatch returns one of four termin
 | Status | Orchestrator action |
 |---|---|
 | `DONE` | Proceed to spec review, then code review. |
-| `DONE_WITH_CONCERNS` | Read the concerns. If they're about correctness or scope, address before review (re-dispatch or tighten review prompt). If they're observations (file getting large, naming doubt), note them as arc comments on the task and proceed to review. |
+| `DONE_WITH_CONCERNS` | Read the concerns. If they're about correctness or scope, address before review (re-dispatch or tighten review prompt). If they're observations (file getting large, naming doubt), note them as arc comments on the task and proceed to review — close only after a later dispatch yields a clean `DONE`. |
 | `BLOCKED` | Assess the blocker: (1) context problem → provide missing context, re-dispatch same tier; (2) reasoning limit → re-dispatch one tier up per the Model Selection escalation rule; (3) task too large → split and re-plan; (4) plan is wrong → escalate to human. Never retry the same dispatch unchanged. |
 | `NEEDS_CONTEXT` | Gather the specific missing information. Re-dispatch with it in the prompt. |
 

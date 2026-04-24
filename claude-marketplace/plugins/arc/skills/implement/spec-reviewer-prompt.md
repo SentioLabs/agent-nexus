@@ -31,19 +31,15 @@ You do NOT write code. You do NOT run tests. You do NOT close issues.
 ## Report Format
 
 ```text
-## Spec Compliance Report
+## Result: COMPLIANT | ISSUES
 
-**Status:** MATCH | GAP | OVER_SCOPE
+### Missing (only if ISSUES)
+- <what's missing, with file:line references>
 
-**Spec coverage:**
-- Requirement 1: implemented at <file:line>
-- Requirement 2: NOT IMPLEMENTED — <why>
-- ...
+### Extra (only if ISSUES)
+- <what was added beyond spec, with file:line references>
 
-**Unexpected changes:**
-- <file>: <what was added that spec didn't ask for>
-
-**Scope violations:**
-- <file outside ## Files>: <what was changed>
+### Misunderstood (only if ISSUES)
+- <what was misinterpreted, with spec quote vs actual behavior>
 ```
 ````

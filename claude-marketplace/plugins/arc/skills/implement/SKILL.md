@@ -167,24 +167,7 @@ Only dispatched after spec compliance passes. Use the `review` skill or dispatch
 HEAD_SHA=$(git rev-parse HEAD)
 ```
 
-```
-Review these changes against the task spec and project conventions.
-
-## Task Spec
-<paste output of: arc show <task-id>>
-
-## Design Spec
-<excerpt from parent epic, if available>
-
-## Changes
-<git diff $PRE_TASK_SHA..$HEAD_SHA>
-
-## Evaluator Status
-not dispatched
-
-Report findings as: Critical, Important, Minor.
-If design spec provided, also report Plan Adherence.
-```
+Use the template at `../review/reviewer-prompt.md`. Fill placeholders (`{TASK_ID}`, `{BASE_SHA}` = PRE_TASK_SHA recorded earlier, `{HEAD_SHA}` = current HEAD, `{DESIGN_EXCERPT}` from parent epic or "none", `{EVALUATOR_STATUS}` = "active" if evaluator was dispatched, else "not dispatched"). Follow Model Selection above for the dispatch `model:` — sonnet default is appropriate for most reviews.
 
 Handle findings:
 

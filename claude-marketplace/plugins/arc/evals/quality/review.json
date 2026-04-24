@@ -1,12 +1,12 @@
 [
   {
     "eval_id": 1,
-    "eval_name": "Review dispatches arc-reviewer with correct context including design spec",
+    "eval_name": "Review dispatches code-reviewer with correct context including design spec",
     "prompt": "Review the implementation of ARC-5.2 (OAuth integration). PRE_TASK_SHA is abc1234. This task is a child of epic ARC-5.",
     "assertions": [
       {
         "id": 1,
-        "text": "Output dispatches arc-reviewer subagent via Agent tool",
+        "text": "Output dispatches code-reviewer subagent via Agent tool",
         "type": "quality"
       },
       {
@@ -39,7 +39,7 @@
   {
     "eval_id": 2,
     "eval_name": "Review triages findings by severity correctly",
-    "prompt": "The arc-reviewer found: Critical — SQL injection in query builder. Important — missing error handling for network timeouts. Minor — inconsistent variable naming in test helpers.",
+    "prompt": "The code-reviewer found: Critical — SQL injection in query builder. Important — missing error handling for network timeouts. Minor — inconsistent variable naming in test helpers.",
     "assertions": [
       {
         "id": 1,
@@ -88,7 +88,7 @@
   {
     "eval_id": 4,
     "eval_name": "Review evaluates findings technically, not performatively",
-    "prompt": "The arc-reviewer flagged: Critical — 'The function GetUser should return (User, error) not (*User, error) because User is small enough to copy.' But the codebase consistently uses pointer returns for all storage methods.",
+    "prompt": "The code-reviewer flagged: Critical — 'The function GetUser should return (User, error) not (*User, error) because User is small enough to copy.' But the codebase consistently uses pointer returns for all storage methods.",
     "assertions": [
       {
         "id": 1,
@@ -114,7 +114,7 @@
     "assertions": [
       {
         "id": 1,
-        "text": "Output re-dispatches arc-reviewer with updated SHAs to verify the fix",
+        "text": "Output re-dispatches code-reviewer with updated SHAs to verify the fix",
         "type": "quality"
       },
       {
@@ -127,7 +127,7 @@
   {
     "eval_id": 6,
     "eval_name": "Review handles deviation-fix recommendation",
-    "prompt": "The arc-reviewer reported: Plan Adherence — DEVIATION: The design specifies MemoryID as int64 but the implementation uses string. RATIONALE: Subagent may have followed common API patterns where IDs are strings. RECOMMENDATION: fix.",
+    "prompt": "The code-reviewer reported: Plan Adherence — DEVIATION: The design specifies MemoryID as int64 but the implementation uses string. RATIONALE: Subagent may have followed common API patterns where IDs are strings. RECOMMENDATION: fix.",
     "assertions": [
       {
         "id": 1,
@@ -149,7 +149,7 @@
   {
     "eval_id": 7,
     "eval_name": "Review handles deviation-accept recommendation",
-    "prompt": "The arc-reviewer reported: Plan Adherence — DEVIATION: The design specifies HandleError returns (error) but implementation returns (*AppError, error) which provides structured error context. RATIONALE: The codebase already uses *AppError throughout the API layer. RECOMMENDATION: accept — aligns with existing codebase conventions and provides richer error context.",
+    "prompt": "The code-reviewer reported: Plan Adherence — DEVIATION: The design specifies HandleError returns (error) but implementation returns (*AppError, error) which provides structured error context. RATIONALE: The codebase already uses *AppError throughout the API layer. RECOMMENDATION: accept — aligns with existing codebase conventions and provides richer error context.",
     "assertions": [
       {
         "id": 1,

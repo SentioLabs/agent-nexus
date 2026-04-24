@@ -60,7 +60,7 @@
       },
       {
         "id": 2,
-        "text": "Output dispatches arc-evaluator AND arc-reviewer (via review skill) simultaneously after tests pass",
+        "text": "Output dispatches arc-evaluator AND code-reviewer (via review skill) simultaneously after tests pass",
         "type": "quality"
       },
       {
@@ -232,7 +232,7 @@
   {
     "eval_id": 11,
     "eval_name": "Implement prioritizes evaluator spec-intent over reviewer code quality",
-    "prompt": "For ARC-5.3, the arc-reviewer says the code is clean with no issues. But the arc-evaluator reports FAIL: spec requires 'idempotent delete — deleting a non-existent resource returns 204' but the acceptance test shows 404 is returned.",
+    "prompt": "For ARC-5.3, the code-reviewer says the code is clean with no issues. But the arc-evaluator reports FAIL: spec requires 'idempotent delete — deleting a non-existent resource returns 204' but the acceptance test shows 404 is returned.",
     "assertions": [
       {
         "id": 1,

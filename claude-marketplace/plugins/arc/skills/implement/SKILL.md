@@ -161,7 +161,7 @@ Handle results:
 
 ### 6. Code Quality Review
 
-Only dispatched after spec compliance passes. Use the `review` skill or dispatch `arc-reviewer` directly:
+Only dispatched after spec compliance passes. Use the `review` skill or dispatch `code-reviewer` directly:
 
 ```bash
 HEAD_SHA=$(git rev-parse HEAD)
@@ -182,7 +182,7 @@ Handle findings:
 
 Circuit breaker: 3 review/fix cycles on the same finding → escalate to user.
 
-> **Docs-only tasks**: Skip code quality review. For substantial documentation changes (developer-facing API docs, architecture docs), optionally dispatch `arc-reviewer` for a quality check.
+> **Docs-only tasks**: Skip code quality review. For substantial documentation changes (developer-facing API docs, architecture docs), optionally dispatch `code-reviewer` for a quality check.
 
 ### 6.5. High-Risk Evaluation (Optional)
 

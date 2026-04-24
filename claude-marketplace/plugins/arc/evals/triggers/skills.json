@@ -179,19 +179,19 @@
     "_target": "arc:review"
   },
   {
-    "query": "The builder just finished task ARC-5.2 (OAuth endpoint implementation). PRE_TASK_SHA is abc1234. I need a code review before we close this task — dispatch the arc-reviewer to check the diff from abc1234 to HEAD against the task spec. Look for critical issues, security concerns in the OAuth flow, test coverage gaps, and adherence to project conventions.",
+    "query": "The builder just finished task ARC-5.2 (OAuth endpoint implementation). PRE_TASK_SHA is abc1234. I need a code review before we close this task — dispatch the code-reviewer to check the diff from abc1234 to HEAD against the task spec. Look for critical issues, security concerns in the OAuth flow, test coverage gaps, and adherence to project conventions.",
     "should_trigger": true,
     "target_skill": "arc:review",
     "note": "Post-implementation review dispatch with SHAs and specific review criteria"
   },
   {
-    "query": "I want a thorough code review of the changes since the last commit. We modified internal/api/server.go, internal/api/middleware.go, and added 3 new test files. Check for security issues in the auth handling, proper error propagation, and make sure the tests actually cover the edge cases. Dispatch the arc-reviewer agent with the diff.",
+    "query": "I want a thorough code review of the changes since the last commit. We modified internal/api/server.go, internal/api/middleware.go, and added 3 new test files. Check for security issues in the auth handling, proper error propagation, and make sure the tests actually cover the edge cases. Dispatch the code-reviewer agent with the diff.",
     "should_trigger": true,
     "target_skill": "arc:review",
     "note": "Detailed code review request with specific files and review focus areas"
   },
   {
-    "query": "Before we close out the session, I want to review all the code changes from today's work. We implemented 3 tasks (ARC-5.1, 5.2, 5.3) and I want to make sure nothing was missed — run the arc-reviewer agent against the full diff from this morning's baseline to HEAD, and triage any findings by severity.",
+    "query": "Before we close out the session, I want to review all the code changes from today's work. We implemented 3 tasks (ARC-5.1, 5.2, 5.3) and I want to make sure nothing was missed — run the code-reviewer agent against the full diff from this morning's baseline to HEAD, and triage any findings by severity.",
     "should_trigger": true,
     "target_skill": "arc:review",
     "note": "End-of-session review with multi-task scope and severity triage"

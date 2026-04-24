@@ -60,7 +60,7 @@
     "query": "Review the code changes in the last commit",
     "should_trigger": false,
     "target_agent": "arc:builder",
-    "note": "Code review — should dispatch arc-reviewer, not implementer"
+    "note": "Code review — should dispatch code-reviewer, not implementer"
   },
   {
     "query": "Write documentation for the new API endpoints",
@@ -71,24 +71,24 @@
 
   {
     "_comment": "=== ARC-REVIEWER AGENT ===",
-    "_target": "arc:arc-reviewer"
+    "_target": "arc:code-reviewer"
   },
   {
     "query": "Review the diff from commit abc123 to HEAD against the spec for task ARC-5.2. Check for critical issues, code quality, and test coverage.",
     "should_trigger": true,
-    "target_agent": "arc:arc-reviewer",
+    "target_agent": "arc:code-reviewer",
     "note": "Post-implementation review dispatch"
   },
   {
     "query": "Do a code review of the changes the implementer just made for the session middleware task.",
     "should_trigger": true,
-    "target_agent": "arc:arc-reviewer",
+    "target_agent": "arc:code-reviewer",
     "note": "Review after implementer completes"
   },
   {
     "query": "Implement the fix that the reviewer identified in finding #2",
     "should_trigger": false,
-    "target_agent": "arc:arc-reviewer",
+    "target_agent": "arc:code-reviewer",
     "note": "Implementation request — should dispatch implementer, not reviewer"
   },
 
@@ -135,13 +135,13 @@
     "query": "Review the code changes in the last commit for code quality and conventions",
     "should_trigger": false,
     "target_agent": "arc:arc-evaluator",
-    "note": "Code quality review — should dispatch arc-reviewer, not evaluator"
+    "note": "Code quality review — should dispatch code-reviewer, not evaluator"
   },
   {
     "query": "Check the git diff for any issues with the implementation",
     "should_trigger": false,
     "target_agent": "arc:arc-evaluator",
-    "note": "Diff-based review — evaluator never reads diffs, should dispatch arc-reviewer"
+    "note": "Diff-based review — evaluator never reads diffs, should dispatch code-reviewer"
   },
   {
     "query": "Implement the missing behavior that the evaluator identified",

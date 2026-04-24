@@ -11,6 +11,30 @@ Orchestrate task implementation by dispatching fresh `arc-implementer` subagents
 
 **The main agent NEVER writes implementation code.** It orchestrates, dispatches, and reviews. If you're tempted to "just quickly fix this" — dispatch a subagent instead.
 
+## Model Selection
+
+Every Agent dispatch can override the subagent's frontmatter model via the `model:` parameter. Use this to match model tier to task complexity. The default floor per agent is set in frontmatter — use these overrides to downgrade for trivial tasks or escalate for complex ones.
+
+| Task signal | Dispatch `model:` |
+|---|---|
+| Mechanical: 1-2 files, spec unambiguous, no cross-cutting concerns | `haiku` (downgrade from sonnet floor) |
+| Standard: integration work, multi-file but contained, unambiguous | omit `model:` (use agent default) |
+| Complex: 3+ files, cross-layer, design judgment required, migrations, breaking changes | `opus` |
+| Re-dispatch after `BLOCKED` | escalate one tier (haiku → sonnet → opus); stop at opus |
+| Re-dispatch after `NEEDS_CONTEXT` | same tier, richer context |
+
+Examples:
+
+```text
+Agent(subagent_type="arc-implementer", model="haiku", prompt="...")       # mechanical
+Agent(subagent_type="arc-implementer", prompt="...")                      # standard (sonnet)
+Agent(subagent_type="arc-implementer", model="opus", prompt="...")        # complex
+```
+
+**When unsure, omit `model:`** — the agent's frontmatter floor is calibrated for the typical case.
+
+**Escalation rule:** If a subagent returns `BLOCKED` with a reasoning or capability complaint, re-dispatch with the next tier up before asking the human. Stop escalating at opus — if opus also returns `BLOCKED`, escalate to the human with the subagent's blocker summary.
+
 ## Dispatch Modes
 
 ### Sequential (default)
@@ -293,6 +317,19 @@ If integration tests fail:
 
 Go to step 1 for the next task. Continue until all tasks in the epic are closed.
 
+## Handle Implementer Status
+
+Every `arc-implementer` and `arc-doc-writer` dispatch returns one of four terminal statuses. Handle each explicitly:
+
+| Status | Orchestrator action |
+|---|---|
+| `DONE` | Proceed to spec review, then code review. |
+| `DONE_WITH_CONCERNS` | Read the concerns. If they're about correctness or scope, address before review (re-dispatch or tighten review prompt). If they're observations (file getting large, naming doubt), note them as arc comments on the task and proceed to review. |
+| `BLOCKED` | Assess the blocker: (1) context problem → provide missing context, re-dispatch same tier; (2) reasoning limit → re-dispatch one tier up per the Model Selection escalation rule; (3) task too large → split and re-plan; (4) plan is wrong → escalate to human. Never retry the same dispatch unchanged. |
+| `NEEDS_CONTEXT` | Gather the specific missing information. Re-dispatch with it in the prompt. |
+
+**Never close a task** whose last report was `BLOCKED`, `NEEDS_CONTEXT`, or `DONE_WITH_CONCERNS` unresolved. Re-dispatch until you have a clean `DONE` — then close.
+
 ## Parallel Dispatch Protocol
 
 When you have identified a batch of truly independent tasks (see [Dispatch Modes](#dispatch-modes)), switch from the sequential loop to this protocol:
@@ -392,7 +429,8 @@ arc close <id> -r "reason"            # Close completed task
 
 - Never write implementation code as the main agent — always dispatch
 - Never close a task without confirming tests pass yourself (fresh run)
-- Never close a task if the implementer reported `PARTIAL` without re-dispatching
+- Never close a task if the implementer reported `BLOCKED`, `NEEDS_CONTEXT`, or unresolved `DONE_WITH_CONCERNS` without re-dispatching
+- When re-dispatching after `BLOCKED`, escalate one model tier per the Model Selection table — never retry the same dispatch unchanged
 - If in doubt about the result, re-dispatch rather than fixing manually
 - Never dispatch parallel agents without committing and pushing all sequential work first
 - Never dispatch parallel agents on tasks that share files

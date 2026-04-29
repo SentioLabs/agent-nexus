@@ -1,6 +1,6 @@
 ---
 name: brainstorm
-description: You MUST use this skill for any design exploration, architecture decision, or trade-off analysis before implementation begins — especially when the user says "brainstorm", "explore the design", "think through", "what approach should we take", or describes a feature with multiple valid strategies. This is the arc-native brainstorming skill that writes designs to docs/plans/ and registers them for review via arc plan. Always prefer this over generic brainstorming when the project uses arc issue tracking.
+description: You MUST use this skill for any design exploration, architecture decision, or trade-off analysis before implementation begins — especially when the user says "brainstorm", "explore the design", "think through", "what approach should we take", or describes a feature with multiple valid strategies. This is the arc-native brainstorming skill that writes designs to docs/plans/ and registers them for review via arc share. Always prefer this over generic brainstorming when the project uses arc issue tracking.
 ---
 
 # Brainstorm — Design Discovery
@@ -126,60 +126,49 @@ These exact definitions and contract tests become the **T0 foundation task** dur
 
 ### 6. Save Design and Register for Review
 
-Write the design document to `docs/plans/` and register it as an ephemeral plan for review:
+Write the design document to `docs/plans/` using `YYYY-MM-DD-<topic>.md` naming.
 
-```bash
-# Write the design markdown file
-# Use YYYY-MM-DD-<topic>.md naming convention
-cat > docs/plans/YYYY-MM-DD-<topic>.md <<'EOF'
-<design content>
-EOF
+Then ask the user how they want to review. **Use the AskUserQuestion tool**:
 
-# Register the plan for review (returns a plan ID + planner URL)
-arc plan create docs/plans/YYYY-MM-DD-<topic>.md
+```
+Question: "How would you like to review this design?"
+Options:
+  - "Local review (just me)" — encrypted, key stays on this machine
+  - "Shared review (multiple reviewers)" — encrypted, URL shared with others
+  - "Save for later" — just save the file; no server registration
 ```
 
-The `arc plan create` command returns a plan ID. Use the plan ID to construct the planner URL in the next step.
+Route on the answer:
+
+- **Local review** → `arc share create docs/plans/<file>.md --local`
+- **Shared review** → `arc share create docs/plans/<file>.md --share`
+- **Save for later** → no server call; tell the user the file is at `docs/plans/<file>.md` and resume in a new session
+
+Both `arc share create` invocations return a share URL of the form
+`<server>/share/<id>#k=<key>` and persist the edit_token + key into
+`~/.arc/shares.json`. The skill should print the URL verbatim so the
+user can click it (or share it).
 
 ### 7. Review Loop
 
-After `arc plan create` returns the plan ID, **ALWAYS output the planner URL** so the user can click it directly in their terminal. The `arc plan create` command prints this URL, but also output it yourself to be sure:
+Print the share URL the CLI returned. **Use the AskUserQuestion tool**:
 
 ```
-Plan ready for review:
-
-  http://localhost:7432/planner/<plan-id>
-
-```
-
-Replace `localhost:7432` with the actual server URL if different (check `ARC_SERVER` env var or the arc config).
-
-Then use the **AskUserQuestion tool** — include the planner URL directly in the options so the user sees it without scrolling:
-```
-Question: "Plan ready for review at http://localhost:7432/planner/<plan-id> — how would you like to proceed?"
+Question: "Plan ready for review at <url> — how would you like to proceed?"
 Options:
-  - "Approve" (proceed to /arc:plan for implementation breakdown)
-  - "I've submitted feedback in the planner (http://localhost:7432/planner/<plan-id>)" (read comments, revise, re-present)
-  - "Save for later" (leave as draft — resume in a new session)
+  - "Approve" — `arc share approve <id>` and proceed to /arc:plan
+  - "I've finished review (pull accepted comments now)"
+    — `arc share pull <id>` (accepted-only by default)
+    — display, ask "Apply these to the plan?" — revise file, re-share if needed, repeat
+  - "Save for later" — design is saved; resume in a new session
 ```
 
-**If user approves:**
-```bash
-arc plan approve <plan-id>
-```
-Then proceed to step 8.
-
-**If user says "feedback submitted":**
-```bash
-# Read review comments
-arc plan comments <plan-id>
-# Also re-read the file content in case the user edited it in the planner
-arc plan show <plan-id>
-```
-Revise the design file based on the feedback, then re-present the planner URL and options. Repeat until approved.
-
-**If user says "save for later":**
-Tell the user they can resume by running `/arc:brainstorm` in a new session and referencing the plan file and plan ID.
+For shared reviews the loop is the same — the server URL just points
+at a public arc-paste instance instead of localhost. Reviewers comment
+on the same `/share/<id>#k=<key>` URL. The author is the only one who
+can mark comments as `accepted` (verified by the plan's
+`author_name`); only `accepted` comments flow into refinement when
+pulled with `arc share pull`.
 
 ### 8. Routing Analysis & Transition
 
@@ -246,7 +235,7 @@ If `/arc:build` is recommended instead, swap which option gets the "(recommended
 
 - The ONLY next skill after brainstorm is `plan` (or `implement` for small work)
 - Never invoke implementation skills from brainstorm
-- Design documents go in `docs/plans/` and are registered via `arc plan create <file-path>`
+- Design documents go in `docs/plans/` and are registered via `arc share create <file-path>`
 - Arc issues track persistent work; TaskCreate/TaskUpdate tracks workflow progress in the CLI
 - YAGNI: if the user didn't ask for it, don't design it
 - Format all arc content (descriptions, plans, comments) per `skills/arc/_formatting.md`

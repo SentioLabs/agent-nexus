@@ -6,5 +6,6 @@
   "codex-marketplace/plugins/atlassian": "0.3.0",
   "codex-marketplace/plugins/mneme": "0.11.0",
   "codex-marketplace/plugins/slop-review": "0.4.0",
-  "codex-marketplace/plugins/worktrunk": "0.3.0"
+  "codex-marketplace/plugins/worktrunk": "0.3.0",
+  "opencode-marketplace/plugins/frontend-design": "0.1.0"
 }

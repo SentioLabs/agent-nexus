@@ -172,6 +172,21 @@
         {"type": "chore", "section": "Miscellaneous", "hidden": true},
         {"type": "test", "section": "Tests", "hidden": true}
       ]
+    },
+    "opencode-marketplace/plugins/frontend-design": {
+      "release-type": "simple",
+      "component": "opencode-frontend-design",
+      "bump-minor-pre-major": true,
+      "version-file": "version.txt",
+      "changelog-sections": [
+        {"type": "feat", "section": "Features"},
+        {"type": "fix", "section": "Bug Fixes"},
+        {"type": "perf", "section": "Performance"},
+        {"type": "refactor", "section": "Refactoring"},
+        {"type": "docs", "section": "Documentation", "hidden": true},
+        {"type": "chore", "section": "Miscellaneous", "hidden": true},
+        {"type": "test", "section": "Tests", "hidden": true}
+      ]
     }
   }
 }

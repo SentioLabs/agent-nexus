@@ -34,6 +34,7 @@ prompt in a scratch repo or temp directory instead.
 
 - `slop-review`: installs the `ai-slop-review` skill and the `/slop-review-review`
   command
+- `frontend-design`: installs the `frontend-design` skill
 - `worktrunk`: installs the `worktrunk` skill and its reference docs
 - `atlassian`: installs the Atlassian skills and merges the Atlassian MCP server into
   `opencode.json`
@@ -106,6 +107,7 @@ For a remote install, fetch from the raw GitHub URLs listed below.
 
 - `all`
 - `slop-review`
+- `frontend-design`
 - `worktrunk`
 - `atlassian`
 - `mneme`
@@ -174,6 +176,25 @@ When installing locally from this repo, use these source paths instead:
 - `opencode-marketplace/plugins/slop-review/skills/ai-slop-review/references/python.md`
 - `opencode-marketplace/plugins/slop-review/skills/ai-slop-review/references/rust.md`
 - `opencode-marketplace/plugins/slop-review/skills/ai-slop-review/references/svelte-ts.md`
+
+### frontend-design
+
+Source plugin root:
+
+- Local: `opencode-marketplace/plugins/frontend-design/`
+- Remote: `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/frontend-design/`
+
+Create these relative paths under the selected target root:
+
+- `skills/frontend-design/SKILL.md`
+
+Fetch them from:
+
+- `https://raw.githubusercontent.com/sentiolabs/agent-nexus/main/opencode-marketplace/plugins/frontend-design/skills/frontend-design/SKILL.md`
+
+When installing locally from this repo, use these source paths instead:
+
+- `opencode-marketplace/plugins/frontend-design/skills/frontend-design/SKILL.md`
 
 ### worktrunk
 
@@ -486,6 +507,10 @@ For `slop-review`, report:
 - Skill: `ai-slop-review`
 - Command: `/slop-review-review`
 
+For `frontend-design`, report:
+
+- Skill: `frontend-design`
+
 For `worktrunk`, report:
 
 - Skill: `worktrunk`
@@ -536,6 +561,10 @@ For `arc`, report:
   - `.opencode/skills/ai-slop-review/references/rust.md`
   - `.opencode/skills/ai-slop-review/references/svelte-ts.md`
 - A successful global install should leave the same relative files under
+  `~/.config/opencode/`.
+- A successful local install of `frontend-design` should leave this file present:
+  - `.opencode/skills/frontend-design/SKILL.md`
+- A successful global install of `frontend-design` should leave the same relative file under
   `~/.config/opencode/`.
 - A successful local install of `worktrunk` should leave these files present:
   - `.opencode/skills/worktrunk/SKILL.md`

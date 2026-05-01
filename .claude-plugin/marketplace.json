@@ -31,6 +31,14 @@
       "author": {
         "name": "Sentio Labs"
       }
+    },
+    {
+      "name": "git-spice",
+      "source": "./claude-marketplace/plugins/git-spice",
+      "description": "Drive git-spice stacked-branch workflows from Claude Code. Skills teach the mental model, slash commands cover the daily operations, and subagents build new stacks or repair broken ones.",
+      "author": {
+        "name": "Sentio Labs"
+      }
     }
   ]
 }

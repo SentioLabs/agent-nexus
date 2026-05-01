@@ -145,14 +145,15 @@ Plans are reviewed as encrypted **shares** backed by filesystem markdown files i
 
 **Two modes** (chosen at create time):
 
-- `--local` — share lives on the local arc-server. Reviewers must reach `http://localhost:7432/share/<id>#k=<key>`. Best for solo work.
-- `--share` — share lives on the configured remote share server (default `https://arcplanner.sentiolabs.io`). Best for collaborating with humans on other machines.
+- Default (no flag) — share lives on the local arc-server. Reviewers reach `http://localhost:7432/share/<id>#k=<key>`. Best for solo work.
+- `--remote` — share lives on the configured remote share server (default `https://arcplanner.sentiolabs.io`). Best for collaborating with humans on other machines.
+- `--server <url>` — explicit override; wins over `--remote` and forces shared mode against the given server.
 
 **CLI commands:**
 
 | Command | Purpose |
 |---------|---------|
-| `arc share create <file-path> --local\|--share` | Encrypt a plan and create a share, returns share ID |
+| `arc share create <file-path> [--remote]` | Encrypt a plan and create a share, returns share ID. Default is local; `--remote` targets the configured share server. Output prints a single URL: `Preview URL` (local) or `Author URL` (shared) — the reviewer URL is obtained from the in-page **Share link** button on the share page header, not the CLI. |
 | `arc share show <id>` | Decrypt and print plan content (use `--author-url` to reprint the Author URL) |
 | `arc share approve <id>` | Mark the share as approved |
 | `arc share comments <id>` | All review comments + statuses |
@@ -163,7 +164,7 @@ Plans are reviewed as encrypted **shares** backed by filesystem markdown files i
 
 The review cycle: create → reviewers leave annotations → author Accepts/Resolves/Rejects → `arc share pull` surfaces accepted comments to the implementation flow. Approved design content is written into the epic's description field when creating implementation tasks. Run `arc docs plans` for full details.
 
-> The `arc plan *` commands (create/show/approve/reject/comments) still exist but are **legacy** — they back the older non-encrypted local-only review surface at `/planner/<id>`. New flows should use `arc share *`.
+> **Legacy plan commands** — `arc plan create|show|approve|comments` back the older non-encrypted local-only review surface at `/planner/<id>`. The `/arc:brainstorm` skill offers this as a third review path (alongside `arc share` local and remote) for users who want the simpler review surface without encryption. Use these commands when a plan's review marker has `kind=legacy` (see the brainstorm skill's marker contract).
 
 ## Labels
 

@@ -128,49 +128,97 @@ These exact definitions and contract tests become the **T0 foundation task** dur
 
 Write the design document to `docs/plans/` using `YYYY-MM-DD-<topic>.md` naming.
 
-Then ask the user how they want to review. **Use the AskUserQuestion tool**:
+Arc supports three review surfaces. They differ along two axes — *who reviews* (just you vs. teammates on other machines) and *do you want encryption + the new annotation/accept-resolve UI* (legacy planner is plain HTTP and simpler; `arc share` is encrypted and richer). Pick based on how the design will actually be reviewed, not which command you happen to remember.
+
+**Use the AskUserQuestion tool:**
 
 ```
 Question: "How would you like to review this design?"
 Options:
-  - "Local review (just me)" — encrypted, key stays on this machine
-  - "Shared review (multiple reviewers)" — encrypted, URL shared with others
-  - "Save for later" — just save the file; no server registration
+  - "Legacy planner (solo, plain HTTP, simplest)" —
+      `arc plan` surface at /planner/<id>. No encryption, no accept-resolve;
+      just a comment thread on a markdown render. Best when you want quick
+      review notes without setting up the share UI.
+  - "Encrypted local share (solo, but want annotations/accept-resolve)" —
+      `arc share` on this machine. Plan content + comments are encrypted at
+      rest in ~/.arc/data.db. Reviewer URL only works from this machine.
+  - "Encrypted remote share (multiple reviewers)" —
+      `arc share` on the configured remote server (default arcplanner.sentiolabs.io).
+      Reviewers on other machines can open the link.
+  - "Save for later" — write the file to docs/plans/ and stop. No server
+      registration; resume in a new session.
 ```
 
 Route on the answer:
 
-- **Local review** → `arc share create docs/plans/<file>.md --local`
-- **Shared review** → `arc share create docs/plans/<file>.md --share`
-- **Save for later** → no server call; tell the user the file is at `docs/plans/<file>.md` and resume in a new session
+| Choice | CLI to run | Marker `kind=` | URL printed |
+|---|---|---|---|
+| Legacy planner | `arc plan create docs/plans/<file>.md` | `legacy` | `Review at: http://localhost:7432/planner/<id>` |
+| Encrypted local | `arc share create docs/plans/<file>.md` | `share-local` | `Preview URL (local-only — not reachable by others):` |
+| Encrypted remote | `arc share create docs/plans/<file>.md --remote` | `share-remote` | `Author URL (keep private — open it, then use the in-page Share link button to copy a reviewer URL):` |
+| Save for later | (no command) | (no marker) | n/a |
 
-Both `arc share create` invocations return **two** URLs:
+**Capture the ID and write the review marker.** After the create call succeeds, prepend a single HTML-comment line to the design doc so downstream skills (`/arc:plan`, `/arc:build`, agents that read the doc) know which CLI to query for review state. Without the marker, downstream falls back to `arc share list --json | jq` which doesn't cover legacy plans.
 
-- **Share URL** — what reviewers open. No edit token. `<server>/share/<id>#k=<key>`.
-- **Author URL** — what *you* open. Same URL plus `&t=<edit_token>` in the fragment, which unlocks Accept/Resolve/Reject controls.
+```bash
+# Run the chosen CLI and capture stdout.
+OUT=$(arc share create docs/plans/2026-05-01-foo.md --remote)
+echo "$OUT"   # ALWAYS print verbatim — the user needs to see the URL
 
-The CLI also persists the edit_token + key into the local arc keyring (a `shares` table in `~/.arc/data.db`, served by the local arc-server — never written to disk as JSON). If you lose the Author URL, regenerate it with `arc share show <id> --author-url`. The skill should print BOTH URLs verbatim so the user can click the Author URL and share the Share URL with reviewers.
+# Extract the ID:
+#   - share-local / share-remote: the URL fragment contains /share/<id>#...
+#   - legacy: the first line is "Plan created: <id> (file: ..., status: ...)"
+ID=$(echo "$OUT" | grep -oE '/share/[^#]+' | head -1 | sed 's|/share/||')
+# For legacy, instead:  ID=$(echo "$OUT" | grep -oE 'Plan created: \S+' | awk '{print $3}')
+
+KIND="share-remote"   # legacy | share-local | share-remote (matches the chosen branch)
+
+# Prepend the marker idempotently. If line 1 already starts with "<!-- arc-review:",
+# replace it; otherwise prepend a new line.
+FILE="docs/plans/2026-05-01-foo.md"
+if head -1 "$FILE" | grep -q '^<!-- arc-review:'; then
+  sed -i.bak "1s|.*|<!-- arc-review: kind=$KIND id=$ID -->|" "$FILE" && rm "$FILE.bak"
+else
+  { echo "<!-- arc-review: kind=$KIND id=$ID -->"; cat "$FILE"; } > "$FILE.tmp" && mv "$FILE.tmp" "$FILE"
+fi
+```
+
+The marker format is fixed: `<!-- arc-review: kind=<legacy|share-local|share-remote> id=<id> -->`. Always line 1, always exactly one space between fields.
+
+**URL handling rules — print exactly what the CLI printed, then add a kind-specific instruction:**
+
+- **Legacy** — print the `Review at:` line. Tell the user this URL is local-only (their browser must reach `http://localhost:7432`).
+- **Encrypted local** — print the Preview URL line. Tell the user it's not reachable from other machines; if they need a reviewer on a different machine, re-create the share with `--remote` instead.
+- **Encrypted remote** — print the Author URL line. Then tell the user: *"Open this URL yourself; that's the author view. To send a reviewer link, click the **Share link** button in the page header — it strips `&t=` and copies a reviewer URL to your clipboard. Don't paste the Author URL into chat or tickets — the `&t=` token gives the recipient your edit privileges."*
+
+The encrypted-share CLI persists the edit_token + key into the local arc keyring (a `shares` table in `~/.arc/data.db`, served by the local arc-server — never written to disk as JSON). If a share Author URL is lost, regenerate it with `arc share show <id> --author-url`. Legacy plans don't have this — the URL is just `<base>/planner/<id>` and there are no edit tokens.
 
 ### 7. Review Loop
 
-Print the share URL the CLI returned. **Use the AskUserQuestion tool**:
+Print the URL from step 6 again as a reminder. **Use the AskUserQuestion tool:**
 
 ```
 Question: "Plan ready for review at <url> — how would you like to proceed?"
 Options:
-  - "Approve" — `arc share approve <id>` and proceed to /arc:plan
-  - "I've finished review (pull accepted comments now)"
-    — `arc share pull <id>` (accepted-only by default)
-    — display, ask "Apply these to the plan?" — revise file, re-share if needed, repeat
+  - "Approve" — mark the design approved and proceed to /arc:plan
+  - "I've finished review (pull comments now)" — fetch reviewer feedback,
+      apply edits, re-share if needed, repeat
   - "Save for later" — design is saved; resume in a new session
 ```
 
-For shared reviews the loop is the same — the server URL just points
-at a public arc-paste instance instead of localhost. Reviewers comment
-on the same `/share/<id>#k=<key>` URL. The author is the only one who
-can mark comments as `accepted` (verified by the plan's
-`author_name`); only `accepted` comments flow into refinement when
-pulled with `arc share pull`.
+Branch the CLI by the marker's `kind`:
+
+| kind | Approve | Pull comments |
+|---|---|---|
+| `legacy` | `arc plan approve <id>` | `arc plan comments <id>` (no accepted-only filter — review the thread inline) |
+| `share-local` | `arc share approve <id>` | `arc share pull <id>` (accepted-only by default) |
+| `share-remote` | `arc share approve <id>` | `arc share pull <id>` (accepted-only by default) |
+
+**Why the legacy path lacks `pull`:** legacy plan comments don't have an Accept/Resolve/Reject state — they're a flat thread. The trade-off was made when picking legacy in step 6; if the volume of comments grows, suggest re-creating the design as `share-local` so the user gets the accepted-only filter.
+
+**For `share-local` / `share-remote`** — only `accepted` comments flow into refinement when pulled. The author is the only one who can mark comments as `accepted` (verified by the plan's `author_name`). For `share-remote`, reviewers comment via the reviewer URL (the in-page Share link button; *not* the Author URL).
+
+After a refinement pass, if the design changed materially, run `arc share update <id> <plan-file>` (or the legacy equivalent — re-create the plan) and loop back to step 7. The marker stays valid; the ID doesn't change.
 
 ### 8. Routing Analysis & Transition
 
@@ -237,7 +285,7 @@ If `/arc:build` is recommended instead, swap which option gets the "(recommended
 
 - The ONLY next skill after brainstorm is `plan` (or `implement` for small work)
 - Never invoke implementation skills from brainstorm
-- Design documents go in `docs/plans/` and are registered via `arc share create <file-path>`
+- Design documents go in `docs/plans/` and are registered via one of three review surfaces (`arc plan create` for legacy, `arc share create` for encrypted local, `arc share create … --remote` for encrypted remote). The skill writes a `<!-- arc-review: kind=… id=… -->` marker as line 1 of the doc so downstream skills can route their CLI calls.
 - Arc issues track persistent work; TaskCreate/TaskUpdate tracks workflow progress in the CLI
 - YAGNI: if the user didn't ask for it, don't design it
 - Format all arc content (descriptions, plans, comments) per `skills/arc/_formatting.md`

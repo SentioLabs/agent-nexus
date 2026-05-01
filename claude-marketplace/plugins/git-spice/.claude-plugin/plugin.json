@@ -1,7 +1,7 @@
 {
   "name": "git-spice",
   "description": "Drive git-spice stacked-branch workflows from Claude Code. Skills teach the mental model, slash commands cover the daily operations, and subagents build new stacks or repair broken ones.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "Sentio Labs",
     "url": "https://github.com/sentiolabs"

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/SentioLabs/agent-nexus/compare/claude-arc-v0.8.0...claude-arc-v0.9.0) (2026-05-01)
+
+
+### Features
+
+* **arc:** migrate brainstorm/plan/arc/build skills to `arc share` workflow ([#10](https://github.com/SentioLabs/agent-nexus/issues/10)) ([d8ccaa2](https://github.com/SentioLabs/agent-nexus/commit/d8ccaa2a514eb34179668bc3b8f36d607240504e))
+
 ## [0.8.0](https://github.com/SentioLabs/agent-nexus/compare/claude-arc-v0.7.0...claude-arc-v0.8.0) (2026-04-24)
 
 

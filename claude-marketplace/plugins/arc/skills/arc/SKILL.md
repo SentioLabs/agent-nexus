@@ -85,7 +85,7 @@ Run `arc prime` for full workflow context, or `arc <command> --help` for specifi
 - `arc close` - Complete work
 - `arc show` - View details
 - `arc dep` - Manage dependencies
-- `arc plan` - Manage plans (create, show, approve, reject, comments)
+- `arc share` - Manage encrypted plan shares (create, show, approve, comments, pull, list, update, delete)
 - `arc which` - Show active project and resolution source
 - `arc paths` - Manage workspace path registrations
 - `arc project` - Manage projects (list, create, delete, rename, merge)
@@ -139,21 +139,31 @@ Arc supports four dependency types:
 
 **Deep dive**: Run `arc docs dependencies` for examples and patterns.
 
-## Plans
+## Plan Shares
 
-Plans are ephemeral review artifacts backed by filesystem markdown files in `docs/plans/`. They support a review workflow with approval, rejection, and comments.
+Plans are reviewed as encrypted **shares** backed by filesystem markdown files in `docs/plans/`. The author's edit tokens are stored in the arc-server's local keyring (a `shares` table in `~/.arc/data.db`) — multi-client accessible via `/api/v1/shares`, never written to disk as JSON.
+
+**Two modes** (chosen at create time):
+
+- `--local` — share lives on the local arc-server. Reviewers must reach `http://localhost:7432/share/<id>#k=<key>`. Best for solo work.
+- `--share` — share lives on the configured remote share server (default `https://arcplanner.sentiolabs.io`). Best for collaborating with humans on other machines.
 
 **CLI commands:**
 
 | Command | Purpose |
 |---------|---------|
-| `arc plan create <file-path>` | Register an ephemeral plan, returns plan ID |
-| `arc plan show <plan-id>` | Show plan content, status, and comments |
-| `arc plan approve <plan-id>` | Approve the plan |
-| `arc plan reject <plan-id>` | Reject the plan |
-| `arc plan comments <plan-id>` | List review comments |
+| `arc share create <file-path> --local\|--share` | Encrypt a plan and create a share, returns share ID |
+| `arc share show <id>` | Decrypt and print plan content (use `--author-url` to reprint the Author URL) |
+| `arc share approve <id>` | Mark the share as approved |
+| `arc share comments <id>` | All review comments + statuses |
+| `arc share pull <id>` | Accepted-only comments (the agent-input form) |
+| `arc share list` | List shares known to this machine (incl. `plan_file` mapping). Add `--json` for `[{id, kind, url, key_b64url, plan_file, created_at}]` — pipe to `jq` to look up a share's local file path |
+| `arc share update <id> <plan-file>` | Replace the encrypted plan content |
+| `arc share delete <id>` | Delete a share (`--force` cleans up local keyring entries when the server is already gone) |
 
-Plans go through a review cycle: create, review (with comments), then approve or reject. Approved design content is written into the epic's description field when creating implementation tasks. Run `arc docs plans` for full details.
+The review cycle: create → reviewers leave annotations → author Accepts/Resolves/Rejects → `arc share pull` surfaces accepted comments to the implementation flow. Approved design content is written into the epic's description field when creating implementation tasks. Run `arc docs plans` for full details.
+
+> The `arc plan *` commands (create/show/approve/reject/comments) still exist but are **legacy** — they back the older non-encrypted local-only review surface at `/planner/<id>`. New flows should use `arc share *`.
 
 ## Labels
 

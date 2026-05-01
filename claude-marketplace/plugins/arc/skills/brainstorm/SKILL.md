@@ -144,10 +144,12 @@ Route on the answer:
 - **Shared review** → `arc share create docs/plans/<file>.md --share`
 - **Save for later** → no server call; tell the user the file is at `docs/plans/<file>.md` and resume in a new session
 
-Both `arc share create` invocations return a share URL of the form
-`<server>/share/<id>#k=<key>` and persist the edit_token + key into
-`~/.arc/shares.json`. The skill should print the URL verbatim so the
-user can click it (or share it).
+Both `arc share create` invocations return **two** URLs:
+
+- **Share URL** — what reviewers open. No edit token. `<server>/share/<id>#k=<key>`.
+- **Author URL** — what *you* open. Same URL plus `&t=<edit_token>` in the fragment, which unlocks Accept/Resolve/Reject controls.
+
+The CLI also persists the edit_token + key into the local arc keyring (a `shares` table in `~/.arc/data.db`, served by the local arc-server — never written to disk as JSON). If you lose the Author URL, regenerate it with `arc share show <id> --author-url`. The skill should print BOTH URLs verbatim so the user can click the Author URL and share the Share URL with reviewers.
 
 ### 7. Review Loop
 

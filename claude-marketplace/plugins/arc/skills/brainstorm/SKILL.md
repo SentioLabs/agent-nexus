@@ -1,6 +1,6 @@
 ---
 name: brainstorm
-description: You MUST use this skill for any design exploration, architecture decision, or trade-off analysis before implementation begins — especially when the user says "brainstorm", "explore the design", "think through", "what approach should we take", or describes a feature with multiple valid strategies. This is the arc-native brainstorming skill that writes designs to docs/plans/ and registers them for review via arc share. Always prefer this over generic brainstorming when the project uses arc issue tracking.
+description: You MUST use this skill for any design exploration, architecture decision, or trade-off analysis before implementation begins — especially when the user says "brainstorm", "explore the design", "think through", "what approach should we take", or describes a feature with multiple valid strategies. This is the arc-native brainstorming skill that writes designs to docs/plans/ and registers them on one of three review surfaces (legacy `arc plan`, encrypted local `arc share`, or encrypted remote `arc share --remote`), depending on who's reviewing and whether encryption is needed. Always prefer this over generic brainstorming when the project uses arc issue tracking.
 ---
 
 # Brainstorm — Design Discovery
@@ -158,7 +158,7 @@ Route on the answer:
 | Encrypted remote | `arc share create docs/plans/<file>.md --remote` | `share-remote` | `Author URL (keep private — open it, then use the in-page Share link button to copy a reviewer URL):` |
 | Save for later | (no command) | (no marker) | n/a |
 
-**Capture the ID and write the review marker.** After the create call succeeds, prepend a single HTML-comment line to the design doc so downstream skills (`/arc:plan`, `/arc:build`, agents that read the doc) know which CLI to query for review state. Without the marker, downstream falls back to `arc share list --json | jq` which doesn't cover legacy plans.
+**Capture the ID and write the review marker.** After the create call succeeds, prepend a single HTML-comment line to the design doc so `/arc:plan` (and any future skill that queries review state) knows which CLI to call. Today only `/arc:plan` reads it — `/arc:build` and the dispatched implementer/reviewer agents read design content from the parent epic's description, not from the share/plan CLIs — but the marker is the canonical record of which surface this doc lives on. Without it, downstream falls back to `arc share list --json | jq` which doesn't cover legacy plans.
 
 ```bash
 # Run the chosen CLI and capture stdout.
@@ -218,7 +218,14 @@ Branch the CLI by the marker's `kind`:
 
 **For `share-local` / `share-remote`** — only `accepted` comments flow into refinement when pulled. The author is the only one who can mark comments as `accepted` (verified by the plan's `author_name`). For `share-remote`, reviewers comment via the reviewer URL (the in-page Share link button; *not* the Author URL).
 
-After a refinement pass, if the design changed materially, run `arc share update <id> <plan-file>` (or the legacy equivalent — re-create the plan) and loop back to step 7. The marker stays valid; the ID doesn't change.
+After a refinement pass, if the design changed materially, update the review surface to match the new content. The CLI and marker handling differ by `kind`:
+
+| kind | Update CLI | ID stable? | Marker action |
+|---|---|---|---|
+| `share-local` / `share-remote` | `arc share update <id> <plan-file>` | yes | leave marker as-is |
+| `legacy` | `arc plan create <plan-file>` (no in-place update — re-creates with a new ID) | **no — new ID** | rewrite line 1 with the new ID |
+
+For legacy, after re-creating, replace the `id=<old>` portion of line 1 with the new ID — the idempotent `sed` snippet from step 6 works as-is: set `KIND=legacy` and `ID=<new>` and the "marker already present" branch overwrites line 1. Then loop back to step 7.
 
 ### 8. Routing Analysis & Transition
 

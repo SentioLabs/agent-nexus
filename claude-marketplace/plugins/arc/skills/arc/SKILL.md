@@ -139,17 +139,23 @@ Arc supports four dependency types:
 
 **Deep dive**: Run `arc docs dependencies` for examples and patterns.
 
-## Plan Shares
+## Design Reviews
 
-Plans are reviewed as encrypted **shares** backed by filesystem markdown files in `docs/plans/`. The author's edit tokens are stored in the arc-server's local keyring (a `shares` table in `~/.arc/data.db`) — multi-client accessible via `/api/v1/shares`, never written to disk as JSON.
+Design docs live in `docs/plans/` as filesystem markdown. Arc registers them on one of three review surfaces, chosen at create time by the `/arc:brainstorm` skill based on who's reviewing and whether encryption is needed. Each surface has its own CLI verb set; `/arc:plan` and any other consumer reads line 1 of the doc — `<!-- arc-review: kind=<legacy|share-local|share-remote> id=<id> -->` — to know which CLI to call.
 
-**Two modes** (chosen at create time):
+**Surfaces:**
 
-- Default (no flag) — share lives on the local arc-server. Reviewers reach `http://localhost:7432/share/<id>#k=<key>`. Best for solo work.
-- `--remote` — share lives on the configured remote share server (default `https://arcplanner.sentiolabs.io`). Best for collaborating with humans on other machines.
-- `--server <url>` — explicit override; wins over `--remote` and forces shared mode against the given server.
+| `kind` | Create command | URL pattern | Encrypted? | Best for |
+|---|---|---|---|---|
+| `legacy` | `arc plan create <file>` | `http://localhost:7432/planner/<id>` | no | Solo, plain HTTP, simplest comment thread |
+| `share-local` | `arc share create <file>` | `http://localhost:7432/share/<id>#k=<key>` | yes | Solo, but want annotations + accept-resolve UI |
+| `share-remote` | `arc share create <file> --remote` | `<remote>/share/<id>#k=<key>` (default `https://arcplanner.sentiolabs.io`) | yes | Reviewers on other machines |
 
-**CLI commands:**
+`arc share create --server <url>` overrides `--remote` to target an explicit server.
+
+For the encrypted surfaces, the author's edit tokens live in the arc-server's local keyring (a `shares` table in `~/.arc/data.db`) — multi-client accessible via `/api/v1/shares`, never written to disk as JSON. Legacy plans don't have edit tokens; the URL is just the planner path.
+
+### `arc share` commands (share-local, share-remote)
 
 | Command | Purpose |
 |---------|---------|
@@ -159,12 +165,23 @@ Plans are reviewed as encrypted **shares** backed by filesystem markdown files i
 | `arc share comments <id>` | All review comments + statuses |
 | `arc share pull <id>` | Accepted-only comments (the agent-input form) |
 | `arc share list` | List shares known to this machine (incl. `plan_file` mapping). Add `--json` for `[{id, kind, url, key_b64url, plan_file, created_at}]` — pipe to `jq` to look up a share's local file path |
-| `arc share update <id> <plan-file>` | Replace the encrypted plan content |
+| `arc share update <id> <plan-file>` | Replace the encrypted plan content (in-place; ID stays stable) |
 | `arc share delete <id>` | Delete a share (`--force` cleans up local keyring entries when the server is already gone) |
 
-The review cycle: create → reviewers leave annotations → author Accepts/Resolves/Rejects → `arc share pull` surfaces accepted comments to the implementation flow. Approved design content is written into the epic's description field when creating implementation tasks. Run `arc docs plans` for full details.
+### `arc plan` commands (legacy)
 
-> **Legacy plan commands** — `arc plan create|show|approve|comments` back the older non-encrypted local-only review surface at `/planner/<id>`. The `/arc:brainstorm` skill offers this as a third review path (alongside `arc share` local and remote) for users who want the simpler review surface without encryption. Use these commands when a plan's review marker has `kind=legacy` (see the brainstorm skill's marker contract).
+| Command | Purpose |
+|---------|---------|
+| `arc plan create <file-path>` | Register a plan on the legacy `/planner/<id>` surface (plain HTTP, no encryption). There's no in-place update — re-running `create` produces a new ID. |
+| `arc plan show <id>` | Print plan metadata + content (the metadata header includes `File: <path>`, useful for plan-file lookups) |
+| `arc plan approve <id>` | Mark the plan as approved |
+| `arc plan comments <id>` | List comments on the plan (flat thread; no Accept/Resolve/Reject states) |
+
+### Review cycle
+
+create → reviewers leave annotations → author Accepts/Resolves/Rejects (encrypted surfaces) or replies inline (legacy) → `arc share pull` surfaces accepted comments to the implementation flow (legacy reads the comments thread inline since it has no accepted-only filter). Approved design content is written into the epic's description field when creating implementation tasks. Run `arc docs plans` for full details.
+
+The `<!-- arc-review: kind=… id=… -->` marker on line 1 of every registered design doc tells downstream skills which CLI table above to use. See `skills/brainstorm/SKILL.md` step 6 for the marker-write contract and `skills/plan/SKILL.md` step 1 for the read pattern.
 
 ## Labels
 

@@ -1,0 +1,38 @@
+{
+  "name": "@sentiolabs/opencode-arc",
+  "version": "0.2.0",
+  "description": "Official OpenCode plugin package for arc workflow integration.",
+  "type": "module",
+  "main": "./index.js",
+  "module": "./index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "commands",
+    "agents",
+    "skills",
+    "README.md",
+    "CHANGELOG.md",
+    "version.txt"
+  ],
+  "scripts": {
+    "test": "node --test index.test.mjs",
+    "pack:dry-run": "npm pack --dry-run",
+    "prepublishOnly": "npm test && npm run pack:dry-run"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "arc",
+    "agent-workflow"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "@opencode-ai/plugin": "*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

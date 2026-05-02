@@ -1,0 +1,46 @@
+name: OpenCode npm publish
+
+on:
+  workflow_call:
+    inputs:
+      package-path:
+        description: Path to the OpenCode npm package directory.
+        required: true
+        type: string
+      node-version:
+        description: Node.js version used for npm publishing.
+        required: false
+        type: string
+        default: "24"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          registry-url: https://registry.npmjs.org
+          cache: npm
+          cache-dependency-path: ${{ inputs.package-path }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ inputs.package-path }}
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ${{ inputs.package-path }}
+        run: npm test
+
+      - name: Verify package contents
+        working-directory: ${{ inputs.package-path }}
+        run: npm run pack:dry-run
+
+      - name: Publish to npm
+        working-directory: ${{ inputs.package-path }}
+        run: npm publish --access public --provenance

@@ -29,6 +29,11 @@
     "agent-workflow"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SentioLabs/agent-nexus",
+    "directory": "opencode-marketplace/plugins/arc"
+  },
   "peerDependencies": {
     "@opencode-ai/plugin": "*"
   },

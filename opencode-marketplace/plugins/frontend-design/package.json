@@ -1,6 +1,6 @@
 {
   "name": "@sentiolabs/opencode-frontend-design",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Official OpenCode plugin package for frontend-design skills.",
   "type": "module",
   "main": "./index.js",

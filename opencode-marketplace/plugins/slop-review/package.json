@@ -1,6 +1,6 @@
 {
   "name": "@sentiolabs/opencode-slop-review",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Official OpenCode plugin package for AI slop review workflows.",
   "type": "module",
   "main": "./index.js",

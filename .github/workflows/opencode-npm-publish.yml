@@ -11,10 +11,7 @@ on:
         description: Node.js version used for npm publishing.
         required: false
         type: string
-        default: "20"
-    secrets:
-      npm_token:
-        required: true
+        default: "24"
 
 jobs:
   publish:
@@ -47,5 +44,3 @@ jobs:
       - name: Publish to npm
         working-directory: ${{ inputs.package-path }}
         run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}

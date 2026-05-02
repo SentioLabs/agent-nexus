@@ -48,5 +48,3 @@ jobs:
     uses: ./.github/workflows/opencode-npm-publish.yml
     with:
       package-path: opencode-marketplace/plugins/arc
-    secrets:
-      npm_token: ${{ secrets.NPM_TOKEN }}

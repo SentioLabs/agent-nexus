@@ -39,6 +39,13 @@ test("package files include runtime assets, docs, and version marker", () => {
   ]);
 });
 
+test("README documents OpenCode package install with opencode.json plugin array", () => {
+  const readme = fs.readFileSync(path.join(pluginRoot, "README.md"), "utf8");
+
+  assert.match(readme, /```json\n\{\n  "plugin": \["@sentiolabs\/opencode-frontend-design"\]\n\}\n```/);
+  assert.doesNotMatch(readme, /plugins:\s*\[FrontendDesignPlugin\]/);
+});
+
 test("config hook adds bundled frontend-design skills path", async () => {
   const plugin = await FrontendDesignPlugin({});
   const config = {};

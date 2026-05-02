@@ -14,14 +14,12 @@ Install the npm package in your OpenCode project:
 npm install @sentiolabs/opencode-frontend-design
 ```
 
-Then add the plugin to your OpenCode configuration:
+Then add the plugin to your `opencode.json` configuration:
 
-```js
-import FrontendDesignPlugin from "@sentiolabs/opencode-frontend-design";
-
-export default {
-  plugins: [FrontendDesignPlugin],
-};
+```json
+{
+  "plugin": ["@sentiolabs/opencode-frontend-design"]
+}
 ```
 
 The repository installer remains supported.

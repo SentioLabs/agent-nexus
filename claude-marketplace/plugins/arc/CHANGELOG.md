@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/SentioLabs/agent-nexus/compare/claude-arc-v0.9.0...claude-arc-v0.9.1) (2026-05-02)
+
+
+### Bug Fixes
+
+* **arc:** make brainstorm/arc skills kind-aware for legacy plans ([1ebb32a](https://github.com/SentioLabs/agent-nexus/commit/1ebb32a91889982f72898e2584139672ee485b75))
+
 ## [0.9.0](https://github.com/SentioLabs/agent-nexus/compare/claude-arc-v0.8.0...claude-arc-v0.9.0) (2026-05-01)
 
 

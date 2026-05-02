@@ -8,6 +8,22 @@ OpenCode port of Anthropic's `frontend-design` plugin.
 
 ## Install
 
+Install the npm package in your OpenCode project:
+
+```bash
+npm install @sentiolabs/opencode-frontend-design
+```
+
+Then add the plugin to your `opencode.json` configuration:
+
+```json
+{
+  "plugin": ["@sentiolabs/opencode-frontend-design"]
+}
+```
+
+The repository installer remains supported.
+
 Use the repository install entrypoint:
 
 ```text

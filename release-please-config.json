@@ -199,6 +199,37 @@
       "component": "opencode-frontend-design",
       "bump-minor-pre-major": true,
       "version-file": "version.txt",
+      "extra-files": [
+        "version.txt",
+        {
+          "type": "json",
+          "path": "package.json",
+          "jsonpath": "$.version"
+        }
+      ],
+      "changelog-sections": [
+        {"type": "feat", "section": "Features"},
+        {"type": "fix", "section": "Bug Fixes"},
+        {"type": "perf", "section": "Performance"},
+        {"type": "refactor", "section": "Refactoring"},
+        {"type": "docs", "section": "Documentation", "hidden": true},
+        {"type": "chore", "section": "Miscellaneous", "hidden": true},
+        {"type": "test", "section": "Tests", "hidden": true}
+      ]
+    },
+    "opencode-marketplace/plugins/slop-review": {
+      "release-type": "simple",
+      "component": "opencode-slop-review",
+      "bump-minor-pre-major": true,
+      "version-file": "version.txt",
+      "extra-files": [
+        "version.txt",
+        {
+          "type": "json",
+          "path": "package.json",
+          "jsonpath": "$.version"
+        }
+      ],
       "changelog-sections": [
         {"type": "feat", "section": "Features"},
         {"type": "fix", "section": "Bug Fixes"},

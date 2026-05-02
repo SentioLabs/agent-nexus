@@ -10,6 +10,16 @@ OpenCode port of the `slop-review` plugin.
 
 ## Install
 
+Install as an OpenCode npm plugin by adding the package name to `opencode.json`:
+
+```json
+{
+  "plugin": ["@sentiolabs/opencode-slop-review"]
+}
+```
+
+### Repository installer
+
 Use the repository install entrypoint:
 
 ```text

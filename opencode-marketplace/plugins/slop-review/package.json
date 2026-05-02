@@ -1,0 +1,42 @@
+{
+  "name": "@sentiolabs/opencode-slop-review",
+  "version": "0.3.0",
+  "description": "Official OpenCode plugin package for AI slop review workflows.",
+  "type": "module",
+  "main": "./index.js",
+  "module": "./index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "commands",
+    "skills",
+    "README.md",
+    "CHANGELOG.md",
+    "version.txt"
+  ],
+  "scripts": {
+    "test": "node --test index.test.mjs",
+    "pack:dry-run": "npm pack --dry-run",
+    "prepublishOnly": "npm test && npm run pack:dry-run"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "slop-review",
+    "ai-code-review"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SentioLabs/agent-nexus",
+    "directory": "opencode-marketplace/plugins/slop-review"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": "*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

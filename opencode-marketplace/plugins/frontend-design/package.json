@@ -1,0 +1,42 @@
+{
+  "name": "@sentiolabs/opencode-frontend-design",
+  "version": "0.2.0",
+  "description": "Official OpenCode plugin package for frontend-design skills.",
+  "type": "module",
+  "main": "./index.js",
+  "module": "./index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "skills",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "version.txt"
+  ],
+  "scripts": {
+    "test": "node --test index.test.mjs",
+    "pack:dry-run": "npm pack --dry-run",
+    "prepublishOnly": "npm test && npm run pack:dry-run"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "frontend-design",
+    "design"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SentioLabs/agent-nexus",
+    "directory": "opencode-marketplace/plugins/frontend-design"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": "*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

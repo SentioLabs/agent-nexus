@@ -48,3 +48,23 @@ jobs:
     uses: ./.github/workflows/opencode-npm-publish.yml
     with:
       package-path: opencode-marketplace/plugins/arc
+
+  publish-opencode-frontend-design:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.releases_created == 'true' && contains(needs.release-please.outputs.paths_released, 'opencode-marketplace/plugins/frontend-design') }}
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/opencode-npm-publish.yml
+    with:
+      package-path: opencode-marketplace/plugins/frontend-design
+
+  publish-opencode-slop-review:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.releases_created == 'true' && contains(needs.release-please.outputs.paths_released, 'opencode-marketplace/plugins/slop-review') }}
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/opencode-npm-publish.yml
+    with:
+      package-path: opencode-marketplace/plugins/slop-review

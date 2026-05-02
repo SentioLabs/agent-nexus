@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/SentioLabs/agent-nexus/compare/opencode-arc-v0.3.0...opencode-arc-v0.3.1) (2026-05-02)
+
+
+### Bug Fixes
+
+* **opencode:** add npm provenance repository metadata ([#15](https://github.com/SentioLabs/agent-nexus/issues/15)) ([17360c5](https://github.com/SentioLabs/agent-nexus/commit/17360c55f27bd74013f64a04874c34664d9ae34c))
+
 ## [0.3.0](https://github.com/SentioLabs/agent-nexus/compare/opencode-arc-v0.2.0...opencode-arc-v0.3.0) (2026-05-02)
 
 

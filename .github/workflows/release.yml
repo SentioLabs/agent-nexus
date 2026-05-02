@@ -4,23 +4,21 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: write
-  pull-requests: write
-  id-token: write
-
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      releases_created: ${{ steps.release.outputs.releases_created }}
+      paths_released: ${{ steps.release.outputs.paths_released }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          registry-url: https://registry.npmjs.org
-          cache: npm
-          cache-dependency-path: opencode-marketplace/plugins/arc/package-lock.json
 
       - name: Validate Shared Layout
         run: node shared/scripts/validate-shared.mjs
@@ -41,24 +39,14 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-      - name: Install OpenCode Arc dependencies
-        if: ${{ steps.release.outputs.releases_created == 'true' && contains(steps.release.outputs.paths_released, 'opencode-marketplace/plugins/arc') }}
-        working-directory: opencode-marketplace/plugins/arc
-        run: npm ci
-
-      - name: Test OpenCode Arc package
-        if: ${{ steps.release.outputs.releases_created == 'true' && contains(steps.release.outputs.paths_released, 'opencode-marketplace/plugins/arc') }}
-        working-directory: opencode-marketplace/plugins/arc
-        run: npm test
-
-      - name: Verify OpenCode Arc package contents
-        if: ${{ steps.release.outputs.releases_created == 'true' && contains(steps.release.outputs.paths_released, 'opencode-marketplace/plugins/arc') }}
-        working-directory: opencode-marketplace/plugins/arc
-        run: npm run pack:dry-run
-
-      - name: Publish OpenCode Arc to npm
-        if: ${{ steps.release.outputs.releases_created == 'true' && contains(steps.release.outputs.paths_released, 'opencode-marketplace/plugins/arc') }}
-        working-directory: opencode-marketplace/plugins/arc
-        run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  publish-opencode-arc:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.releases_created == 'true' && contains(needs.release-please.outputs.paths_released, 'opencode-marketplace/plugins/arc') }}
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/opencode-npm-publish.yml
+    with:
+      package-path: opencode-marketplace/plugins/arc
+    secrets:
+      npm_token: ${{ secrets.NPM_TOKEN }}

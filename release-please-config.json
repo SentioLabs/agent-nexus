@@ -200,6 +200,7 @@
       "bump-minor-pre-major": true,
       "version-file": "version.txt",
       "extra-files": [
+        "version.txt",
         {
           "type": "json",
           "path": "package.json",
@@ -222,6 +223,7 @@
       "bump-minor-pre-major": true,
       "version-file": "version.txt",
       "extra-files": [
+        "version.txt",
         {
           "type": "json",
           "path": "package.json",

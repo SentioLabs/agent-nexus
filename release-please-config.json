@@ -42,9 +42,9 @@
         {"type": "test", "section": "Tests", "hidden": true}
       ]
     },
-    "claude-marketplace/plugins/slop-review": {
+    "claude-marketplace/plugins/code-quality": {
       "release-type": "simple",
-      "component": "claude-slop-review",
+      "component": "claude-code-quality",
       "bump-minor-pre-major": true,
       "extra-files": [
         {

@@ -1,0 +1,21 @@
+{
+  "name": "code-quality",
+  "version": "0.2.0",
+  "description": "Pre-merge code quality plugin. Bundles slop-review (4-lens parallel review for AI-generated code, idiom drift, quality issues, and architecture/solution-fit) with model-tiered subagents and calibration.",
+  "author": {
+    "name": "SentioLabs",
+    "url": "https://github.com/sentiolabs"
+  },
+  "homepage": "https://github.com/sentiolabs/claude-marketplace",
+  "repository": "https://github.com/sentiolabs/claude-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "code-quality",
+    "code-review",
+    "ai-slop",
+    "idiom-fluency",
+    "ai-authorship",
+    "solution-fit",
+    "architecture-review"
+  ]
+}

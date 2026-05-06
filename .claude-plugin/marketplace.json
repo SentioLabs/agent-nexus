@@ -25,9 +25,9 @@
       }
     },
     {
-      "name": "slop-review",
-      "source": "./claude-marketplace/plugins/slop-review",
-      "description": "Detect low-quality AI-generated code using a 3-lens parallel review architecture with model-tiered agents. Scans for AI authorship signals, idiom violations, and code quality issues.",
+      "name": "code-quality",
+      "source": "./claude-marketplace/plugins/code-quality",
+      "description": "Pre-merge code quality plugin. Bundles slop-review (4-lens parallel review for AI-generated code, idiom drift, quality issues, and architecture/solution-fit) with model-tiered subagents and calibration.",
       "author": {
         "name": "Sentio Labs"
       }

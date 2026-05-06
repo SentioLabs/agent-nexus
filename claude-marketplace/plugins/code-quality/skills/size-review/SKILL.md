@@ -64,6 +64,30 @@ content, which is useful context for the reviewer.
 
 ---
 
+## Cost and runtime guidance
+
+This skill is **shape analysis, not content review**. The default workflow needs only
+file *names*, *line counts*, *commit titles*, *PR body*, and *reviewer comments* — not
+full file contents. Most reviews fit comfortably in 50-100k tokens of input.
+
+- **Default to base 200k context.** The `[1M]` context tier is wasted capacity for
+  shape analysis; do not escalate unless a specific seam check requires reading large
+  source files. Most reviews don't.
+- **Sonnet is sufficient for the mechanical steps** (Steps 1-3: scope discovery,
+  exclusions, structural signals). The judgment-heavy steps (Steps 4-6: seam
+  viability, effort rating, recommendation) benefit from Opus when available, but
+  Sonnet handles them adequately at substantially lower cost.
+- **Don't fetch full file contents** unless verifying a specific seam viability check
+  (Step 4). A name + commit-title + PR-body view is the load-bearing input.
+- **Run as a single-pass analysis.** Unlike slop-review, this skill doesn't need
+  parallel subagents — the steps are sequential and each consumes the previous step's
+  output.
+
+For high-volume CI usage (every PR), consider running this skill at Sonnet by default
+and reserving Opus only for explicit deep-dive requests or PRs flagged by other gates.
+
+---
+
 ## Workflow
 
 ### Step 1: Scope, base, and stack detection

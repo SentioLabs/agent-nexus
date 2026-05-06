@@ -68,6 +68,31 @@ When launching subagents, specify the `model` parameter explicitly:
 - `model: "opus"` for Phase 1a, Phase 1b, Phase 1d, and Phase 2
 - `model: "sonnet"` for Phase 1c
 
+### Context window
+
+Default to **base 200k context** for every step. Only escalate to a `[1M]`
+context model when Step 0's gathered context bundle (files under review +
+base branch files + project guidance + idiom baseline + reviewer comments)
+exceeds ~150k tokens. Most reviews fit comfortably in 200k. The `[1M]`
+tier carries a real per-token premium and is wasted capacity for typical
+PRs.
+
+If you must use `[1M]`, only escalate the *specific* steps that need it
+(usually Phase 2 calibration, which sees the union of all Phase 1
+findings) — not every subagent.
+
+### Output budget per lens
+
+Cap each Phase 1 lens at roughly **5,000 output tokens**. Findings
+should be terse: 2-4 sentences per finding plus the structured fields.
+Phase 2 calibration consumes structured findings, not essays — verbose
+lens output inflates Phase 2 input cost without adding signal.
+
+Phase 1d may run slightly longer (~7,000 tokens) because solution-fit
+analysis often needs to explain architectural reasoning. Phase 2
+calibration may run up to 10,000 tokens because it covers all lenses
+plus cross-lens analysis.
+
 ---
 
 ## Workflow
@@ -149,9 +174,10 @@ base branch files, and reviewer comments) -- all Phase 1 agents and Phase 2 need
 
 ### Phase 1: Parallel 4-lens scan
 
-Launch the applicable subagents in parallel. Each receives the files under review, the
-problem reconstruction, codebase context, the idiom baseline, reviewer comments, and the
-relevant language reference files from Step 0.
+Launch the applicable subagents in parallel. **Tailor each lens's context bundle** to
+what that lens actually needs — broadcasting the full Step 0 context to every agent
+multiplies input cost by 4× without adding signal. Each lens's prompt below specifies
+which context elements to include.
 
 **Important:** Always use `general-purpose` subagents (or omit the `subagent_type` parameter).
 Do NOT use specialized review agents (coderabbit, feature-dev, pr-review-toolkit, etc.) --
@@ -161,6 +187,35 @@ their own prompts with these instructions, producing inconsistent results.
 For large reviews (>10 files), split each lens across multiple parallel subagents by
 directory or module. Phase 1d should stay cross-cutting unless the PR spans genuinely
 independent systems.
+
+**Per-lens context budget** (deliver these subsets to each lens, not the full bundle):
+
+| Lens | Files under review | Base branch files | Project guidance | Idiom baseline | Reviewer comments | Problem reconstruction | Language refs |
+|------|:------------------:|:-----------------:|:----------------:|:--------------:|:-----------------:|:----------------------:|:-------------:|
+| Phase 1a (AI Authorship) | ✓ | ✓ | ✓ | – | – | – | – |
+| Phase 1b (Idiom Fluency) | ✓ | ✓ | ✓ | ✓ | – | – | ✓ |
+| Phase 1c (Code Quality) | ✓ | – | ✓ | – | – | – | – |
+| Phase 1d (Solution-Fit) | ✓ | ✓ | ✓ | – | ✓ | ✓ | – |
+| Phase 2 (Calibration) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+The "✓" columns are required for that lens's analysis; "–" elements would be ignored or
+add noise. Phase 2 calibration receives the union (it's the cross-lens synthesis step
+and must see what every lens saw).
+
+### Skip Phase 1d for trivial changes
+
+Phase 1d is the most reasoning-heavy lens. **Skip it entirely** when ALL of these hold:
+
+- Fewer than 5 files changed
+- Fewer than 100 lines added (after exclusions)
+- No architecture, workflow, infrastructure, or developer-experience signal in the PR
+  title/body (no mentions of: workflow, CI, scripts, infra, deploy, migration, refactor,
+  dependency, build, tooling, abstraction)
+- No reviewer comments raising solution-level objections (phrases like "why",
+  "what problem", "anti-pattern", "wrong layer")
+
+For tiny local edits, Phase 1a + 1b + 1c are sufficient. Solution-fit objections don't
+apply at that scope.
 
 #### Phase 1a: AI Authorship Detection (model: "opus")
 
@@ -200,7 +255,9 @@ independent systems.
 > | File | AI Likelihood (0-100) | Primary Signals | Notes |
 > |------|----------------------|-----------------|-------|
 >
-> Tag every finding with `[AI_AUTHORSHIP]`.
+> Tag every finding with `[AI_AUTHORSHIP]`. Keep findings terse: 2-4 sentences each.
+> Aim for under 5,000 tokens of total output — Phase 2 calibration consumes structured
+> findings, not essays.
 
 #### Phase 1b: Idiom Fluency (model: "opus")
 
@@ -232,7 +289,8 @@ independent systems.
 > - **Reasoning** -- why the current code is non-idiomatic in this project's context
 > - **Confidence** (0-100)
 >
-> Tag every finding with `[IDIOM]`.
+> Tag every finding with `[IDIOM]`. Keep findings terse: 2-4 sentences each. Aim for
+> under 5,000 tokens of total output.
 
 #### Phase 1c: Code Quality (model: "sonnet")
 
@@ -264,7 +322,8 @@ independent systems.
 > - **Reasoning** -- what the concrete quality issue is
 > - **Confidence** (0-100)
 >
-> Tag every finding with `[CODE_QUALITY]`.
+> Tag every finding with `[CODE_QUALITY]`. Keep findings terse: 2-4 sentences each.
+> Aim for under 5,000 tokens of total output.
 
 #### Phase 1d: Architecture and Solution-Fit Review (model: "opus")
 
@@ -311,7 +370,9 @@ user only asks about local code style and no architecture or workflow choice is 
 > | Dimension | Score (0-100) | Finding | Better Direction |
 > |-----------|--------------:|---------|------------------|
 >
-> Tag every finding with `[SOLUTION_FIT]`.
+> Tag every finding with `[SOLUTION_FIT]`. Keep findings terse: 3-5 sentences each
+> (slightly longer than other lenses because architectural reasoning often needs
+> explanation). Aim for under 7,000 tokens of total output.
 
 ---
 
@@ -653,6 +714,14 @@ Only read the ones relevant to the code under review. Each reference file includ
 
 If the code is in a language not covered by a reference file, rely on the universal
 signals and your general knowledge of that language's idioms.
+
+**Cost optimization — reference file caching.** These reference files are static between
+runs against the same codebase. In runtimes that support prompt caching (Claude Code's
+session cache, Anthropic SDK `cache_control` markers, etc.), include the loaded language
+reference content in a cached prefix so repeat reviews against the same repo amortize
+the input cost. In Claude Code this is automatic for skill content. In headless / CI
+contexts (GitHub Actions via Claude Agent SDK), set `cache_control: {"type": "ephemeral"}`
+on the reference-file content blocks for the largest savings.
 
 ---
 

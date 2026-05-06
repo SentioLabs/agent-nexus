@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.10.0](https://github.com/SentioLabs/agent-nexus/compare/claude-arc-v0.9.1...claude-arc-v0.10.0) (2026-05-06)
+
+
+### Features
+
+* **arc:** add protected-branch check to brainstorm/build/finish skills ([e5a79ba](https://github.com/SentioLabs/agent-nexus/commit/e5a79ba97b4caf383490208216dde22e992217a4))
+
+
+### Refactoring
+
+* **arc:** drop duplicated rule summary from branch-check refs ([effefd0](https://github.com/SentioLabs/agent-nexus/commit/effefd073940343ad96a12705cd3c7a7685d0b23))
+
 ## [0.9.1](https://github.com/SentioLabs/agent-nexus/compare/claude-arc-v0.9.0...claude-arc-v0.9.1) (2026-05-02)
 
 

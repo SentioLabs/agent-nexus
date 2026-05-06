@@ -2,7 +2,7 @@
   "claude-marketplace/plugins/arc": "0.10.0",
   "claude-marketplace/plugins/git-spice": "0.2.0",
   "claude-marketplace/plugins/mneme": "0.10.0",
-  "claude-marketplace/plugins/code-quality": "0.3.0",
+  "claude-marketplace/plugins/code-quality": "0.4.0",
   "codex-marketplace/plugins/arc": "0.8.0",
   "codex-marketplace/plugins/atlassian": "0.3.0",
   "codex-marketplace/plugins/mneme": "0.11.0",

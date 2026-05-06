@@ -1,32 +1,30 @@
 ---
 name: ai-slop-review
 description: >
-  Detect low-quality AI-generated code ("AI slop") in any codebase using a 3-lens parallel
-  review architecture. Use this skill when the user asks to review code quality, audit files
-  or PRs for AI-generated patterns, check if code is idiomatic, assess whether code looks
-  AI-written, or asks anything like "review this for slop", "is this idiomatic?", "does this
-  look AI-generated?", "what's wrong with this code?", "audit code quality", or "find AI
-  patterns". Also trigger for general code review requests where idiomaticity and quality
-  are the primary concern even if the user does not explicitly mention "AI slop". Trigger
-  proactively after large AI-assisted code generation sessions when the user asks for a
-  quality check. Supports Go, Python, Rust, and Svelte/TypeScript with language-specific
-  reference files, but the universal signals apply to any language.
+  Use when reviewing code quality, AI-generated patterns, idiom drift, architecture fit,
+  wrong-problem solutions, abstraction boundaries, PR strategy, or reviewer concerns about
+  whether an approach should exist. Trigger for "review this for slop", "is this idiomatic?",
+  "does this look AI-generated?", "audit code quality", "find AI patterns", or general
+  quality reviews where local code hygiene or solution fit is the concern. Supports Go,
+  Python, Rust, and Svelte/TypeScript references; universal signals apply to any language.
 compatibility: opencode
 license: MIT
 ---
 
 # AI Slop Review
 
-Identify low-quality, likely AI-generated code through a 3-lens parallel review
-architecture. Three specialized agents scan in parallel for AI authorship signals, idiom
-violations, and code quality issues. A calibration agent then scores and filters findings.
-Only findings that survive calibration appear in the final report.
+Identify low-quality, likely AI-generated code and solution-level slop through a parallel
+review architecture. Specialized agents scan for AI authorship signals, idiom violations,
+code quality issues, and whether the implementation is the right solution to the problem.
+A calibration agent then scores and filters findings. Only findings that survive
+calibration appear in the final report.
 
-## Why three lenses matter
+## Why multiple lenses matter
 
 A single reviewer either blurs concerns together (mixing "is this AI-generated?" with
-"is this good code?") or anchors too heavily on one dimension. The 3-lens architecture
-separates these concerns so each agent can focus deeply:
+"is this good code?" and "is this the right solution?") or anchors too heavily on one
+dimension. The multi-lens architecture separates these concerns so each agent can focus
+deeply:
 
 - **Phase 1a (AI Authorship Detection):** Looks for patterns that betray machine
   generation -- contextual blindness, boilerplate residue, aspirational documentation,
@@ -37,35 +35,44 @@ separates these concerns so each agent can focus deeply:
 - **Phase 1c (Code Quality):** Traditional quality review -- dead code, stale docs,
   debug artifacts, test quality, security, DRY violations. Deliberately agnostic about
   whether code is AI-generated.
+- **Phase 1d (Architecture and Solution-Fit):** Asks whether the implementation should
+  exist in this shape. Locally clean code can still be slop if it patches a symptom,
+  chooses the wrong owner, or ignores an existing tool or framework mechanism.
 
 After the parallel scan, a calibration agent scores every finding on a 0-100 scale,
 cross-references across lenses, and produces a filtered, verdict-bearing report.
 
+The review must answer two separate questions:
+
+- Is the code locally slop?
+- Is the solution itself slop?
+
 ## Execution Guidance
 
 Use the lightest reasonable pass for Step 0 and stronger reasoning passes for Phase 1a,
-Phase 1b, and Phase 2 if your runtime exposes model selection.
+Phase 1b, Phase 1d, and Phase 2 if your runtime exposes model selection.
 
 | Step | Agent | Suggested execution |
 |------|-------|---------------------|
-| Step 0 | Scope and context gathering | `explore` subagent or equivalent lightweight scan |
+| Step 0 | Scope, problem reconstruction, and context gathering | `explore` subagent or equivalent lightweight scan |
 | Phase 1a | AI Authorship Detection | `general` subagent |
 | Phase 1b | Idiom Fluency | `general` subagent |
 | Phase 1c | Code Quality | `general` subagent |
+| Phase 1d | Architecture and Solution-Fit | `general` subagent for PRs and non-trivial changes |
 | Phase 2 | Calibration | `general` subagent |
 | Phase 3 | Synthesis | inline (no subagent) |
 
 If model selection is available, prefer:
 
 - a fast, low-cost model for Step 0
-- a stronger reasoning model for Phase 1a, Phase 1b, and Phase 2
+- a stronger reasoning model for Phase 1a, Phase 1b, Phase 1d, and Phase 2
 - a balanced model for Phase 1c
 
 ---
 
 ## Workflow
 
-### Step 0: Determine scope, gather context, and build idiom baseline
+### Step 0: Determine scope, reconstruct the problem, gather context, and build idiom baseline
 
 Use an `explore` subagent or an equivalent lightweight scan for this step.
 
@@ -74,6 +81,27 @@ Use an `explore` subagent or an equivalent lightweight scan for this step.
 - If the user says "review this PR" or "review my changes", use `git diff` to identify changed files
 - If the user says "review the codebase" or similar broad request, scan `src/` or the main
   source directory, excluding vendored code, generated files, and test fixtures
+
+**Phase 0 problem reconstruction** (do this before any review -- it prevents solution-level false negatives):
+
+For PRs and non-trivial changes, produce a short problem statement before launching Phase 1:
+
+1. Identify the stated problem from PR title, description, linked issues, commits, and
+   human reviewer comments
+2. Identify the inferred actual failure mode from changed code, tests, logs, commands,
+   and reproduction evidence
+3. Identify existing mechanisms that already own the problem area: framework features,
+   package managers, build tools, platform APIs, repo scripts, or established team flows
+4. Identify the minimal solution that would solve the problem without new abstractions
+5. Record unanswered questions where the PR does not explain why the chosen approach is necessary
+
+For PR reviews, always read human reviewer comments before final grading. Treat comments
+as context signals about requirements, missing evidence, tool mental models, and
+solution-level objections -- not just as line-level code review inputs.
+
+When PR comments include phrases like "why", "what problem", "anti-pattern", "wrong
+layer", "should just work", "too much baggage", "AI fix this", or "do we need this",
+route them to Phase 1d. These are usually architecture or solution-fit objections.
 
 **Context gathering** (do this before any review -- it prevents false positives):
 
@@ -110,22 +138,28 @@ When reviewing a PR, also gather the base branch versions of changed files so th
 Phase 1 agents can distinguish between pre-existing patterns and newly introduced ones.
 Use `git show <base>:<path>` for each changed file.
 
-Store all gathered context (codebase context, idiom baseline, base branch files) -- all
-Phase 1 agents and Phase 2 need it.
+Also gather the PR title, description, linked issues, commit list, changed-file list, and
+human reviewer comments. If using GitHub, prefer `gh pr view --comments` plus the
+appropriate `gh api` review-comment endpoints when available.
+
+Store all gathered context (problem reconstruction, codebase context, idiom baseline,
+base branch files, and reviewer comments) -- all Phase 1 agents and Phase 2 need it.
 
 ---
 
-### Phase 1: Parallel 3-lens scan
+### Phase 1: Parallel multi-lens scan
 
-Launch three `general` subagents in parallel. Each receives the files under review, the
-codebase context, the idiom baseline, and the relevant language reference files from Step 0.
+Launch the applicable `general` subagents in parallel. Each receives the files under
+review, the problem reconstruction, codebase context, the idiom baseline, reviewer
+comments, and the relevant language reference files from Step 0.
 
 **Important:** Always use general-purpose subagents for this review. Do not use specialized
 review bots or additional repo-specific review prompts that blend their own methodology into
 this one.
 
 For large reviews (>10 files), split each lens across multiple parallel subagents by
-directory or module.
+directory or module. Phase 1d should stay cross-cutting unless the PR spans genuinely
+independent systems.
 
 #### Phase 1a: AI Authorship Detection
 
@@ -231,17 +265,65 @@ directory or module.
 >
 > Tag every finding with `[CODE_QUALITY]`.
 
+#### Phase 1d: Architecture and Solution-Fit Review
+
+Required for PRs and non-trivial changes. Optional for tiny single-file edits where the
+user only asks about local code style and no architecture or workflow choice is involved.
+
+> You are an adversarial architecture and solution-fit reviewer. Your job is to decide
+> whether the implementation is the right solution to the problem, regardless of whether
+> the changed code is locally correct.
+>
+> Do NOT focus on formatting, style, or small bugs. Focus on whether the PR should exist
+> in this shape.
+>
+> Review these dimensions:
+>
+> 1. **Problem fit** -- Does the PR solve the actual problem, or only a symptom?
+> 2. **Abstraction boundary** -- Is the solution implemented at the right layer, or does
+>    it bypass the component, tool, or owner that should own the behavior?
+> 3. **Existing mechanisms** -- Does the repo, framework, platform, package manager, or
+>    third-party tool already provide a better solution?
+> 4. **Scope control** -- Does the PR spread one issue across too many files, docs,
+>    scripts, configs, workflows, or user surfaces?
+> 5. **Maintenance cost** -- Does the solution create custom code that must track external
+>    behavior, file formats, CLI output, or conventions unnecessarily?
+> 6. **Operational behavior** -- Does the solution change user workflows, CI behavior,
+>    failure modes, or target semantics in ways not justified by the problem?
+> 7. **Evidence quality** -- Does the PR prove the problem and chosen solution, or does it
+>    look like an "AI fix this" response to a guessed root cause?
+> 8. **Education opportunity** -- If the author seems to misunderstand a tool, framework,
+>    or architecture boundary, identify the missing mental model factually and
+>    non-personally.
+>
+> For each finding, report:
+> - **File(s) or PR area involved**
+> - The **claimed or inferred problem**
+> - Why the solution is **mismatched or over-scoped**
+> - The **existing mechanism or simpler alternative**
+> - **Evidence** from the repo, docs, commands, or reviewer comments
+> - **Confidence** (0-100)
+> - **Severity**: Low, Medium, High
+>
+> At the end, produce:
+>
+> | Dimension | Score (0-100) | Finding | Better Direction |
+> |-----------|--------------:|---------|------------------|
+>
+> Tag every finding with `[SOLUTION_FIT]`.
+
 ---
 
 ### Phase 2: Calibration review
 
 Launch a **separate, independent** `general` subagent. This agent receives ALL findings
-from all three Phase 1 lenses, the original files, the codebase context, and the idiom
-baseline.
+from all Phase 1 lenses, the original files, the problem reconstruction, reviewer
+comments, the codebase context, and the idiom baseline.
 
 > You are a senior staff engineer performing calibration review. You are fair, precise,
-> and allergic to false positives. Your job is to take findings from three parallel
-> reviewers (AI Authorship, Idiom Fluency, Code Quality) and produce a unified,
+> and allergic to false positives. Your job is to take findings from the parallel
+> reviewers (AI Authorship, Idiom Fluency, Code Quality, Architecture and Solution-Fit)
+> and produce a unified,
 > calibrated assessment.
 >
 > **For each finding, you must:**
@@ -264,17 +346,35 @@ baseline.
 >    - **ESCALATED** -- worse than the scanner realized. Explain the additional concern.
 > 6. **Re-tag** if the finding was categorized under the wrong lens (e.g., an idiom
 >    finding tagged `[CODE_QUALITY]` should be re-tagged `[IDIOM]`).
+> 7. Explicitly answer the solution-fit questions:
+>    - Could this code be locally acceptable but still the wrong solution?
+>    - Did the implementation choose the wrong owner or abstraction boundary?
+>    - Did reviewer comments reveal a system-level objection the code lenses missed?
+>    - Are there signs the engineer or AI assistant misunderstood a tool, framework, or
+>      repo convention?
+>    - Should the grade change because the solution is strategically poor even if the diff
+>      is small?
 >
 > **Cross-finding analysis:**
 >
 > After processing individual findings, perform cross-lens analysis:
-> - **Missed findings:** Flag anything the three scanners missed that you notice while
+> - **Missed findings:** Flag anything the Phase 1 scanners missed that you notice while
 >   verifying. The scanners may have been so focused on their checklists that they
 >   overlooked issues hiding in plain sight.
 > - **Cross-lens patterns:** Identify cases where findings from different lenses
 >   reinforce each other (e.g., an `[AI_AUTHORSHIP]` contextual blindness finding
 >   combined with an `[IDIOM]` finding on the same code strongly suggests AI generation).
 >   Note these correlations explicitly.
+> - **Solution-fit patterns:** Do not treat `[SOLUTION_FIT]` findings as optional
+>   appendices. If the implementation strategy is wrong, it must affect the top-line grade.
+> - **Reviewer comment classification:** Classify each substantive human reviewer comment:
+>
+> | Status | Meaning |
+> |--------|---------|
+> | Supported | Evidence confirms the reviewer is raising a real solution or code issue. |
+> | Partially supported | The concern is directionally right, but narrower or lower severity. |
+> | Not supported | The reviewer concern does not hold after checking repo reality. |
+> | Needs clarification | The PR does not contain enough evidence to decide. |
 >
 > **File-level authorship table:**
 >
@@ -285,12 +385,13 @@ baseline.
 > |------|----------------------|----------------------|-------------|---------|
 >
 > Your output is the complete calibrated finding list with scores, verdicts, reasoning,
-> cross-lens correlations, and the file-level authorship table.
+> cross-lens correlations, reviewer-comment classifications, solution_fit_score, and the
+> file-level authorship table.
 
 Provide the subagent with:
-- All Phase 1a, 1b, and 1c findings
+- All Phase 1a, 1b, 1c, and 1d findings
 - The original files under review (so it can re-read them independently)
-- The codebase context and idiom baseline from Step 0
+- The problem reconstruction, reviewer comments, codebase context, and idiom baseline from Step 0
 
 ---
 
@@ -305,7 +406,7 @@ for finding inclusion:
 
 #### Grading algorithm
 
-Compute a numerical grade for each file, then roll up to a repo-level grade.
+Compute local code scores first, then combine them with solution-fit for the final grade.
 
 **Step 1: Per-file dimension scores**
 
@@ -327,16 +428,38 @@ Weights reflect that this is a *slop* review, not an *authorship* review. Good
 AI-written code that follows idioms and has no quality issues should score well.
 Authorship signals serve as corroborating evidence, not a primary driver.
 
-**Step 3: Repo-level rollup**
+**Step 3: Local code rollup**
 
 ```
-repo_score = Σ(file_score * file_loc) / Σ(file_loc)
+code_local_score = Σ(file_score * file_loc) / Σ(file_loc)
 ```
 
 Weight by lines of code so a 500-line file with issues matters more than a 10-line
 utility.
 
-**Step 4: Letter grade and verdict**
+**Step 4: Solution-fit score**
+
+Use the calibrated Phase 1d and Phase 2 result as `solution_fit_score` (0-100). If Phase
+1d was not applicable because the scope was a tiny local edit, omit `solution_fit_score`
+and use `code_local_score` as the final score.
+
+For PRs and non-trivial changes:
+
+```
+final_score = (0.60 * code_local_score) + (0.40 * solution_fit_score)
+```
+
+For PRs whose purpose is architecture, tooling, workflows, infrastructure, developer
+experience, or process, solution fit matters equally:
+
+```
+final_score = (0.50 * code_local_score) + (0.50 * solution_fit_score)
+```
+
+This matters because AI-generated PRs often have clean syntax and decent local hygiene
+while choosing the wrong overall approach.
+
+**Step 5: Letter grade and verdict**
 
 | Grade | Score | Verdict |
 |-------|-------|---------|
@@ -402,6 +525,35 @@ Code that would pass review in isolation but is clearly unaware of its surroundi
 AI generates locally coherent code. It rarely generates *contextually* coherent code.
 This is the single most reliable signal and should be weighted heavily.
 
+### Solution-level slop signals
+
+Generated work can look competent file-by-file while still choosing the wrong solution.
+Flag these as `[SOLUTION_FIT]` when evidence supports them:
+
+| Signal | Description |
+|--------|-------------|
+| Symptom patching | The PR fixes the observed error but not the root cause. |
+| Wrong owner | Logic is added outside the component, tool, or layer that should own it. |
+| Custom wrapper over managed tool | New scripts parse or enforce behavior already owned by a package manager, framework, or platform. |
+| Multi-surface workaround | One issue is patched in code, scripts, docs, and CI without proving why all are needed. |
+| Evidence-free root cause | The PR assumes a cause but does not reproduce or verify it. |
+| Defensive generality | A generic framework is created before there is a repeated need. |
+| Policy split | Two commands or code paths now enforce different rules for the same concern. |
+| Documentation as retrofit | Docs are updated to justify the new workaround rather than explain established team workflow. |
+
+Concrete regression scenario: `BACtrack/bacstack#430`
+(`https://github.com/BACtrack/bacstack/pull/430`) should be treated as a pressure test.
+The improved review should identify PATH/tool resolution drift as the actual problem,
+check whether `mise exec -- ...` already provides the command execution boundary, mark a
+custom `scripts/check_tool_version.sh` wrapper as the wrong solution boundary if evidence
+confirms it, classify reviewer comments as solution-level signals, and downgrade the
+overall grade even if local shell quality is acceptable.
+
+When identifying a skill or mental-model gap, phrase it as an education opportunity, not
+personal criticism. Good: "The PR suggests a mise mental-model gap: `mise.toml` was
+treated as a manifest to parse manually rather than making `mise exec` the execution
+boundary for managed tools." Bad: "The author does not understand mise."
+
 ---
 
 ## Output Format
@@ -410,9 +562,45 @@ This is the single most reliable signal and should be weighted heavily.
 ## AI Slop Review: <filename, directory, or PR scope>
 
 **Scope:** <what was reviewed -- files, line count, language(s)>
-**Grade:** [A-F] (<repo_score>/100)
+**Grade:** [A-F] (<final_score>/100)
+**Local Code Score:** <code_local_score>/100
+**Solution-Fit Score:** <solution_fit_score>/100 or "Not applicable for this scope"
 **Verdict:** [Clean / Mild concerns / Significant concerns / Strong slop signals / Pervasive slop]
 **Confidence:** [High / Medium / Low] -- how confident the review is in its verdict
+
+### Solution-Level Assessment
+
+| Dimension | Score | Finding | Better Direction |
+|-----------|------:|---------|------------------|
+| Problem understanding | 70 | ... | ... |
+| Solution fit | 86 | ... | ... |
+| Maintenance burden | 82 | ... | ... |
+| Target ownership | 76 | ... | ... |
+| Documentation scope | 65 | ... | ... |
+
+### Evidence Checked
+
+| Check | Observed Result | Assessment |
+|-------|-----------------|------------|
+| command, repo fact, reviewer comment, or code path | output/result | why it matters |
+
+### Reviewer Comment Classification
+
+| Comment | Status | Evidence | Assessment |
+|---------|--------|----------|------------|
+| reviewer concern | Supported / Partially supported / Not supported / Needs clarification | checked fact | what it means |
+
+### Education Opportunity
+
+<If the author appears to misunderstand a tool, framework, or architecture boundary,
+call it out factually and non-personally. Focus on the missing mental model and how to
+teach it. Omit this section if there is no evidence of a teachable misunderstanding.>
+
+### Solution-Fit Findings
+
+| # | Area | Signal | Finding | Better Direction | Confidence | Verdict |
+|---|------|--------|---------|------------------|------------|---------|
+| 1 | Makefile/scripts/docs | Wrong owner | description | use existing mechanism | 86 | CONFIRMED |
 
 ### File-Level Assessment
 

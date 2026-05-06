@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/SentioLabs/agent-nexus/compare/opencode-slop-review-v0.4.0...opencode-slop-review-v0.5.0) (2026-05-06)
+
+
+### Features
+
+* **opencode:** add solution-fit slop review lens ([6a4fbb4](https://github.com/SentioLabs/agent-nexus/commit/6a4fbb47d3d7cfe281e49414919a9ec5f13a7d6e))
+
 ## [0.4.0](https://github.com/SentioLabs/agent-nexus/compare/opencode-slop-review-v0.3.0...opencode-slop-review-v0.4.0) (2026-05-02)
 
 

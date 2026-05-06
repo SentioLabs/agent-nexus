@@ -65,7 +65,7 @@ Create a TodoWrite checklist with all steps and work through them:
     ```bash
     git add <file1> <file2> ...
     ```
-12. **Protected-branch check** — perform the check defined in `skills/arc/_branch-check.md` (run `git branch --show-current`; if `main`/`master`/`release`/`production` and no `CLAUDE.md` opt-out, ask via `AskUserQuestion` and act on the answer). This is the *last* place to catch trunk-direct work; ideally `brainstorm` or `build` already established a feature branch earlier, but check anyway because some flows skip those skills.
+12. **Protected-branch check** — perform the check per `skills/arc/_branch-check.md`. This is the *last* place to catch trunk-direct work; ideally `brainstorm` or `build` already established a feature branch earlier, but check anyway because some flows skip those skills.
 13. Commit with conventional commit message:
     ```bash
     git commit -m "feat(scope): summary of changes"

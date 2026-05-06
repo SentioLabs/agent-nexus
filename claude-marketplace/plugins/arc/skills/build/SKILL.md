@@ -13,7 +13,7 @@ Orchestrate task implementation by dispatching fresh `builder` subagents per tas
 
 ## Pre-flight: Branch Setup
 
-Before dispatching any task, perform the protected-branch check defined in `skills/arc/_branch-check.md` (run `git branch --show-current`; if `main`/`master`/`release`/`production` and no `CLAUDE.md` opt-out, ask via `AskUserQuestion`).
+Before dispatching any task, perform the protected-branch check per `skills/arc/_branch-check.md`.
 
 This catches the case where build was invoked without going through `brainstorm` first. Subagents commit to whatever branch the main agent is on — and the parallel-dispatch checkpoint push (P1) goes there too. Discovering at finish time that an entire epic landed on trunk is not recoverable cheaply. Suggest a branch name from the epic/task title if the user picks "switch."
 

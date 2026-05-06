@@ -11,6 +11,12 @@ Orchestrate task implementation by dispatching fresh `builder` subagents per tas
 
 **The main agent NEVER writes implementation code.** It orchestrates, dispatches, and reviews. If you're tempted to "just quickly fix this" — dispatch a subagent instead.
 
+## Pre-flight: Branch Setup
+
+Before dispatching any task, perform the protected-branch check defined in `skills/arc/_branch-check.md` (run `git branch --show-current`; if `main`/`master`/`release`/`production` and no `CLAUDE.md` opt-out, ask via `AskUserQuestion`).
+
+This catches the case where build was invoked without going through `brainstorm` first. Subagents commit to whatever branch the main agent is on — and the parallel-dispatch checkpoint push (P1) goes there too. Discovering at finish time that an entire epic landed on trunk is not recoverable cheaply. Suggest a branch name from the epic/task title if the user picks "switch."
+
 ## Model Selection
 
 Every Agent dispatch can override the subagent's frontmatter model via the `model:` parameter. Use this to match model tier to task complexity. The default floor per agent is set in frontmatter — use these overrides to downgrade for trivial tasks or escalate for complex ones.

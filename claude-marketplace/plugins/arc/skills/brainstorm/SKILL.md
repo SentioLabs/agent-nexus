@@ -11,6 +11,12 @@ Explore requirements through Socratic dialogue before any implementation begins.
 
 **Do NOT write any implementation code, scaffold any project, or take any implementation action until the design is approved.** Brainstorming produces a design document — not code.
 
+## Pre-flight: Branch Setup
+
+Before starting the design dialogue, perform the protected-branch check defined in `skills/arc/_branch-check.md` (run `git branch --show-current`; if `main`/`master`/`release`/`production` and no `CLAUDE.md` opt-out, ask via `AskUserQuestion`).
+
+Brainstorm itself doesn't commit code, but the design doc, the planned tasks, the eventual implementation, and the final commits will all land on whatever branch you start from. Catching trunk *now* avoids "we built three hours of work and it's all on main" at finish time. If the user picks "switch to a feature branch", suggest a name based on the brief they just gave you (e.g. `feat/<topic>`).
+
 ## Workflow
 
 Create a task for each step below using `TaskCreate`. Mark each as `in_progress` when starting and `completed` when done. This creates a visible progress list in the CLI that carries forward into the plan skill.

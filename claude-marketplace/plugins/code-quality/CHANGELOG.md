@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/SentioLabs/agent-nexus/compare/claude-code-quality-v0.4.0...claude-code-quality-v0.4.1) (2026-05-06)
+
+
+### Performance
+
+* **code-quality:** runtime-portable cost optimizations for slop+size review ([24de3a1](https://github.com/SentioLabs/agent-nexus/commit/24de3a1677f80b9930410cd61d17e56a7711280e))
+
 ## [0.4.0](https://github.com/SentioLabs/agent-nexus/compare/claude-code-quality-v0.3.0...claude-code-quality-v0.4.0) (2026-05-06)
 
 

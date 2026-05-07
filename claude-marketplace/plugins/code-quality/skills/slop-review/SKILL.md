@@ -629,6 +629,10 @@ boundary for managed tools." Bad: "The author does not understand mise."
 **Verdict:** [Clean / Mild concerns / Significant concerns / Strong slop signals / Pervasive slop]
 **Confidence:** [High / Medium / Low] -- how confident the review is in its verdict
 
+> **Reading the scores:** All `/100` values in this report are **defect counts** —
+> 0 = clean, 100 = pervasive slop. **Lower is better.** *Confidence* values use the
+> opposite convention (higher = more confident the finding is real).
+
 ### Solution-Level Assessment
 
 | Dimension | Score | Finding | Better Direction |

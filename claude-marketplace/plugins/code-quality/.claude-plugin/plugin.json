@@ -1,6 +1,6 @@
 {
   "name": "code-quality",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Pre-merge code quality plugin. Bundles slop-review (4-lens parallel review for AI-generated code, idiom drift, quality issues, and architecture/solution-fit) with model-tiered subagents and calibration.",
   "author": {
     "name": "SentioLabs",

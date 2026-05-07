@@ -157,6 +157,18 @@ authority for Phase 1b -- anything matching it is NOT flagged. Include:
 - **Import conventions:** grouping order, aliasing patterns, relative vs absolute
 - **Naming conventions:** abbreviation norms, exported/unexported patterns, file naming
 
+**Acceptance file** (skip if absent):
+
+If `.code-quality/slop-acceptances.md` exists at the repo root, read it and store the
+verbatim contents alongside the rest of Step 0 output. The file is a project-level
+"do not bring this up again" list, written by the maintainers, that tells Phase 2
+calibration to dismiss findings that match an entry. Only Phase 2 needs the file —
+Phase 1 lenses scan blind so they still produce evidence the maintainers can
+re-evaluate when removing an entry.
+
+If the file is missing, Phase 2 grades normally with no acceptances applied. Do not
+fabricate acceptances; do not infer them from CLAUDE.md or other docs.
+
 **Scope adaptation for PR reviews:**
 
 When reviewing a PR, also gather the base branch versions of changed files so that
@@ -168,7 +180,8 @@ human reviewer comments. Prefer `gh pr view --comments` plus the appropriate `gh
 review-comment endpoints when available.
 
 Store all gathered context (problem reconstruction, codebase context, idiom baseline,
-base branch files, and reviewer comments) -- all Phase 1 agents and Phase 2 need it.
+base branch files, reviewer comments, and acceptances file if present) -- all Phase 1
+agents and Phase 2 need it (Phase 1 sees everything except the acceptances file).
 
 ---
 
@@ -190,17 +203,19 @@ independent systems.
 
 **Per-lens context budget** (deliver these subsets to each lens, not the full bundle):
 
-| Lens | Files under review | Base branch files | Project guidance | Idiom baseline | Reviewer comments | Problem reconstruction | Language refs |
-|------|:------------------:|:-----------------:|:----------------:|:--------------:|:-----------------:|:----------------------:|:-------------:|
-| Phase 1a (AI Authorship) | ✓ | ✓ | ✓ | – | – | – | – |
-| Phase 1b (Idiom Fluency) | ✓ | ✓ | ✓ | ✓ | – | – | ✓ |
-| Phase 1c (Code Quality) | ✓ | – | ✓ | – | – | – | – |
-| Phase 1d (Solution-Fit) | ✓ | ✓ | ✓ | – | ✓ | ✓ | – |
-| Phase 2 (Calibration) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Lens | Files under review | Base branch files | Project guidance | Idiom baseline | Reviewer comments | Problem reconstruction | Language refs | Acceptances |
+|------|:------------------:|:-----------------:|:----------------:|:--------------:|:-----------------:|:----------------------:|:-------------:|:-----------:|
+| Phase 1a (AI Authorship) | ✓ | ✓ | ✓ | – | – | – | – | – |
+| Phase 1b (Idiom Fluency) | ✓ | ✓ | ✓ | ✓ | – | – | ✓ | – |
+| Phase 1c (Code Quality) | ✓ | – | ✓ | – | – | – | – | – |
+| Phase 1d (Solution-Fit) | ✓ | ✓ | ✓ | – | ✓ | ✓ | – | – |
+| Phase 2 (Calibration) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 The "✓" columns are required for that lens's analysis; "–" elements would be ignored or
 add noise. Phase 2 calibration receives the union (it's the cross-lens synthesis step
-and must see what every lens saw).
+and must see what every lens saw). Acceptances are deliberately Phase-2-only: Phase 1
+lenses scan blind so the underlying evidence stays visible to maintainers reviewing
+whether to keep an acceptance.
 
 ### Skip Phase 1d for trivial changes
 
@@ -386,6 +401,34 @@ reviewer comments, the codebase context, and the idiom baseline.
 > and allergic to false positives. Your job is to take findings from the parallel
 > reviewers (AI Authorship, Idiom Fluency, Code Quality, Architecture and Solution-Fit)
 > and produce a unified, calibrated assessment.
+>
+> **Accepted deviations.** If Step 0 supplied a `.code-quality/slop-acceptances.md`
+> file, you MUST apply it before grading. For each pending finding from
+> Phase 1a/1b/1c/1d:
+>
+> 1. Read the acceptances file as plain prose.
+> 2. Decide whether the finding is substantively the same concern as any entry in
+>    the file. Use semantic judgment, not literal match — entries describe a class
+>    of finding (e.g., "plugin marketplace pinning"), not a specific finding ID.
+> 3. If yes, set verdict = `DISMISSED (Accepted)` with a reason of the form
+>    "Accepted in slop-acceptances.md: <topic>".
+> 4. Do NOT include accepted findings in the main report tables, in the borderline
+>    appendix, or in the dismissed-findings collapse. Instead, list them once in a
+>    new "Accepted Deviations" section near the bottom of the report (see Output
+>    Format).
+> 5. Suppressed findings still influence the per-file authorship table (they are
+>    evidence of AI-shaping the code) but do NOT contribute to per-file Idiom or
+>    Quality scores, and the matched solution-fit findings do NOT contribute to
+>    `solution_fit_score`.
+>
+> The acceptance file is the project owner's pre-registered "do not bring this up
+> again" list. Trust it. If you genuinely think an entry is unsafe (e.g., it
+> suppresses a real security issue or masks a regression), include a single
+> `ESCALATED` finding flagging the acceptance itself with a clear reason — but the
+> default posture is to honor the file. Never silently ignore an acceptance you
+> disagree with; surface it.
+>
+> If no acceptances file was supplied, skip this step entirely and grade as normal.
 >
 > **For each finding, you must:**
 >
@@ -695,9 +738,21 @@ teach it. Omit this section if there is no evidence of a teachable misunderstand
 | # | File:Line | Lens | Finding | Confidence | Verdict |
 |---|-----------|------|---------|------------|---------|
 
+### Accepted Deviations
+<Only render this section if `.code-quality/slop-acceptances.md` was supplied AND
+at least one Phase 1 finding matched an entry. Lists concerns the scanners raised
+that the project has pre-registered as accepted. Maintainers can re-evaluate by
+removing entries from the acceptances file, which will cause those findings to
+flow through the normal report on the next run.>
+
+| Topic | Phase 1 score | Lens | Acceptance reason |
+|-------|--------------:|------|-------------------|
+| <topic from acceptances file> | <score> | AI / Idiom / Quality / Solution-Fit | <reason from acceptances file> |
+
 ### Dismissed Findings
 <collapsed or brief -- shows what the scanners flagged but calibration removed,
-so the user can see the review was thorough without being noisy>
+so the user can see the review was thorough without being noisy. Do NOT duplicate
+findings already shown in Accepted Deviations here.>
 ```
 
 If the code is clean or only has minor issues, say so directly. The goal is an honest,
@@ -741,6 +796,9 @@ Every codebase has its own conventions. Before flagging something as slop, check
    Don't flag framework-conventional code as slop.
 4. **Team size and stage** -- A 2-person startup codebase has different quality norms
    than a 50-person team's production system. Calibrate accordingly.
+5. **Acceptances file** -- Has the project pre-registered the concern in
+   `.code-quality/slop-acceptances.md`? If yes, Phase 2 will dismiss the finding
+   automatically; Phase 1 still scans blind so the evidence remains visible.
 
 The Phase 1 scanners should flag potential issues regardless. The Phase 2 calibration
 reviewer is where this nuance gets applied.

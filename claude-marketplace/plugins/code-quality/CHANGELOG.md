@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/SentioLabs/agent-nexus/compare/claude-code-quality-v0.5.0...claude-code-quality-v0.6.0) (2026-05-07)
+
+
+### Features
+
+* **code-quality:** honor .code-quality/slop-acceptances.md in slop-review ([#23](https://github.com/SentioLabs/agent-nexus/issues/23)) ([1c54eeb](https://github.com/SentioLabs/agent-nexus/commit/1c54eebad308efc4ed0fed75d6721cc36485e86a))
+
 ## [0.5.0](https://github.com/SentioLabs/agent-nexus/compare/claude-code-quality-v0.4.1...claude-code-quality-v0.5.0) (2026-05-07)
 
 

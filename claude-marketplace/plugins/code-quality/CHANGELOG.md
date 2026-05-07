@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/SentioLabs/agent-nexus/compare/claude-code-quality-v0.4.1...claude-code-quality-v0.5.0) (2026-05-07)
+
+
+### Features
+
+* **code-quality:** clarify slop-review score polarity in report header ([d291188](https://github.com/SentioLabs/agent-nexus/commit/d2911887fa4ab3dc2937b6cbf91a4ed449767509))
+
 ## [0.4.1](https://github.com/SentioLabs/agent-nexus/compare/claude-code-quality-v0.4.0...claude-code-quality-v0.4.1) (2026-05-06)
 
 

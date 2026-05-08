@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/SentioLabs/agent-nexus/compare/claude-code-quality-v0.7.0...claude-code-quality-v0.8.0) (2026-05-08)
+
+
+### Features
+
+* **code-quality:** flip slop-review scoring to higher = better ([#27](https://github.com/SentioLabs/agent-nexus/issues/27)) ([a24e414](https://github.com/SentioLabs/agent-nexus/commit/a24e414c5ebf4c85adc945b9f2bb8fbf43459712))
+
 ## [0.7.0](https://github.com/SentioLabs/agent-nexus/compare/claude-code-quality-v0.6.0...claude-code-quality-v0.7.0) (2026-05-08)
 
 

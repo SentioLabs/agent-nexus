@@ -807,46 +807,340 @@ reviewer is where this nuance gets applied.
 
 ## Step 4: Output Actions
 
-After the review is synthesized, determine how to surface the findings based on the
-review scope. Apply these defaults, then let the user override:
+After the review is synthesized, surface the findings. The default flow is:
+**detect mode → detect a PR → ask the user (only when interactive) → render and deliver**.
 
-- **PR review:** Default to Option B (PR inline comments)
-- **Codebase audit:** Default to Option A (review branch with markdown)
+### 4.1 Detect interactive vs. non-interactive (CI/CD) mode
 
-Present the user with the options below and the recommended default. Explain the
-trade-offs and let them choose.
+The skill runs in two contexts:
 
-### Option A: Review branch with markdown report
+- **Interactive** — a human is in the loop (Claude Code session, IDE
+  extension). `AskUserQuestion` works.
+- **Non-interactive** — running headless in CI/CD (GitHub Actions via the
+  Claude Agent SDK, scheduled cron job, automation). `AskUserQuestion`
+  has no human to answer it; either it errors or it stalls the job.
 
-Best for: full-codebase audits, team-wide visibility, archival.
+Detect non-interactive mode if **any** of these is true:
 
-1. Create a new branch from the current HEAD: `<user>/slop-review`
-2. Write the full review to `CLAUDE_SLOP_REVIEW.md` in the repo root
-3. Commit and push the branch
-4. Tell the user the branch is ready -- they can open a PR for team discussion
-   or keep it as a reference artifact
+```bash
+[ "${CI:-}"             = "true" ] || \
+[ "${GITHUB_ACTIONS:-}" = "true" ] || \
+[ "${GITLAB_CI:-}"      = "true" ] || \
+[ "${BUILDKITE:-}"      = "true" ] || \
+[ ! -t 0 ]   # stdin is not a TTY
+```
 
-This creates a durable record that doesn't clutter the main branch but is
-accessible to the whole team.
+If the user passed an explicit non-interactive flag in their request
+("non-interactive mode", "headless", "CI mode", "auto-post"), treat it as
+non-interactive regardless of env.
 
-### Option B: PR inline comments
+In non-interactive mode:
 
-Best for: PR-scoped reviews, when findings map to specific changed lines,
-when the team does code review via GitHub.
+- **Skip `AskUserQuestion` entirely.** Never call it — it is interactive
+  by design.
+- **Default behavior depends on PR detection** (next section):
+  - PR detected → post the rendered PR comment automatically.
+  - No PR detected → write `SLOP_REVIEW.md` to the working directory and
+    additionally print a one-line summary (verdict + grade + final score)
+    to stdout so the CI log captures it.
+- **Never prompt for confirmation before posting.** In CI the user has
+  already opted in to auto-posting by triggering the workflow; an
+  unanswered confirm would block the job.
+- **Surface failures visibly.** If `gh pr comment` fails (auth, rate
+  limit, repo permissions), exit non-zero with the error so the workflow
+  step fails loudly. Do not silently fall back.
 
-1. Identify the PR (from user input or current branch's open PR)
-2. For each confirmed finding, post an inline review comment at the exact
-   file and line using `gh api` to create a pull request review:
+### 4.2 Detect whether a PR exists
+
+Determine whether a pull request is in scope, in priority order:
+
+1. **Explicit PR in the original request.** If the user passed a PR number
+   (`/code-quality:slop-review #436`) or URL, use it directly.
+2. **GitHub Actions event payload.** If running under GitHub Actions and
+   the triggering event is a pull request, read the PR number from
+   `GITHUB_EVENT_PATH`:
+
    ```bash
-   gh api repos/{owner}/{repo}/pulls/{pr}/reviews -f event=COMMENT \
-     -f body="AI Slop Review: found N issues" \
-     -f 'comments[][path]=...' -f 'comments[][line]=...' \
-     -f 'comments[][body]=...'
+   if [ -n "${GITHUB_EVENT_PATH:-}" ] && [ -f "$GITHUB_EVENT_PATH" ]; then
+     jq -r '.pull_request.number // empty' "$GITHUB_EVENT_PATH"
+     # repo: $GITHUB_REPOSITORY (owner/name)
+   fi
    ```
-3. Group related findings into a single review submission
-4. Include the verdict and confidence in the review summary comment
 
-Format each inline comment as:
+   This works on `pull_request` and `pull_request_target` triggers without
+   requiring a checked-out PR branch.
+3. **Current branch's open PR.** Otherwise run:
+
+   ```bash
+   gh pr view --json number,url,headRepository,baseRepository \
+     --jq '{number, url, repo: (.headRepository.owner.login + "/" + .headRepository.name)}' \
+     2>/dev/null
+   ```
+
+   If this returns a PR number, "Post comment to PR" is available. If it
+   fails (no PR open, not a GitHub repo, no `gh` auth), the option is
+   unavailable.
+
+### 4.3 Ask the user (interactive mode only)
+
+**Skip this section entirely in non-interactive mode** (per §4.1). In CI:
+post the PR comment via §4.4 if a PR was detected, otherwise write
+`SLOP_REVIEW.md` via §4.6.
+
+In interactive mode, use the `AskUserQuestion` tool. The exact options
+depend on whether a PR was detected:
+
+**PR detected — present two options:**
+
+```text
+question: "How would you like to surface these findings?"
+header:   "Output"
+options:
+  1. label: "Post comment to PR #<N>"
+     description: "Post the rendered review as a single PR comment on PR
+                   #<N> via gh pr comment. Recommended for PR-scoped reviews."
+  2. label: "Write SLOP_REVIEW.md"
+     description: "Write the full markdown report to SLOP_REVIEW.md at the
+                   repo root. Does not commit or push."
+```
+
+`AskUserQuestion` automatically appends an **"Other"** choice — that is the
+"type something else" escape hatch. Do not add it manually. Mark the PR
+option as `(Recommended)` in its label when a PR is detected.
+
+**No PR detected — skip the question.** Write `SLOP_REVIEW.md` directly and
+tell the user: "No open PR found for this branch — wrote findings to
+`SLOP_REVIEW.md` (untracked)." If the user wants something else they can
+ask in their next turn. Do not present a 1-option menu; `AskUserQuestion`
+requires at least 2 options and a single-choice ask is friction without
+information.
+
+If the user picks **"Other"**, parse their free-form text. Common requests
+to handle:
+
+- Review branch + markdown — see §4.7
+- GitHub issues for each confirmed finding — see §4.7
+- Inline review comments at specific lines — see §4.7
+- Print to terminal only — just emit the markdown report and exit
+
+### 4.4 Posting to a PR
+
+When the user selects "Post comment to PR" (interactive) OR when running
+in non-interactive mode with a PR detected (CI), render the report using
+the **PR Comment Format** in §4.5. **This is structurally different from
+the full markdown report** — the report is exhaustive; the PR comment is
+glanceable with collapsibles for the deep tables.
+
+Steps:
+
+1. Render the comment to a temp file (e.g., `/tmp/slop-review-<pr>.md`).
+2. **Interactive mode only:** show the user a brief preview hint (top 5
+   lines + section list) and confirm — even though they already chose
+   this option, the comment contents weren't visible at the time of
+   choice. A confirmation here avoids posting a comment they wouldn't
+   have approved. **Skip the confirm in non-interactive mode** — the user
+   pre-authorized auto-posting by triggering the workflow.
+3. Post:
+
+   ```bash
+   gh pr comment <PR_NUMBER> --body-file <path> --repo <owner>/<repo>
+   ```
+
+   `--repo` is required when the PR is in a different repository than the
+   current working directory; §4.2's detection returns the value to use.
+   In GitHub Actions the value is `$GITHUB_REPOSITORY`.
+
+4. Echo the comment URL returned by `gh pr comment` back to the user (or
+   to stdout in CI) so they can verify.
+
+5. **CI failure handling.** If `gh pr comment` fails in CI (auth, rate
+   limit, repo permissions, branch protection), exit non-zero with the
+   error so the workflow step fails loudly. Do not silently fall back to
+   writing `SLOP_REVIEW.md` — that hides the failure.
+
+**Do not** reference `SLOP_REVIEW.md` or other uncommitted files in the
+posted comment — links to untracked paths 404 from the PR view. Attribution
+should be a plain `<sub>` footer with no links.
+
+### 4.5 PR Comment Format
+
+The PR comment is rendered for fast skimming inside a PR conversation.
+Use this exact structure:
+
+```markdown
+## 🤖 AI Slop Review — `<branch-name>`
+
+**Verdict:** <verdict> · **Grade:** <letter> · **Confidence:** <level>
+
+| Local Code | Solution-Fit | Final | Scale |
+|:----------:|:------------:|:-----:|:-----:|
+| **<code>** / 100 | **<sf>** / 100 | **<final>** / 100 | 0 = clean, 100 = pervasive slop · *lower is better* |
+
+> [!NOTE]
+> <One-sentence summary of where the damage concentrates and the
+> code-local vs. solution-fit shape of this PR.>
+
+---
+
+### 🔥 Must-fix before merge
+
+<Interactive task-list checkboxes for confirmed findings with score ≥ 70
+that block merge. Each item: short bold label, file:line, one sentence on
+the issue, one sentence on the fix.>
+
+- [ ] **<short label>** — `<file:line>`. <Issue.> <Fix.>
+
+### 💡 Worth considering
+
+<Task-list checkboxes for findings 50–69 and idiom/architectural nudges.>
+
+- [ ] **<short label>** — `<file:line>`. <Issue.> <Fix.>
+
+---
+
+### 🏗️ <Architectural concern headline>
+
+> [!WARNING]
+> <The single most important architectural finding, with sub-bullets if
+> needed. Use [!WARNING] for items that change merge-readiness, [!IMPORTANT]
+> for must-read context, [!CAUTION] for risk-of-regression. Use at most
+> two alert blocks per comment.>
+
+---
+
+### 🧪 <Test/idiom concern headline, if any>
+
+<Short narrative (2-4 sentences) plus bulleted evidence. Omit the section
+if no concentrated test/idiom theme exists.>
+
+---
+
+<details>
+<summary><b>📊 File-level scorecard</b> (click to expand)</summary>
+
+<File-level table from the markdown report. Trim a common path prefix from
+every row when every file shares one (e.g., `apps/core-api/internal/...` →
+`internal/...`). Rendered tables on narrow viewports truncate badly with
+long paths.>
+
+</details>
+
+<details>
+<summary><b>🔍 All findings by lens</b> (click to expand)</summary>
+
+#### AI Authorship Signals
+<Compact table — ID | Location | Signal | Conf | Verdict (use ✅, ⬆️, ⬇️ icons)>
+
+#### Idiom Violations
+<Compact table — ID | Location | Issue | Better | Conf>
+
+#### Code Quality
+<Compact table — ID | Location | Issue | Conf>
+
+#### Solution-Fit
+<Compact table — ID | Area | Concern | Conf>
+
+</details>
+
+<details>
+<summary><b>✅ Positive signals</b></summary>
+
+<Bulleted list of things done well — DRY wins, idiomatic choices,
+correctly-scoped abstractions, etc.>
+
+</details>
+
+---
+
+### 📚 Education opportunity
+
+<Include only if there is a teachable mental-model gap. Phrase factually
+and non-personally — "the PR suggests an X mental-model gap" not "the
+author doesn't understand X". 2–3 short paragraphs at most.>
+
+---
+
+<sub>Generated by `/code-quality:slop-review` · 4-lens parallel scan + Opus calibration</sub>
+```
+
+**Rendering rules for the PR comment:**
+
+1. **Lead with the score table.** Most informative thing in a 5-line glance.
+2. **Use GitHub alert syntax** (`> [!NOTE]`, `> [!WARNING]`, `> [!IMPORTANT]`,
+   `> [!CAUTION]`, `> [!TIP]`) sparingly — at most two per comment. Match
+   semantic weight to visual weight; a [!WARNING] should mean "this changes
+   whether I'd merge".
+3. **Use task-list checkboxes** (`- [ ]`) for fixable items. They become
+   interactive in the PR UI so the author can check them off as they fix —
+   the comment doubles as a punch list.
+4. **Push lens detail tables into `<details>` blocks.** A skimmable comment
+   beats an exhaustive one. Open by default only the score table and the
+   must-fix list.
+5. **Trim file paths.** If every entry shares a common prefix, drop it.
+   Narrow viewports collapse long paths and lose the file name.
+6. **Use the emoji vocabulary consistently.** 🔥 must-fix · 💡 nice-to-have ·
+   🏗️ architecture · 🧪 testing/idiom · 📊 scorecard · 🔍 lens detail ·
+   ✅ positives · 📚 education. Don't reach for emoji elsewhere.
+7. **No broken links.** Do not reference `SLOP_REVIEW.md` or any other
+   uncommitted file. The `<sub>` footer is enough attribution.
+8. **Footer attribution** uses `<sub>` for de-emphasis. Keep it one line
+   with no links.
+
+### 4.6 Writing SLOP_REVIEW.md
+
+When the user selects "Write SLOP_REVIEW.md" (interactive) OR when running
+non-interactively with no PR detected (CI), write the full markdown report
+(per the **Output Format** section above) to `SLOP_REVIEW.md` at the repo
+root. Do not commit, do not push.
+
+- **Interactive:** tell the user the file was written and that it is
+  currently untracked.
+- **Non-interactive (CI):** also print a single-line summary to stdout —
+  `slop-review: <verdict> · grade <letter> · <final_score>/100 · wrote
+  SLOP_REVIEW.md` — so the workflow log captures the result. If the CI is
+  expected to upload `SLOP_REVIEW.md` as a workflow artifact, the path
+  should remain at the repo root unless the workflow specifies otherwise.
+
+If `SLOP_REVIEW.md` already exists:
+
+- **Interactive:** ask whether to overwrite, append, or write to a
+  date-stamped filename (e.g., `SLOP_REVIEW.<YYYY-MM-DD>.md`).
+- **Non-interactive:** overwrite without prompting. CI runs are expected
+  to be reproducible; appending across runs would corrupt artifacts.
+
+### 4.7 Other delivery shapes (when the user picks "Other")
+
+These are fallbacks — only use when the user explicitly asks via the
+"Other" free-form input.
+
+**Review branch with markdown report.** Best for full-codebase audits and
+archival. Create a new branch `<user>/slop-review`, write to
+`CLAUDE_SLOP_REVIEW.md` at the repo root, commit, and push. Tell the user
+the branch is ready and they can open a PR for team discussion.
+
+**GitHub issues.** Best for tech-debt tracking. For each confirmed finding
+(or group of related findings), create a GitHub issue with: descriptive
+title, SHA-pinned permalink(s) to the offending code, signal category and
+severity, suggested fix, and appropriate labels (`ai-slop`, severity
+labels). Group related findings into single issues where it makes sense
+("4 instances of bare except Exception: pass" is one issue, not four).
+Ask whether to create a milestone (e.g., "AI Slop Cleanup") before opening
+issues.
+
+**Inline PR review comments.** Best when findings map to specific changed
+lines and the team prefers per-line review. For each confirmed finding,
+post an inline review comment at the exact file and line using
+`gh api repos/{owner}/{repo}/pulls/{pr}/reviews`:
+
+```bash
+gh api repos/{owner}/{repo}/pulls/{pr}/reviews -f event=COMMENT \
+  -f body="AI Slop Review: found N issues" \
+  -f 'comments[][path]=...' -f 'comments[][line]=...' \
+  -f 'comments[][body]=...'
+```
+
+Group related findings into a single review submission. Format each
+inline comment as:
 
 ```text
 **[Signal: <category>]** <finding description>
@@ -854,40 +1148,9 @@ Format each inline comment as:
 <why this matters and what idiomatic code would look like>
 ```
 
-Keep comments concise -- a reviewer, not an essay writer.
+Keep inline comments concise — a reviewer, not an essay writer.
 
-### Option C: GitHub Issues
-
-Best for: tech debt tracking, when findings need to be assigned and scheduled,
-when the team uses issues for work management.
-
-1. Ask the user if they want a milestone created (e.g., "AI Slop Cleanup")
-2. Create labels if they don't exist: `ai-slop`, plus severity labels
-3. For each confirmed finding (or group of related findings), create a
-   GitHub issue with:
-   - Descriptive title
-   - SHA-pinned permalink(s) to the offending code
-   - The signal category and severity from the review
-   - Suggested fix approach
-   - The appropriate labels and milestone
-4. Pin critical issues if there are 3 or fewer
-5. Report the created issue numbers back to the user
-
-Group related findings into single issues where it makes sense (e.g.,
-"4 instances of bare except Exception: pass" is one issue, not four).
-
-### Option D: Combined (Review branch + one of the above)
-
-The user may want both the archival markdown AND actionable items. If they
-choose this, do the review branch first (Option A), then apply Option B or C.
-Update the issue/comment links to point at the review markdown for full context.
-
-### Asking the user
-
-After presenting the review summary, ask:
-
-> How would you like to surface these findings?
-> - **Branch** -- commit the review to a `<user>/slop-review` branch
-> - **PR comments** -- post inline comments on a PR
-> - **Issues** -- create GitHub issues for tracking
-> - **Branch + Issues** or **Branch + PR comments** -- both
+**Combined.** The user may want both an archival markdown AND actionable
+items. If so, do the markdown delivery first, then the actionable
+delivery. Update issue/comment bodies to reference the markdown only if
+that file has been committed and pushed (otherwise the link 404s).

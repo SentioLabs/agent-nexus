@@ -266,9 +266,10 @@ apply at that scope.
 > - **Reasoning** -- why this pattern indicates AI generation rather than human authorship
 > - **Confidence** (0-100)
 >
-> At the end, produce a **per-file authorship assessment**:
-> | File | AI Likelihood (0-100) | Primary Signals | Notes |
-> |------|----------------------|-----------------|-------|
+> At the end, produce a **per-file authorship assessment**. Score with quality
+> polarity — **higher = more human-like, lower = more AI-generated**:
+> | File | Authorship Score (0-100) | Primary Signals | Notes |
+> |------|-------------------------|-----------------|-------|
 >
 > Tag every finding with `[AI_AUTHORSHIP]`. Keep findings terse: 2-4 sentences each.
 > Aim for under 5,000 tokens of total output — Phase 2 calibration consumes structured
@@ -380,7 +381,8 @@ user only asks about local code style and no architecture or workflow choice is 
 > - **Confidence** (0-100)
 > - **Severity**: Low, Medium, High
 >
-> At the end, produce:
+> At the end, produce a per-dimension table. Score with quality polarity —
+> **higher = better fit, lower = worse fit**:
 >
 > | Dimension | Score (0-100) | Finding | Better Direction |
 > |-----------|--------------:|---------|------------------|
@@ -483,10 +485,11 @@ reviewer comments, the codebase context, and the idiom baseline.
 > **File-level authorship table:**
 >
 > Produce a per-file authorship assessment for EVERY file in scope, incorporating
-> Phase 1a's assessments and your own calibration:
+> Phase 1a's assessments and your own calibration. Authorship Score uses quality
+> polarity — **higher = more human-like, lower = more AI-generated**:
 >
-> | File | AI Likelihood (0-100) | Calibrated Confidence | Key Signals | Verdict |
-> |------|----------------------|----------------------|-------------|---------|
+> | File | Authorship Score (0-100) | Calibrated Confidence | Key Signals | Verdict |
+> |------|-------------------------|----------------------|-------------|---------|
 >
 > Your output is the complete calibrated finding list with scores, verdicts, reasoning,
 > cross-lens correlations, reviewer-comment classifications, solution_fit_score, and the
@@ -501,35 +504,47 @@ Provide the subagent with:
 
 ### Phase 3: Synthesize, grade, and report
 
-Merge the calibrated findings into the output format below. Apply these thresholds
-for finding inclusion:
+Merge the calibrated findings into the output format below. Apply these
+thresholds for finding inclusion. **These gate on per-finding *confidence*
+(reviewer certainty that the finding is real), not on the file/quality
+scores defined later in this section** — confidence and quality use the
+same polarity (higher = stronger), but they're different axes.
 
-- **Score >= 70:** Include in the main report sections
-- **Score 50-69:** Include in a borderline appendix
-- **Score < 50:** Include in the dismissed findings section
+- **Confidence >= 70:** Include in the main report sections
+- **Confidence 50-69:** Include in a borderline appendix
+- **Confidence < 50:** Include in the dismissed findings section
 
 #### Grading algorithm
 
 Compute local code scores first, then combine them with solution-fit for the final grade.
 
-**Step 1: Per-file dimension scores**
+**Step 1: Per-file dimension scores (quality polarity — higher = better)**
 
-- **AI Likelihood** -- use the calibrated per-file score from Phase 2 (0-100)
-- **Idiom Score** -- aggregate confirmed `[IDIOM]` findings for the file using
-  density-weighted mean: `mean(finding_scores) * (1 + log2(count))`, capped at 100.
-  If no idiom findings, score is 0.
-- **Quality Score** -- aggregate confirmed `[CODE_QUALITY]` findings the same way:
-  `mean(finding_scores) * (1 + log2(count))`, capped at 100. If no quality findings,
-  score is 0.
+All dimension scores in this report use quality polarity: **100 = clean,
+0 = pervasive slop**. Per-finding *confidence* values use the same convention
+(higher = more confident the finding is real). Compute each dimension from
+its confirmed findings via a density-weighted defect intensity, then invert
+to quality polarity:
+
+- **Authorship Score** -- use the calibrated per-file score from Phase 2 (0-100,
+  higher = more human-like). If Phase 1a reported in probability-of-AI form,
+  convert via `authorship_score = 100 - ai_likelihood`.
+- **Idiom Score** -- compute `defect = min(100, mean(finding_confidences) * (1 + log2(count)))`
+  over confirmed `[IDIOM]` findings for the file, then `idiom_score = 100 - defect`.
+  If no idiom findings, score is **100** (no detected violations).
+- **Quality Score** -- compute `defect = min(100, mean(finding_confidences) * (1 + log2(count)))`
+  over confirmed `[CODE_QUALITY]` findings, then `quality_score = 100 - defect`.
+  If no quality findings, score is **100**.
 
 **Step 2: Weighted file score**
 
 ```
-file_score = (0.10 * ai_likelihood) + (0.40 * idiom_score) + (0.50 * quality_score)
+file_score = (0.10 * authorship_score) + (0.40 * idiom_score) + (0.50 * quality_score)
 ```
 
+All inputs are quality-polarity, so `file_score` is too (higher = better).
 Weights reflect that this is a *slop* review, not an *authorship* review. Good
-AI-written code that follows idioms and has no quality issues should score well.
+AI-written code that follows idioms and has no quality issues should score high.
 Authorship signals serve as corroborating evidence, not a primary driver.
 
 **Step 3: Local code rollup**
@@ -543,9 +558,10 @@ utility.
 
 **Step 4: Solution-fit score**
 
-Use the calibrated Phase 1d and Phase 2 result as `solution_fit_score` (0-100). If Phase
-1d was not applicable because the scope was a tiny local edit, omit `solution_fit_score`
-and use `code_local_score` as the final score.
+Use the calibrated Phase 1d and Phase 2 result as `solution_fit_score` (0-100,
+higher = better solution fit). If Phase 1d was not applicable because the scope
+was a tiny local edit, omit `solution_fit_score` and use `code_local_score` as
+the final score.
 
 For PRs and non-trivial changes:
 
@@ -565,13 +581,15 @@ while choosing the wrong overall approach.
 
 **Step 5: Letter grade and verdict**
 
+Quality polarity — **higher score = better grade**:
+
 | Grade | Score | Verdict |
 |-------|-------|---------|
-| A | 0-20 | Clean |
-| B | 21-40 | Mild concerns |
+| A | 81-100 | Clean |
+| B | 61-80 | Mild concerns |
 | C | 41-60 | Significant concerns |
-| D | 61-80 | Strong slop signals |
-| F | 81-100 | Pervasive slop |
+| D | 21-40 | Strong slop signals |
+| F | 0-20 | Pervasive slop |
 
 ---
 
@@ -672,19 +690,20 @@ boundary for managed tools." Bad: "The author does not understand mise."
 **Verdict:** [Clean / Mild concerns / Significant concerns / Strong slop signals / Pervasive slop]
 **Confidence:** [High / Medium / Low] -- how confident the review is in its verdict
 
-> **Reading the scores:** All `/100` values in this report are **defect counts** —
-> 0 = clean, 100 = pervasive slop. **Lower is better.** *Confidence* values use the
-> opposite convention (higher = more confident the finding is real).
+> **Reading the scores:** All `/100` quality scores in this report use the
+> convention **higher is better** — 100 = clean, 0 = pervasive slop. Per-finding
+> *Confidence* values follow the same convention (higher = more confident the
+> finding is real). Letter grades map intuitively: 90 → A, 50 → C, 10 → F.
 
 ### Solution-Level Assessment
 
 | Dimension | Score | Finding | Better Direction |
 |-----------|------:|---------|------------------|
-| Problem understanding | 70 | ... | ... |
-| Solution fit | 86 | ... | ... |
-| Maintenance burden | 82 | ... | ... |
-| Target ownership | 76 | ... | ... |
-| Documentation scope | 65 | ... | ... |
+| Problem understanding | 30 | ... | ... |
+| Solution fit | 14 | ... | ... |
+| Maintenance burden | 18 | ... | ... |
+| Target ownership | 24 | ... | ... |
+| Documentation scope | 35 | ... | ... |
 
 ### Evidence Checked
 
@@ -712,9 +731,9 @@ teach it. Omit this section if there is no evidence of a teachable misunderstand
 
 ### File-Level Assessment
 
-| File | LOC | AI (0.10) | Idiom (0.40) | Quality (0.50) | Score | Grade |
-|------|-----|-----------|--------------|----------------|-------|-------|
-| path/to/file.go | 245 | 72 | 65 | 80 | 73.2 | D |
+| File | LOC | Authorship (0.10) | Idiom (0.40) | Quality (0.50) | Score | Grade |
+|------|-----|-------------------|--------------|----------------|-------|-------|
+| path/to/file.go | 245 | 28 | 35 | 20 | 26.8 | D |
 
 ### AI Authorship Signals
 | # | File:Line | Signal | Finding | Confidence | Verdict |
@@ -734,7 +753,7 @@ teach it. Omit this section if there is no evidence of a teachable misunderstand
 ### Positive Signals
 - <things done well that indicate human authorship or good AI-assisted practice>
 
-### Borderline Findings (score 50-69)
+### Borderline Findings (confidence 50-69)
 | # | File:Line | Lens | Finding | Confidence | Verdict |
 |---|-----------|------|---------|------------|---------|
 
@@ -974,7 +993,7 @@ Use this exact structure:
 
 | Local Code | Solution-Fit | Final | Scale |
 |:----------:|:------------:|:-----:|:-----:|
-| **<code>** / 100 | **<sf>** / 100 | **<final>** / 100 | 0 = clean, 100 = pervasive slop · *lower is better* |
+| **<code>** / 100 | **<sf>** / 100 | **<final>** / 100 | 100 = clean, 0 = pervasive slop · *higher is better* |
 
 > [!NOTE]
 > <One-sentence summary of where the damage concentrates and the
@@ -984,7 +1003,7 @@ Use this exact structure:
 
 ### 🔥 Must-fix before merge
 
-<Interactive task-list checkboxes for confirmed findings with score ≥ 70
+<Interactive task-list checkboxes for confirmed findings with **confidence ≥ 70**
 that block merge. Each item: short bold label, file:line, one sentence on
 the issue, one sentence on the fix.>
 
@@ -992,7 +1011,7 @@ the issue, one sentence on the fix.>
 
 ### 💡 Worth considering
 
-<Task-list checkboxes for findings 50–69 and idiom/architectural nudges.>
+<Task-list checkboxes for findings with confidence 50–69 and idiom/architectural nudges.>
 
 - [ ] **<short label>** — `<file:line>`. <Issue.> <Fix.>
 

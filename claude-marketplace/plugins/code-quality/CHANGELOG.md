@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/SentioLabs/agent-nexus/compare/claude-code-quality-v0.6.0...claude-code-quality-v0.7.0) (2026-05-08)
+
+
+### Features
+
+* **code-quality:** post slop-review findings as PR comment ([#25](https://github.com/SentioLabs/agent-nexus/issues/25)) ([8e1eb04](https://github.com/SentioLabs/agent-nexus/commit/8e1eb042adc83de7aa8da3bc3dcf20509f0a5e04))
+
 ## [0.6.0](https://github.com/SentioLabs/agent-nexus/compare/claude-code-quality-v0.5.0...claude-code-quality-v0.6.0) (2026-05-07)
 
 

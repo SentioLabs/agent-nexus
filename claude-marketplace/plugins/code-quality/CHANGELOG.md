@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/SentioLabs/agent-nexus/compare/claude-code-quality-v0.8.0...claude-code-quality-v0.8.1) (2026-05-10)
+
+
+### Bug Fixes
+
+* **code-quality:** tighten slop-review Phase 1d skip rule ([#29](https://github.com/SentioLabs/agent-nexus/issues/29)) ([85eed38](https://github.com/SentioLabs/agent-nexus/commit/85eed38a849fdc677cfe41ebdcff6adbe4a8f0f6))
+
 ## [0.8.0](https://github.com/SentioLabs/agent-nexus/compare/claude-code-quality-v0.7.0...claude-code-quality-v0.8.0) (2026-05-08)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/SentioLabs/agent-nexus/compare/claude-arc-v0.10.0...claude-arc-v0.11.0) (2026-05-10)
+
+
+### Features
+
+* **arc:** add optional grill-the-design stress-test step to brainstorm ([#30](https://github.com/SentioLabs/agent-nexus/issues/30)) ([1927eee](https://github.com/SentioLabs/agent-nexus/commit/1927eeec9f9e0ce40a30a6cdd1fa71fa063b8622))
+
 ## [0.10.0](https://github.com/SentioLabs/agent-nexus/compare/claude-arc-v0.9.1...claude-arc-v0.10.0) (2026-05-06)
 
 

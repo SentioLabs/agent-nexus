@@ -105,7 +105,10 @@ Launch a subagent with `model: "haiku"` for this step.
 - If the user specifies files/directories, use those
 - If the user says "review this PR" or "review my changes", use `git diff` to identify changed files
 - If the user says "review the codebase" or similar broad request, scan `src/` or the main
-  source directory, excluding vendored code, generated files, and test fixtures
+  source directory, applying the exclusion list defined under "Definition of 'after
+  exclusions'" below. Hand-authored schema sources (e.g. `pkg/ent/schema/`,
+  `prisma/schema.prisma`, `*.proto`, `migrations/*.sql`) are always in scope even when
+  the rest of their generated output is excluded
 
 **Problem reconstruction** (do this before any review -- it prevents solution-level false negatives):
 
@@ -183,6 +186,15 @@ Store all gathered context (problem reconstruction, codebase context, idiom base
 base branch files, reviewer comments, and acceptances file if present) -- all Phase 1
 agents and Phase 2 need it (Phase 1 sees everything except the acceptances file).
 
+**Phase 1d decision** (required output of Step 0):
+
+Before launching Phase 1, emit a structured `Phase 1d Decision` block that evaluates
+the force-include triggers and skip criteria from the "Phase 1d decision" section
+below. The block must show the file count, authored line count, exclusions applied,
+which trigger (if any) fired, and the verdict. A skip with no checklist evaluation
+is not allowed — when in doubt, mark `REQUIRED`. This block exists so the decision
+is auditable rather than buried inside one orchestrator turn.
+
 ---
 
 ### Phase 1: Parallel 4-lens scan
@@ -217,20 +229,111 @@ and must see what every lens saw). Acceptances are deliberately Phase-2-only: Ph
 lenses scan blind so the underlying evidence stays visible to maintainers reviewing
 whether to keep an acceptance.
 
-### Skip Phase 1d for trivial changes
+### Phase 1d decision: when to require, when to skip
 
-Phase 1d is the most reasoning-heavy lens. **Skip it entirely** when ALL of these hold:
+Phase 1d is the most reasoning-heavy lens, but it is also the only one that asks
+*"should this code exist in this shape?"*. Skip it too eagerly and you grade
+locally clean code as A while the solution itself was misframed.
 
-- Fewer than 5 files changed
-- Fewer than 100 lines added (after exclusions)
-- No architecture, workflow, infrastructure, or developer-experience signal in the PR
-  title/body (no mentions of: workflow, CI, scripts, infra, deploy, migration, refactor,
-  dependency, build, tooling, abstraction)
-- No reviewer comments raising solution-level objections (phrases like "why",
-  "what problem", "anti-pattern", "wrong layer")
+**Step 0 MUST emit a `Phase 1d Decision` block** in its output containing:
 
-For tiny local edits, Phase 1a + 1b + 1c are sufficient. Solution-fit objections don't
-apply at that scope.
+- File count and authored line count after exclusions (show the math, not just
+  the result)
+- Which exclusions were applied (list the paths/categories dropped)
+- Which force-include trigger fired, if any
+- Verdict: `REQUIRED` or `SKIPPED`
+- One-sentence justification
+
+If the verdict cannot be expressed as a checklist evaluation in this block, default
+to `REQUIRED`. The decision is auditable; do not skip silently.
+
+#### Force-include triggers (any one fires → Phase 1d is REQUIRED)
+
+If any of these is true, Phase 1d runs regardless of size:
+
+- The diff adds or modifies a **schema definition** — ORM schemas
+  (ent/Prisma/SQLAlchemy/GORM/Diesel models), GraphQL schemas, OpenAPI specs,
+  protobuf, JSON Schema, or any file under `migrations/`, `db/migrate/`, or
+  matching `*.sql`
+- The diff adds a new **repository, service, handler, controller, command, or
+  background-worker** file — these are abstraction-boundary decisions even at
+  small line counts
+- The diff modifies **build/tooling/dev-experience config** — `Makefile`,
+  `mise.toml`, `.tool-versions`, `package.json` scripts, `pyproject.toml` build
+  config, CI workflow files (`.github/workflows/*`, `.gitlab-ci.yml`),
+  `Dockerfile`, devcontainer, or `*.nix` files
+- The diff touches **multiple architectural layers** in a single change
+  (schema + repository + migration; or handler + service + repository; etc.)
+- Reviewer comments include solution-level signals — phrases like "why",
+  "what problem", "anti-pattern", "wrong layer", "should just use", "do we
+  need", "too much baggage", "AI fix this"
+
+#### Skip criteria (Phase 1d may be skipped only when ALL hold AND no trigger fired)
+
+- Fewer than 5 **authored** files changed (after exclusions, see below)
+- Fewer than 100 **authored** lines added (after exclusions)
+- No PR title/body mention of: workflow, CI, scripts, infra, deploy, migration,
+  refactor, dependency, build, tooling, abstraction, layer, pattern, schema,
+  data-layer
+- No reviewer comments raising solution-level objections (see trigger list above)
+
+Soft-sounding rationalizations like "pure data-layer add" or "just adding an
+entity" are themselves Phase 1d judgments — if you find yourself reaching for
+one, the answer is that Phase 1d should run, not that it can be skipped.
+
+#### Definition of "after exclusions"
+
+This definition is shared with the "review the codebase" scope rule above —
+applying different exclusion lists in those two places is what produced the
+PR-435 regression where `pkg/ent/schema/` was nearly missed by the count even
+though the schema is the *source* the rest of `pkg/ent/` is generated from.
+
+The principle: **exclude generator output, never exclude generator inputs.**
+ORMs and codegen tools have a small hand-authored source surface (the schema)
+and a large generated surface. Phase 1d cares about the source.
+
+When counting authored files and lines, **exclude**:
+
+- Suffix-tagged generated files: `*_generated.go`, `*.gen.go`, `*.pb.go`,
+  `*_pb2.py`, `*_pb2_grpc.py`, `*_mock.go`, `*.g.dart`, `*.freezed.dart`
+- Whole generated directories — everything under the directory **except** the
+  hand-authored schema subdirectory:
+  - **ent (Go):** everything under `pkg/ent/` (or wherever ent generates) **except
+    `pkg/ent/schema/`**, which is the hand-authored source and is in scope
+  - **Prisma:** `node_modules/.prisma/`, `**/generated/` — but `prisma/schema.prisma`
+    is in scope
+  - **sqlc:** generated `db/sqlc/*.go` (or wherever the config emits) — but the
+    `*.sql` query files and `sqlc.yaml` are in scope
+  - **oapi-codegen / openapi-generator:** the generated client/server code — but
+    the OpenAPI spec is in scope
+  - **protobuf:** the generated `*.pb.go` / `*_pb2.py` — but the `*.proto` files
+    are in scope
+  - **Diesel (Rust):** `src/schema.rs` (printed by `diesel print-schema`) — but
+    the migration SQL is in scope
+- Atlas/migration tool emissions: `atlas.sum`, `migrate.sum`
+- Lockfiles: `go.sum`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`,
+  `Cargo.lock`, `poetry.lock`, `uv.lock`, `Gemfile.lock`
+- Snapshot test fixtures, golden files, and large data fixtures
+- Vendored dependencies: `vendor/`, `third_party/`, `node_modules/`
+
+**Do NOT exclude** (keep in scope even if they live under a "generated" tree):
+
+- Hand-authored schema sources: `pkg/ent/schema/*`, `prisma/schema.prisma`,
+  `*.proto`, `*.graphql`, `*.sql` query files, hand-edited migration SQL
+- Build/tooling config: `Makefile`, `mise.toml`, `.tool-versions`, CI workflows,
+  `Dockerfile`, codegen config (`sqlc.yaml`, `oapi-codegen.yaml`, `buf.yaml`)
+- Tests, domain types, repositories, services, handlers, business logic
+
+If you cannot tell whether a file is generated, default to **including** it.
+Underestimating authored surface drops Phase 1d for changes it should review;
+overestimating only adds one Opus pass. Quick generated-file tells: a header
+comment like `// Code generated by ... DO NOT EDIT.`, file size disproportionate
+to apparent intent (a 600-line CRUD file from a 40-line schema), or sibling
+files that share suspiciously uniform structure.
+
+For tiny local edits that pass all skip criteria with no force-include trigger
+(the prototypical case: a one-file bug fix or a comment cleanup), Phase 1a + 1b
++ 1c are sufficient — solution-fit objections don't apply at that scope.
 
 #### Phase 1a: AI Authorship Detection (model: "opus")
 

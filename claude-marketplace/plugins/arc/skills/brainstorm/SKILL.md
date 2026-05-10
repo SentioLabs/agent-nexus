@@ -233,6 +233,41 @@ After a refinement pass, if the design changed materially, update the review sur
 
 For legacy, after re-creating, replace the `id=<old>` portion of line 1 with the new ID — the idempotent `sed` snippet from step 6 works as-is: set `KIND=legacy` and `ID=<new>` and the "marker already present" branch overwrites line 1. Then loop back to step 7.
 
+### 7.5. Grill the Design (Optional Stress-Test)
+
+A relentless-interrogation pass that probes the approved design for unresolved *internal* decisions before routing to `/arc:plan`. Different job from step 7 — that loop processes external reviewer comments; this one finds gaps the design didn't fully resolve, which become expensive to fix once implementation starts.
+
+**When to recommend it.** This is opt-in. Mark "grill" as recommended when the design appears Medium/Large per the Scale Detection table (multiple work items, multiple layers crossed, or migrations/breaking changes). For Small-scale single-task work, default the recommendation to "skip" — the overhead isn't worth it.
+
+**Use the AskUserQuestion tool:**
+
+```
+Question: "Stress-test the design before planning?"
+Options:
+  - "Yes, grill me" — interrogate decisions one at a time until we converge
+  - "No, proceed" — skip to step 8 routing analysis
+```
+
+If "Yes", run the loop:
+
+**Loop rules:**
+
+- Walk the design's decision tree **depth-first, ordered by dependency**. Resolve decisions that constrain later answers first (e.g., "what storage layer?" before "how do we serialize sessions?"). When a resolution opens new branches, recurse into them before backtracking.
+- **One question per turn** via `AskUserQuestion`. Mark the recommended option. When the choice is genuinely contested, offer 2-3 options; when one option is objectively dominant, a single recommendation is fine — but never rubber-stamp open questions just because you have an opinion.
+- **Codebase-first rule.** Before each question, name the symbol, file, or pattern that would answer it. If you can name one, search first (Grep / Read / symbol search) and only ask when the codebase doesn't — or can't — answer. This is the single biggest difference from step 2's clarifying questions, where you don't yet have a draft to ground against.
+- **Capture resolutions in-place.** Each resolved decision is an edit to `docs/plans/<file>.md` — update the relevant section, don't maintain a separate Q&A log. The design doc is the artifact.
+
+**Stop when ANY of:**
+
+- The user says "done", "enough", or "stop"
+- Two consecutive rounds surface no new unresolved branches (the tree is exhausted)
+
+**After exit:**
+
+The design doc has now diverged from whatever was published to the review surface in step 6. Mention this to the user and offer to push the grilled version via the kind-aware CLI from the line-1 marker (`arc share update <id> <file>` for `share-*`; re-create with `arc plan create` for `legacy`). The user decides — sometimes the original was already approved and the grilling just sharpens internal understanding; sometimes reviewers need to see the changes.
+
+Then proceed to step 8.
+
 ### 8. Routing Analysis & Transition
 
 After the plan is approved, **you MUST produce a routing analysis before presenting options**. This analysis helps the user make an informed decision about what to do next.

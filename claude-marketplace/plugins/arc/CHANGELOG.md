@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/SentioLabs/agent-nexus/compare/claude-arc-v0.11.0...claude-arc-v0.12.0) (2026-05-12)
+
+
+### Features
+
+* **arc:** grill the design before publishing, not after ([#33](https://github.com/SentioLabs/agent-nexus/issues/33)) ([541c11e](https://github.com/SentioLabs/agent-nexus/commit/541c11eff886837f71ba2740e155ff3237fab04b))
+
 ## [0.11.0](https://github.com/SentioLabs/agent-nexus/compare/claude-arc-v0.10.0...claude-arc-v0.11.0) (2026-05-10)
 
 

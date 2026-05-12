@@ -1,5 +1,23 @@
 #!/usr/bin/env node
 
+// PARKED: this runner is on hold while code-quality is positioned as a
+// local-only Claude Code plugin. Before reviving it for CI/CD use, resolve
+// the conflict between this runner's JSON-envelope contract and the
+// slop-review skill's Step 4 (Output Actions). When invoked here, claude
+// runs `--print` with no TTY, which trips slop-review's non-interactive
+// detection (`[ ! -t 0 ]` in skills/slop-review/SKILL.md §4.1), and the
+// `#<PR>` arg in the prompt trips PR detection (§4.2), so the slop skill
+// will auto-post a PR comment as a side effect before returning JSON here.
+// Pick one before un-parking:
+//   1. Suppress Step 4 from the prompt ("do not run Output Actions; return
+//      JSON only; the caller will deliver"). Cheapest.
+//   2. Embrace it: drop the JSON contract for --mode slop, document the
+//      auto-post as the deliverable, adjust tests.
+//   3. Add a runtime guard (e.g. CODE_QUALITY_DRY_RUN=1) and update the
+//      slop SKILL to honor it. Cleanest semantically; needs a SKILL.md PR.
+// Size-review has no equivalent auto-post path today; if it grows one,
+// apply the same fix symmetrically.
+
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";

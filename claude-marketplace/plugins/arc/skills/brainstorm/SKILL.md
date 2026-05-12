@@ -19,7 +19,7 @@ Brainstorm itself doesn't commit code, but the design doc, the planned tasks, th
 
 ## Workflow
 
-Create a task for each step below using `TaskCreate`. Mark each as `in_progress` when starting and `completed` when done. This creates a visible progress list in the CLI that carries forward into the plan skill.
+Create a task for each step below using `TaskCreate`. Mark each as `in_progress` when starting and `completed` when done. This creates a visible progress list in the CLI that carries forward into the plan skill. Step 5.5 gets its own task whether or not the user opts into grilling — "No, proceed" still counts as completing the step.
 
 ### 1. Explore Project Context
 
@@ -36,6 +36,8 @@ Create a task for each step below using `TaskCreate`. Mark each as `in_progress`
 - Use open-ended text questions only when you need freeform feedback
 - Understand: purpose, constraints, success criteria, target users
 - Continue until you have enough to propose approaches
+
+**If the user forecloses clarifying questions up front** (e.g., "no clarifying questions, just proceed", "skip to the design", "don't ask, just build"), keep this step's questions to a minimum or skip them. Step 5.5 is the explicit recovery loop in that case — depth-first interrogation against a draft, which is harder to skip past than a soft Q&A. Default 5.5's recommendation to *"Yes, grill me"* whenever step 2 was foreclosed, regardless of scale.
 
 **Example AskUserQuestion usage:**
 ```
@@ -140,6 +142,8 @@ Then run a relentless-interrogation pass that probes the drafted design for unre
 
 **When to recommend it.** This is opt-in. Mark "grill" as recommended when the design appears Medium/Large per the Scale Detection table (multiple work items, multiple layers crossed, or migrations/breaking changes). For Small-scale single-task work, default the recommendation to "skip" — the overhead isn't worth it.
 
+**Always recommend grilling when step 2 was foreclosed.** If the user shut down clarifying questions up front, this is the recovery loop — override the scale-based default and mark *"Yes, grill me"* as recommended regardless of how small the design looks.
+
 **Use the AskUserQuestion tool:**
 
 ```
@@ -162,6 +166,7 @@ If "Yes", run the loop:
 
 - The user says "done", "enough", or "stop"
 - Two consecutive rounds surface no new unresolved branches (the tree is exhausted)
+- The loop has run ~10 rounds (hard cap — if you still have open branches at this point, surface them as a "remaining open questions" note in the design doc instead of asking another)
 
 Then proceed to step 6.
 
@@ -187,7 +192,8 @@ Options:
       `arc share` on the configured remote server (default arcplanner.sentiolabs.io).
       Reviewers on other machines can open the link.
   - "Save for later" — keep the saved file (from step 5.5) and stop. No
-      server registration; resume in a new session.
+      server registration; resume in a new session. **Terminates the
+      skill — skip steps 7 and 8.**
 ```
 
 Route on the answer:
@@ -236,15 +242,18 @@ The encrypted-share CLI persists the edit_token + key into the local arc keyring
 
 ### 7. Review Loop
 
-Print the URL from step 6 again as a reminder. **Use the AskUserQuestion tool:**
+**Skip this step entirely if step 6's answer was "Save for later"** — no surface was registered, no URL exists, no marker was written. Step 6 already terminated the skill in that case.
+
+Otherwise, print the URL from step 6 again as a reminder. **Use the AskUserQuestion tool:**
 
 ```
-Question: "Plan ready for review at <url> — how would you like to proceed?"
+Question: "Design ready for review at <url> — how would you like to proceed?"
 Options:
-  - "Approve" — mark the design approved and proceed to /arc:plan
+  - "Approve" — mark the design approved and proceed to step 8
+      routing analysis
   - "I've finished review (pull comments now)" — fetch reviewer feedback,
       apply edits, re-share if needed, repeat
-  - "Save for later" — design is saved; resume in a new session
+  - "Pause review" — design is saved; resume in a new session
 ```
 
 Branch the CLI by the marker's `kind`:
@@ -270,7 +279,7 @@ For legacy, after re-creating, replace the `id=<old>` portion of line 1 with the
 
 ### 8. Routing Analysis & Transition
 
-After the plan is approved, **you MUST produce a routing analysis before presenting options**. This analysis helps the user make an informed decision about what to do next.
+After the design is approved (step 7's Approve), **you MUST produce a routing analysis before presenting options**. This analysis helps the user make an informed decision about what to do next.
 
 #### Routing Analysis
 
@@ -317,9 +326,9 @@ Options:
 
 If `/arc:build` is recommended instead, swap which option gets the "(recommended)" tag.
 
-- **Break into tasks**: invoke the `plan` skill, passing the plan ID
+- **Break into tasks**: invoke the `plan` skill, passing the review ID from the line-1 marker (the `id=…` value; whether it's a legacy plan ID or a share ID depends on `kind=…`)
 - **Implement directly**: invoke the `implement` skill
-- **Done for now**: tell the user the plan is approved and they can run `/arc:plan` in a new session
+- **Done for now**: tell the user the design is approved and they can run `/arc:plan` in a new session
 
 ## Scale Detection
 

@@ -130,9 +130,44 @@ These exact definitions and contract tests become the **T0 foundation task** dur
 
 **Skip this step** if the design maps to a single task or purely sequential work.
 
-### 6. Save Design and Register for Review
+### 5.5. Grill the Design (Optional Stress-Test)
 
-Write the design document to `docs/plans/` using `YYYY-MM-DD-<topic>.md` naming.
+Before publishing the design for review, save the draft to disk and offer a stress-test pass. Both this step and step 6 need the design as a file on disk, so first:
+
+- **Write the design document** to `docs/plans/` using `YYYY-MM-DD-<topic>.md` naming. Do this whether or not the user opts into grilling — step 6 picks it up either way.
+
+Then run a relentless-interrogation pass that probes the drafted design for unresolved *internal* decisions before publishing. This is a distinct job from step 7's review loop: that one processes external reviewer feedback you receive back; this one finds gaps the design didn't fully resolve, which become expensive to fix once implementation starts — and prevents publishing a version that's already known to be incomplete.
+
+**When to recommend it.** This is opt-in. Mark "grill" as recommended when the design appears Medium/Large per the Scale Detection table (multiple work items, multiple layers crossed, or migrations/breaking changes). For Small-scale single-task work, default the recommendation to "skip" — the overhead isn't worth it.
+
+**Use the AskUserQuestion tool:**
+
+```
+Question: "Stress-test the design before publishing?"
+Options:
+  - "Yes, grill me" — interrogate decisions one at a time until we converge
+  - "No, proceed" — skip to step 6 register for review
+```
+
+If "Yes", run the loop:
+
+**Loop rules:**
+
+- Walk the design's decision tree **depth-first, ordered by dependency**. Resolve decisions that constrain later answers first (e.g., "what storage layer?" before "how do we serialize sessions?"). When a resolution opens new branches, recurse into them before backtracking.
+- **One question per turn** via `AskUserQuestion`. Mark the recommended option. When the choice is genuinely contested, offer 2-3 options; when one option is objectively dominant, a single recommendation is fine — but never rubber-stamp open questions just because you have an opinion.
+- **Codebase-first rule.** Before each question, name the symbol, file, or pattern that would answer it. If you can name one, search first (Grep / Read / symbol search) and only ask when the codebase doesn't — or can't — answer. This is the single biggest difference from step 2's clarifying questions, where you don't yet have a draft to ground against.
+- **Capture resolutions in-place.** Each resolved decision is an edit to `docs/plans/<file>.md` — update the relevant section, don't maintain a separate Q&A log. The design doc is the artifact.
+
+**Stop when ANY of:**
+
+- The user says "done", "enough", or "stop"
+- Two consecutive rounds surface no new unresolved branches (the tree is exhausted)
+
+Then proceed to step 6.
+
+### 6. Register for Review
+
+The design doc already exists on disk from step 5.5. This step registers it for review on the surface the user picks.
 
 Arc supports three review surfaces. They differ along two axes — *who reviews* (just you vs. teammates on other machines) and *do you want encryption + the new annotation/accept-resolve UI* (legacy planner is plain HTTP and simpler; `arc share` is encrypted and richer). Pick based on how the design will actually be reviewed, not which command you happen to remember.
 
@@ -151,8 +186,8 @@ Options:
   - "Encrypted remote share (multiple reviewers)" —
       `arc share` on the configured remote server (default arcplanner.sentiolabs.io).
       Reviewers on other machines can open the link.
-  - "Save for later" — write the file to docs/plans/ and stop. No server
-      registration; resume in a new session.
+  - "Save for later" — keep the saved file (from step 5.5) and stop. No
+      server registration; resume in a new session.
 ```
 
 Route on the answer:
@@ -232,41 +267,6 @@ After a refinement pass, if the design changed materially, update the review sur
 | `legacy` | `arc plan create <plan-file>` (no in-place update — re-creates with a new ID) | **no — new ID** | rewrite line 1 with the new ID |
 
 For legacy, after re-creating, replace the `id=<old>` portion of line 1 with the new ID — the idempotent `sed` snippet from step 6 works as-is: set `KIND=legacy` and `ID=<new>` and the "marker already present" branch overwrites line 1. Then loop back to step 7.
-
-### 7.5. Grill the Design (Optional Stress-Test)
-
-A relentless-interrogation pass that probes the approved design for unresolved *internal* decisions before routing to `/arc:plan`. Different job from step 7 — that loop processes external reviewer comments; this one finds gaps the design didn't fully resolve, which become expensive to fix once implementation starts.
-
-**When to recommend it.** This is opt-in. Mark "grill" as recommended when the design appears Medium/Large per the Scale Detection table (multiple work items, multiple layers crossed, or migrations/breaking changes). For Small-scale single-task work, default the recommendation to "skip" — the overhead isn't worth it.
-
-**Use the AskUserQuestion tool:**
-
-```
-Question: "Stress-test the design before planning?"
-Options:
-  - "Yes, grill me" — interrogate decisions one at a time until we converge
-  - "No, proceed" — skip to step 8 routing analysis
-```
-
-If "Yes", run the loop:
-
-**Loop rules:**
-
-- Walk the design's decision tree **depth-first, ordered by dependency**. Resolve decisions that constrain later answers first (e.g., "what storage layer?" before "how do we serialize sessions?"). When a resolution opens new branches, recurse into them before backtracking.
-- **One question per turn** via `AskUserQuestion`. Mark the recommended option. When the choice is genuinely contested, offer 2-3 options; when one option is objectively dominant, a single recommendation is fine — but never rubber-stamp open questions just because you have an opinion.
-- **Codebase-first rule.** Before each question, name the symbol, file, or pattern that would answer it. If you can name one, search first (Grep / Read / symbol search) and only ask when the codebase doesn't — or can't — answer. This is the single biggest difference from step 2's clarifying questions, where you don't yet have a draft to ground against.
-- **Capture resolutions in-place.** Each resolved decision is an edit to `docs/plans/<file>.md` — update the relevant section, don't maintain a separate Q&A log. The design doc is the artifact.
-
-**Stop when ANY of:**
-
-- The user says "done", "enough", or "stop"
-- Two consecutive rounds surface no new unresolved branches (the tree is exhausted)
-
-**After exit:**
-
-The design doc has now diverged from whatever was published to the review surface in step 6. Mention this to the user and offer to push the grilled version via the kind-aware CLI from the line-1 marker (`arc share update <id> <file>` for `share-*`; re-create with `arc plan create` for `legacy`). The user decides — sometimes the original was already approved and the grilling just sharpens internal understanding; sometimes reviewers need to see the changes.
-
-Then proceed to step 8.
 
 ### 8. Routing Analysis & Transition
 

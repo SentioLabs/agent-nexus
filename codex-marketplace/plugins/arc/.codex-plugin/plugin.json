@@ -20,7 +20,7 @@
   "interface": {
     "displayName": "Arc",
     "shortDescription": "Track multi-session coding work with durable issues",
-    "longDescription": "Use arc to manage durable issues, plans, dependencies, and implementation workflows across long-running coding sessions. Codex support keeps project context primed automatically at session start and before compaction so work can resume cleanly, with Codex-specific planning, verification, and stacked-PR playbooks included in the plugin.",
+    "longDescription": "Use arc to manage durable issues, plans, dependencies, and implementation workflows across long-running coding sessions. Codex support keeps project context primed automatically at session start and before compaction so work can resume cleanly, with Codex-specific planning, review, verification, and stacked-PR playbooks included in the plugin.",
     "developerName": "Sentio Labs",
     "category": "Productivity",
     "capabilities": [

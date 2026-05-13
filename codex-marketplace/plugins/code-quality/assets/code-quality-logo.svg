@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Code Quality logo">
+  <rect width="256" height="256" rx="48" fill="#111827"/>
+  <path d="M78 98 42 128l36 30" fill="none" stroke="#A78BFA" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m178 98 36 30-36 30" fill="none" stroke="#A78BFA" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m148 66-40 124" fill="none" stroke="#34D399" stroke-width="16" stroke-linecap="round"/>
+  <path d="M91 205h74" fill="none" stroke="#FBBF24" stroke-width="16" stroke-linecap="round"/>
+</svg>

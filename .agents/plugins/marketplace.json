@@ -29,10 +29,10 @@
       "category": "Productivity"
     },
     {
-      "name": "slop-review",
+      "name": "code-quality",
       "source": {
         "source": "local",
-        "path": "./codex-marketplace/plugins/slop-review"
+        "path": "./codex-marketplace/plugins/code-quality"
       },
       "policy": {
         "installation": "AVAILABLE",

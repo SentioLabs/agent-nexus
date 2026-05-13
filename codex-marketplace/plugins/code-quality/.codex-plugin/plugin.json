@@ -1,6 +1,6 @@
 {
   "name": "code-quality",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "description": "Pre-merge code quality plugin for Codex. Bundles slop-review (4-lens parallel review for AI-generated code, idiom drift, quality issues, and architecture/solution-fit) with size-review for PR split recommendations.",
   "author": {
     "name": "Sentio Labs",

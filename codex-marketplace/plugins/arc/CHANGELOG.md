@@ -8,6 +8,13 @@
 - add Codex-specific brainstorm grill loop, protected-branch guidance, encrypted `arc share` review surfaces, and stacked-PR playbook
 - remove the experimental `arc-team-deploy` surface from the Codex plugin until it has a native Codex workflow
 
+## [0.8.1](https://github.com/SentioLabs/agent-nexus/compare/codex-arc-v0.8.0...codex-arc-v0.8.1) (2026-05-13)
+
+
+### Bug Fixes
+
+* **codex-arc:** include review playbook in description ([#40](https://github.com/SentioLabs/agent-nexus/issues/40)) ([d3e61b2](https://github.com/SentioLabs/agent-nexus/commit/d3e61b2066080e61ec4c7caafc8d3286068f923e))
+
 ## [0.8.0](https://github.com/SentioLabs/agent-nexus/compare/codex-arc-v0.7.0...codex-arc-v0.8.0) (2026-04-23)
 
 

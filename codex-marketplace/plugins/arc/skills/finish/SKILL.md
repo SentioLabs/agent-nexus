@@ -133,8 +133,6 @@ Create a visible progress list with all steps and work through them. In Codex, u
 | Session Type | Behavior |
 |-------------|----------|
 | **Single-agent** | Full protocol above |
-| **Team lead** | Verify teammate work → close arc issues → team cleanup → commit → push |
-| **Teammate** | Commit → push (team lead handles arc close and coordination) |
 
 ## What's NOT in This Protocol
 

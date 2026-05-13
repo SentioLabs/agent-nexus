@@ -380,7 +380,6 @@ For `docs-only` tasks, omit `## Test Command` and use `## Verification` instead:
 - Never reference external docs or the full plan in task descriptions — everything needed is in the description
 - Design documents live in `docs/plans/` and are registered via one of `arc plan create` (legacy), `arc share create` (encrypted local), or `arc share create --remote` (encrypted remote). The brainstorm skill writes a `<!-- arc-review: kind=... id=... -->` marker as line 1 of the doc; always read the marker before invoking review CLIs.
 - Task descriptions must include actual code guidance, not vague instructions
-- Team preparation (teammate labels) is optional — only if user chooses team execution
 - The plan skill creates tasks; it does not implement them
 - The plan skill never runs `arc create` directly — always delegate to `issue-manager`
 - Every task must include a `## Scope Boundary` section — no file modifications outside the `## Files` list

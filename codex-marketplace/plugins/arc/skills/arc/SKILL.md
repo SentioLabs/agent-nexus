@@ -66,7 +66,6 @@ brainstorm → plan → build (per task) → review → finish
 
 After `plan`, choose:
 - **Single-agent + subagents**: Invoke `build`. Main agent orchestrates, subagents do TDD. Best for sequential tasks.
-- **Agentic team (Claude Code today)**: Add `teammate:*` labels, invoke `arc team-deploy`. Best for parallel multi-role work when the Claude team primitives are available. In Codex, this skill is installed as workflow documentation until equivalent team primitives are available.
 - **Stacked PRs (arc + git-spice)**: When the epic is 3+ tasks with linear dependencies and each task is independently reviewable, ship as a stack of PRs instead of one. See [`STACKING.md`](../../STACKING.md) for the integration playbook.
 
 ## Quick Start

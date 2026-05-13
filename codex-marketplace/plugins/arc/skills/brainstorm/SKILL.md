@@ -1,6 +1,6 @@
 ---
 name: brainstorm
-description: Use this skill when the user explicitly asks for the arc brainstorm workflow, such as "/arc:brainstorm", "arc:brainstorm", "arc brainstorm", or "use the arc brainstorm skill". This skill writes designs to docs/plans/ and registers them on one of three review surfaces: legacy `arc plan`, encrypted local `arc share`, or encrypted remote `arc share --remote`.
+description: "Use this skill when the user explicitly asks for the arc brainstorm workflow, such as \"/arc:brainstorm\", \"arc:brainstorm\", \"arc brainstorm\", or \"use the arc brainstorm skill\". This skill writes designs to docs/plans/ and registers them on one of three review surfaces: legacy `arc plan`, encrypted local `arc share`, or encrypted remote `arc share --remote`."
 ---
 
 # Brainstorm - Design Discovery

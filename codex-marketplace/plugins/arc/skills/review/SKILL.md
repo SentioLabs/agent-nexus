@@ -134,7 +134,6 @@ This skill works in both execution models:
 | Context | How review works |
 |---------|-----------------|
 | **Single-agent** | Main agent dispatches `code-reviewer` subagent |
-| **Team mode** | Team lead dispatches QA teammate or `code-reviewer` subagent |
 
 ## Rules
 

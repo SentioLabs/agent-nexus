@@ -128,9 +128,9 @@
         {"type": "test", "section": "Tests", "hidden": true}
       ]
     },
-    "codex-marketplace/plugins/slop-review": {
+    "codex-marketplace/plugins/code-quality": {
       "release-type": "simple",
-      "component": "codex-slop-review",
+      "component": "codex-code-quality",
       "bump-minor-pre-major": true,
       "version-file": "version.txt",
       "extra-files": [

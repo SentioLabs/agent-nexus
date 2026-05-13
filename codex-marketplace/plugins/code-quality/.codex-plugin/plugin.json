@@ -1,0 +1,46 @@
+{
+  "name": "code-quality",
+  "version": "0.8.1",
+  "description": "Pre-merge code quality plugin for Codex. Bundles slop-review (4-lens parallel review for AI-generated code, idiom drift, quality issues, and architecture/solution-fit) with size-review for PR split recommendations.",
+  "author": {
+    "name": "Sentio Labs",
+    "url": "https://github.com/sentiolabs"
+  },
+  "homepage": "https://github.com/sentiolabs/agent-nexus",
+  "repository": "https://github.com/sentiolabs/agent-nexus",
+  "license": "MIT",
+  "keywords": [
+    "code-quality",
+    "code-review",
+    "ai-slop",
+    "idiom-fluency",
+    "ai-authorship",
+    "solution-fit",
+    "architecture-review",
+    "pr-size"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Code Quality",
+    "shortDescription": "Review code for AI slop, idiom drift, solution fit, and PR size",
+    "longDescription": "Use Code Quality in Codex for pre-merge review workflows: slop-review runs a calibrated 4-lens scan for AI-generated code patterns, idiom drift, concrete quality issues, and architecture or solution-fit problems; size-review decides whether a branch or PR should be split into stacked changes.",
+    "developerName": "Sentio Labs",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/sentiolabs/agent-nexus",
+    "privacyPolicyURL": "https://github.com/sentiolabs/agent-nexus/blob/main/docs/legal/privacy.md",
+    "termsOfServiceURL": "https://github.com/sentiolabs/agent-nexus/blob/main/docs/legal/terms.md",
+    "defaultPrompt": [
+      "Review this diff for AI slop and solution-fit problems",
+      "Check whether this PR should be split into smaller stacked changes",
+      "Run a pre-merge code-quality review on my current branch"
+    ],
+    "brandColor": "#7C3AED",
+    "composerIcon": "./assets/code-quality-icon.svg",
+    "logo": "./assets/code-quality-logo.svg",
+    "screenshots": []
+  }
+}

@@ -7,7 +7,7 @@ tools:
   - Grep
 ---
 
-# Arc Issue Tracker Agent
+# Arc Issue Manager Agent
 
 You are a specialized agent for managing issues via the `arc` CLI tool. Execute arc commands efficiently and report results clearly.
 

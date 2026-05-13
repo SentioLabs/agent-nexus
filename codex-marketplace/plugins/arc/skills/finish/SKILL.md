@@ -15,7 +15,7 @@ Uncommitted code doesn't exist. Unpushed commits are local fiction. The remote i
 
 ## Protocol
 
-Create a TodoWrite checklist with all steps and work through them:
+Create a visible progress list with all steps and work through them. In Codex, use `update_plan`; in runtimes with task-list primitives, use the runtime's task tool:
 
 ### Phase 1: Capture Remaining Work
 
@@ -65,20 +65,21 @@ Create a TodoWrite checklist with all steps and work through them:
     ```bash
     git add <file1> <file2> ...
     ```
-12. Commit with conventional commit message:
+12. **Protected-branch check** — perform the check per `skills/arc/_branch-check.md`. This is the last place to catch trunk-direct work; ideally `brainstorm` or `build` already established a feature branch earlier, but check anyway because some flows skip those skills.
+13. Commit with conventional commit message:
     ```bash
     git commit -m "feat(scope): summary of changes"
     ```
-13. Push:
+14. Push:
     ```bash
     git push
     ```
-14. Verify push succeeded:
+15. Verify push succeeded:
     ```bash
     git status    # Must show "up to date with origin"
     ```
-15. If push fails → resolve the issue → retry → succeed. Do not leave unpushed commits.
-16. Clean up worktrees:
+16. If push fails → resolve the issue → retry → succeed. Do not leave unpushed commits.
+17. Clean up worktrees:
     ```bash
     git worktree list
     ```
@@ -118,11 +119,11 @@ Create a TodoWrite checklist with all steps and work through them:
 
 ### Phase 5: Verify and Hand Off
 
-17. Confirm the commit:
+18. Confirm the commit:
     ```bash
     git log -1    # Verify latest commit is visible
     ```
-18. Output context for next session:
+19. Output context for next session:
     ```bash
     arc prime
     ```
@@ -132,8 +133,6 @@ Create a TodoWrite checklist with all steps and work through them:
 | Session Type | Behavior |
 |-------------|----------|
 | **Single-agent** | Full protocol above |
-| **Team lead** | Verify teammate work → close arc issues → team cleanup → commit → push |
-| **Teammate** | Commit → push (team lead handles arc close and coordination) |
 
 ## What's NOT in This Protocol
 

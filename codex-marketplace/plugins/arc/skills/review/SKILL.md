@@ -1,19 +1,19 @@
 ---
 name: review
-description: You MUST use this skill after implementing a task to get code review — especially when the user says "review this", "check my code", "review the changes", or after any implementation task completes. Dispatches the arc-reviewer agent with git diff and task spec, then triages feedback by severity. Always prefer this over generic code review when the project uses arc issue tracking.
+description: You MUST use this skill after implementing a task to get code review — especially when the user says "review this", "check my code", "review the changes", or after any implementation task completes. Dispatches the code-reviewer agent with git diff and task spec, then triages feedback by severity. Always prefer this over generic code review when the project uses arc issue tracking.
 ---
 
 # Review — Code Review Dispatch
 
-Dispatch the `arc-reviewer` subagent to review implementation work, then triage findings.
+Dispatch the `code-reviewer` subagent to review implementation work, then triage findings.
 
 ## Workflow
 
-Create a `TodoWrite` checklist with these steps for standalone review work. If this review is running inside the implement skill's verification fan-out, reuse the implement orchestrator's existing `TaskCreate` item instead of creating parallel tracking.
+Create a visible progress list with these steps for standalone review work. In Codex, use `update_plan`; in runtimes with task-list primitives, use the runtime's task tool. If this review is running inside the build skill's verification fan-out, reuse the build orchestrator's existing progress item instead of creating parallel tracking.
 
 ### 1. Get Git SHAs
 
-Use the `PRE_TASK_SHA` recorded by the implement skill before dispatching the implementer:
+Use the `PRE_TASK_SHA` recorded by the build skill before dispatching the builder:
 
 ```bash
 BASE_SHA=$PRE_TASK_SHA
@@ -32,7 +32,7 @@ HEAD_SHA=$(git rev-parse HEAD)
 
 ### 2. Get Design Context
 
-If the review was invoked from the implement skill, a design excerpt should be available. Retrieve it:
+If the review was invoked from the build skill, a design excerpt should be available. Retrieve it:
 
 ```bash
 # Get the parent epic of this task
@@ -45,7 +45,7 @@ Extract the design excerpt relevant to this task — typically the sections cove
 
 ### 3. Dispatch Reviewer
 
-Use the Agent tool to spawn an `arc-reviewer` subagent with this prompt:
+Spawn a `code-reviewer` subagent with this prompt:
 
 ```text
 Review these changes against the task spec and project conventions.
@@ -73,43 +73,43 @@ When the reviewer reports back:
 
 | Severity | Action |
 |----------|--------|
-| **Critical** | Fix immediately — re-dispatch `arc-implementer` with the specific fix. Then re-review. |
-| **Important** | Fix before moving to next task — re-dispatch `arc-implementer`. Then re-review. |
+| **Critical** | Fix immediately — re-dispatch `builder` with the specific fix. Then re-review. |
+| **Important** | Fix before moving to next task — re-dispatch `builder`. Then re-review. |
 | **Minor** | Note in arc issue comment for later. Proceed. |
-| **Deviation (fix)** | Re-dispatch `arc-implementer` with the specific deviation to correct. |
+| **Deviation (fix)** | Re-dispatch `builder` with the specific deviation to correct. |
 | **Deviation (accept)** | Note the deviation as an arc comment on the task for traceability. Proceed. |
 
 ### 5. Handle Fixes
 
 If fixes are needed:
-1. Re-dispatch `arc-implementer` with the specific findings to address
-2. After the implementer reports back, re-review (go to step 1 with updated SHAs)
+1. Re-dispatch `builder` with the specific findings to address
+2. After the builder reports back, re-review (go to step 1 with updated SHAs)
 3. Continue until the review is clean (no Critical or Important findings)
 
-**Circuit breaker**: If 3 review/fix cycles on the same task haven't resolved all findings, STOP. Escalate to the user with a summary of what keeps recurring — the reviewer and implementer may disagree on the approach, or the task spec may be ambiguous.
+**Circuit breaker**: If 3 review/fix cycles on the same task haven't resolved all findings, STOP. Escalate to the user with a summary of what keeps recurring — the reviewer and builder may disagree on the approach, or the task spec may be ambiguous.
 
 ### 6. Return Findings
 
 Return the reviewer findings, severity, and any re-review recommendation to the caller or orchestrator.
 
-- If Critical or Important findings remain, say they require implementer follow-up plus re-review.
+- If Critical or Important findings remain, say they require builder follow-up plus re-review.
 - If only Minor findings or accepted deviations remain, say review is complete and the caller can decide the next orchestration step.
-- Do not invoke `finish` from this skill and do not decide whether to return to `implement` — that belongs to the caller coordinating the wider workflow.
+- Do not invoke `finish` from this skill and do not decide whether to return to `build` — that belongs to the caller coordinating the wider workflow.
 
 ## Response Discipline
 
-When receiving review feedback from the `arc-reviewer`:
+When receiving review feedback from the `code-reviewer`:
 
 - **Evaluate technically.** Don't agree performatively. If a finding is wrong, explain why with evidence.
 - **If it's right, fix it.** Don't negotiate or defer valid Critical/Important findings.
-- **If it's ambiguous, flag the ambiguity.** Recommend evaluator escalation or an implementer follow-up test when that would resolve the uncertainty.
+- **If it's ambiguous, flag the ambiguity.** Recommend evaluator escalation or a builder follow-up test when that would resolve the uncertainty.
 - **No ego.** The reviewer is checking the subagent's work, not yours personally.
 
 ## Relationship to the Evaluator
 
 The evaluator is **not always present**. Your dispatch prompt includes an `## Evaluator Status` line that tells you whether the evaluator is running for this task.
 
-**When Evaluator Status is `active`** (normal code-task path from `implement`, plus any other review flow where the evaluator was dispatched):
+**When Evaluator Status is `active`** (normal code-task path from `build`, plus any other review flow where the evaluator was dispatched):
 
 The evaluator runs in parallel with you. Your concerns are complementary:
 
@@ -133,14 +133,13 @@ This skill works in both execution models:
 
 | Context | How review works |
 |---------|-----------------|
-| **Single-agent** | Main agent dispatches `arc-reviewer` subagent |
-| **Team mode** | Team lead dispatches QA teammate or `arc-reviewer` subagent |
+| **Single-agent** | Main agent dispatches `code-reviewer` subagent |
 
 ## Rules
 
 - Always review after implementation — don't skip to close
 - Re-review after fixes — don't assume fixes are correct
 - The reviewer reports; you decide what to do with the findings
-- Never make code changes in the review skill — dispatch the implementer for fixes
+- Never make code changes in the review skill — dispatch the builder for fixes
 - Focus on code quality and conventions. Flag behavioral concerns when no evaluator is present.
 - Format all arc content (descriptions, plans, comments) per `skills/arc/_formatting.md`

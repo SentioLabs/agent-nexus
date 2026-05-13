@@ -47,7 +47,7 @@ Fuzzy matching handles typos - "dependncy" finds "dependency" docs.
 | `arc docs` | Overview of all topics |
 | `arc docs workflows` | Step-by-step checklists |
 | `arc docs dependencies` | Dependency types and when to use each |
-| `arc docs boundaries` | When to use arc vs TodoWrite |
+| `arc docs boundaries` | When to use arc vs a session task list |
 | `arc docs resumability` | Writing notes that survive compaction |
 | `arc docs plans` | Plan patterns (inline, parent-epic, shared) with examples |
 | `arc docs plugin` | Claude Code and Codex installation guide |

@@ -1,1 +1,0 @@
-If you believe you have identified a security issue that aligns with Atlassian’s [definition of a vulnerability](https://www.atlassian.com/trust/security/report-a-vulnerability#definition-of-vulnerability), please submit your report to our security team using any of the methods outlined [here](https://www.atlassian.com/trust/security/report-a-vulnerability).

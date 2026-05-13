@@ -94,7 +94,7 @@
       },
       {
         "id": 2,
-        "text": "Output invokes debug or implement skill to fix the failures",
+        "text": "Output invokes debug or build skill to fix the failures",
         "type": "quality"
       },
       {

@@ -1,6 +1,6 @@
 ---
 name: arc
-description: General arc CLI reference and workflow context. Use when the user asks about arc commands, issue tracking workflows, when to use arc vs TodoWrite, or needs help with arc configuration.
+description: General arc CLI reference and workflow context. Use when the user asks about arc commands, issue tracking workflows, when to use arc vs the runtime's short-lived task list, or needs help with arc configuration.
 ---
 
 # Arc Issue Tracker
@@ -27,9 +27,9 @@ The plugin is the single source of truth for agent-runtime integration. It provi
 - **Skills and resources** - detailed guides and reference
 - **Agents** - for bulk operations
 
-## When to Use Arc vs TodoWrite
+## When to Use Arc vs Session Task Lists
 
-| Use Arc | Use TodoWrite |
+| Use Arc | Use a session task list |
 |---------|---------------|
 | Multi-session work | Single-session tasks |
 | Complex dependencies | Linear task lists |
@@ -48,7 +48,7 @@ Arc includes workflow skills that guide you through the development lifecycle wi
 |-------|---------|-------------|
 | `brainstorm` | Design discovery through Socratic dialogue | Starting new features or significant work |
 | `plan` | Break design into implementation tasks | After brainstorm approves a design |
-| `implement` | TDD execution via fresh subagents per task | Ready to implement planned tasks |
+| `build` | TDD execution via fresh subagents per task | Ready to build planned tasks |
 | `debug` | 4-phase root cause investigation | Encountering bugs or test failures |
 | `verify` | Evidence-based completion gates | Before claiming any work is done |
 | `review` | Code review dispatch and triage | After implementing a task |
@@ -57,7 +57,7 @@ Arc includes workflow skills that guide you through the development lifecycle wi
 ### Pipeline
 
 ```
-brainstorm → plan → implement (per task) → review → finish
+brainstorm → plan → build (per task) → review → finish
                         ↕          ↕
                       debug      verify
 ```
@@ -65,8 +65,9 @@ brainstorm → plan → implement (per task) → review → finish
 ### Execution Paths
 
 After `plan`, choose:
-- **Single-agent + subagents**: Invoke `implement`. Main agent orchestrates, subagents do TDD. Best for sequential tasks.
-- **Agentic team (Claude Code today)**: Add `teammate:*` labels, invoke `arc team-deploy`. Best for parallel multi-role work when the Claude team primitives are available.
+- **Single-agent + subagents**: Invoke `build`. Main agent orchestrates, subagents do TDD. Best for sequential tasks.
+- **Agentic team (Claude Code today)**: Add `teammate:*` labels, invoke `arc team-deploy`. Best for parallel multi-role work when the Claude team primitives are available. In Codex, this skill is installed as workflow documentation until equivalent team primitives are available.
+- **Stacked PRs (arc + git-spice)**: When the epic is 3+ tasks with linear dependencies and each task is independently reviewable, ship as a stack of PRs instead of one. See [`STACKING.md`](../../STACKING.md) for the integration playbook.
 
 ## Quick Start
 
@@ -85,7 +86,8 @@ Run `arc prime` for full workflow context, or `arc <command> --help` for specifi
 - `arc close` - Complete work
 - `arc show` - View details
 - `arc dep` - Manage dependencies
-- `arc plan` - Manage plans (create, show, approve, reject, comments)
+- `arc plan` - Manage legacy plain-HTTP plan reviews (create, show, approve, reject, comments)
+- `arc share` - Manage encrypted plan shares (create, show, approve, comments, pull, list, update, delete)
 - `arc which` - Show active project and resolution source
 - `arc paths` - Manage workspace path registrations
 - `arc project` - Manage projects (list, create, delete, rename, merge)
@@ -113,7 +115,7 @@ Fuzzy matching handles typos - "dependncy" finds "dependency" docs.
 
 | Command | Purpose |
 |---------|---------|
-| `arc docs boundaries` | When to use arc vs TodoWrite - decision matrix, integration patterns, common mistakes |
+| `arc docs boundaries` | When to use arc vs a session task list - decision matrix, integration patterns, common mistakes |
 | `arc docs workflows` | Step-by-step checklists for session start, epic planning, side quests, handoff |
 | `arc docs dependencies` | Dependency types (blocks, related, parent-child, discovered-from) and when to use each |
 | `arc docs resumability` | Writing notes that survive compaction - templates and anti-patterns |
@@ -124,7 +126,7 @@ Run `arc docs` without a topic to see an overview.
 
 ## Agent Mode
 
-For bulk operations (creating epics with tasks, batch updates), use the **arc-issue-tracker** agent via the Task tool. This runs arc commands without consuming main conversation context.
+For bulk operations (creating epics with tasks, batch updates), use the **issue-manager** agent as a subagent. This runs arc commands without consuming main conversation context.
 
 ## Dependency Types
 
@@ -139,21 +141,49 @@ Arc supports four dependency types:
 
 **Deep dive**: Run `arc docs dependencies` for examples and patterns.
 
-## Plans
+## Design Reviews
 
-Plans are ephemeral review artifacts backed by filesystem markdown files in `docs/plans/`. They support a review workflow with approval, rejection, and comments.
+Design docs live in `docs/plans/` as filesystem markdown. Arc registers them on one of three review surfaces, chosen at create time by the `brainstorm` skill based on who's reviewing and whether encryption is needed. Each surface has its own CLI verb set; `plan` and any other consumer reads line 1 of the doc, `<!-- arc-review: kind=<legacy|share-local|share-remote> id=<id> -->`, to know which CLI to call.
 
-**CLI commands:**
+**Surfaces:**
+
+| `kind` | Create command | URL pattern | Encrypted? | Best for |
+|---|---|---|---|---|
+| `legacy` | `arc plan create <file>` | `http://localhost:7432/planner/<id>` | no | Solo, plain HTTP, simplest comment thread |
+| `share-local` | `arc share create <file>` | `http://localhost:7432/share/<id>#k=<key>` | yes | Solo, but want annotations + accept-resolve UI |
+| `share-remote` | `arc share create <file> --remote` | `<remote>/share/<id>#k=<key>` (default `https://arcplanner.sentiolabs.io`) | yes | Reviewers on other machines |
+
+`arc share create --server <url>` overrides `--remote` to target an explicit server.
+
+For the encrypted surfaces, the author's edit tokens live in the arc-server's local keyring (a `shares` table in `~/.arc/data.db`) — multi-client accessible via `/api/v1/shares`, never written to disk as JSON. Legacy plans don't have edit tokens; the URL is just the planner path.
+
+### `arc share` commands (share-local, share-remote)
 
 | Command | Purpose |
 |---------|---------|
-| `arc plan create <file-path>` | Register an ephemeral plan, returns plan ID |
-| `arc plan show <plan-id>` | Show plan content, status, and comments |
-| `arc plan approve <plan-id>` | Approve the plan |
-| `arc plan reject <plan-id>` | Reject the plan |
-| `arc plan comments <plan-id>` | List review comments |
+| `arc share create <file-path> [--remote]` | Encrypt a plan and create a share, returns share ID. Default is local; `--remote` targets the configured share server. Output prints a single URL: `Preview URL` (local) or `Author URL` (shared). |
+| `arc share show <id>` | Decrypt and print plan content (use `--author-url` to reprint the Author URL) |
+| `arc share approve <id>` | Mark the share as approved |
+| `arc share comments <id>` | All review comments + statuses |
+| `arc share pull <id>` | Accepted-only comments (the agent-input form) |
+| `arc share list` | List shares known to this machine, including `plan_file` mapping. Add `--json` for machine-readable output. |
+| `arc share update <id> <plan-file>` | Replace the encrypted plan content in place |
+| `arc share delete <id>` | Delete a share (`--force` cleans up local keyring entries when the server is already gone) |
 
-Plans go through a review cycle: create, review (with comments), then approve or reject. Approved design content is written into the epic's description field when creating implementation tasks. Run `arc docs plans` for full details.
+### `arc plan` commands (legacy)
+
+| Command | Purpose |
+|---------|---------|
+| `arc plan create <file-path>` | Register a plan on the legacy `/planner/<id>` surface (plain HTTP, no encryption). There's no in-place update; re-running `create` produces a new ID. |
+| `arc plan show <id>` | Print plan metadata + content. The metadata header includes `File: <path>`, useful for plan-file lookups. |
+| `arc plan approve <id>` | Mark the plan as approved |
+| `arc plan comments <id>` | List comments on the plan (flat thread; no Accept/Resolve/Reject states) |
+
+### Review cycle
+
+create -> reviewers leave annotations -> author Accepts/Resolves/Rejects (encrypted surfaces) or replies inline (legacy) -> `arc share pull` surfaces accepted comments to the implementation flow (legacy reads the comments thread inline because it has no accepted-only filter). Approved design content is written into the epic's description field when creating implementation tasks. Run `arc docs plans` for full details.
+
+The `<!-- arc-review: kind=... id=... -->` marker on line 1 of every registered design doc tells downstream skills which CLI table above to use. See `skills/brainstorm/SKILL.md` step 6 for the marker-write contract and `skills/plan/SKILL.md` step 1 for the read pattern.
 
 ## Labels
 

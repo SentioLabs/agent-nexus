@@ -19,7 +19,7 @@ Arc supports both Claude Code and Codex through repo-local plugin packaging.
 
 ## Compatibility note
 
-This Codex pass enables Arc's core single-agent workflow plus automatic `SessionStart` and `PreCompact` priming.
+Codex packaging enables Arc's core single-agent `brainstorm -> plan -> build -> review -> finish` workflow plus automatic `SessionStart` and `PreCompact` priming.
 
 This Codex pass does not enable arc's Claude-only `PostToolUse` `Agent` registration hook. The hook remains disabled for Codex until an equivalent spawned-agent matcher is confirmed in Codex plugin hooks.
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- sync Codex arc workflow docs with the newer Claude arc vocabulary: `build`, `builder`, `issue-manager`, `code-reviewer`, `spec-reviewer`, `doc-writer`, and `evaluator`
+- add Codex-specific brainstorm grill loop, protected-branch guidance, encrypted `arc share` review surfaces, and stacked-PR playbook
+
 ## [0.8.0](https://github.com/SentioLabs/agent-nexus/compare/codex-arc-v0.7.0...codex-arc-v0.8.0) (2026-04-23)
 
 
@@ -12,13 +19,13 @@
 
 ### Features
 
-- add `arc-spec-reviewer` for exact task-compliance checks in the Codex `arc` workflow
-- dispatch spec review alongside reviewer and evaluator in the Codex `implement` flow
+- add `spec-reviewer` for exact task-compliance checks in the Codex `arc` workflow
+- dispatch spec review alongside reviewer and evaluator in the Codex `build` flow
 
 ### Fixes
 
 - finish syncing Claude `arc` planning wording into the Codex `plan` skill, including the stronger anti-placeholder explanation and self-review loop
-- adopt the richer `PASS | PARTIAL | NEEDS_CONTEXT | DONE_WITH_CONCERNS` contract in the Codex implementer and implement orchestrator
+- adopt the richer `PASS | PARTIAL | NEEDS_CONTEXT | DONE_WITH_CONCERNS` contract in the Codex builder and build orchestrator
 - make the Codex `review` skill explicit about evaluator-active vs evaluator-not-dispatched behavior
 
 ## [0.7.0](https://github.com/SentioLabs/agent-nexus/compare/codex-arc-v0.6.0...codex-arc-v0.7.0) (2026-04-04)
@@ -59,7 +66,7 @@
 
 ### Features
 
-* **arc/brainstorm:** add routing analysis to guide plan vs implement decision ([f779b43](https://github.com/SentioLabs/claude-marketplace/commit/f779b430f213f0e134807cafaae45ec81a22152a))
+* **arc/brainstorm:** add routing analysis to guide plan vs build decision ([f779b43](https://github.com/SentioLabs/claude-marketplace/commit/f779b430f213f0e134807cafaae45ec81a22152a))
 
 ## [0.3.0](https://github.com/SentioLabs/claude-marketplace/compare/arc-v0.2.0...arc-v0.3.0) (2026-03-22)
 

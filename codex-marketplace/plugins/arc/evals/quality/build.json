@@ -1,12 +1,12 @@
 [
   {
     "eval_id": 1,
-    "eval_name": "Implement dispatches subagent — never writes code itself",
+    "eval_name": "Build dispatches subagent — never writes code itself",
     "prompt": "Implement the tasks from epic ARC-5. Start with ARC-5.1 (JWT token generation).",
     "assertions": [
       {
         "id": 1,
-        "text": "Output dispatches an arc-implementer subagent via Agent tool",
+        "text": "Output dispatches a builder subagent via subagent dispatch",
         "type": "quality"
       },
       {
@@ -28,7 +28,7 @@
   },
   {
     "eval_id": 2,
-    "eval_name": "Implement claims task before dispatching",
+    "eval_name": "Build claims task before dispatching",
     "prompt": "Start implementing the next ready task.",
     "assertions": [
       {
@@ -50,8 +50,8 @@
   },
   {
     "eval_id": 3,
-    "eval_name": "Implement verifies result and dispatches evaluation + review in parallel",
-    "prompt": "The arc-implementer just reported back with PASS on all gate checks for ARC-5.1. This task is a child of epic ARC-5.",
+    "eval_name": "Build verifies result and dispatches evaluation + review in parallel",
+    "prompt": "The builder just reported back with PASS on all gate checks for ARC-5.1. This task is a child of epic ARC-5.",
     "assertions": [
       {
         "id": 1,
@@ -60,7 +60,7 @@
       },
       {
         "id": 2,
-        "text": "Output dispatches arc-evaluator AND arc-reviewer (via review skill) simultaneously after tests pass",
+        "text": "Output dispatches evaluator AND code-reviewer (via review skill) simultaneously after tests pass",
         "type": "quality"
       },
       {
@@ -82,8 +82,8 @@
   },
   {
     "eval_id": 4,
-    "eval_name": "Implement handles PARTIAL result correctly",
-    "prompt": "The arc-implementer reported PARTIAL. Gate: Unresolved — spec compliance missed step 3 (error handling for invalid tokens). Test coverage missing edge case for expired tokens.",
+    "eval_name": "Build handles PARTIAL result correctly",
+    "prompt": "The builder reported PARTIAL. Gate: Unresolved — spec compliance missed step 3 (error handling for invalid tokens). Test coverage missing edge case for expired tokens.",
     "assertions": [
       {
         "id": 1,
@@ -92,7 +92,7 @@
       },
       {
         "id": 2,
-        "text": "Output re-dispatches arc-implementer with the specific gate feedback included in the prompt",
+        "text": "Output re-dispatches builder with the specific gate feedback included in the prompt",
         "type": "quality"
       },
       {
@@ -104,7 +104,7 @@
   },
   {
     "eval_id": 5,
-    "eval_name": "Implement routes docs-only tasks to doc-writer",
+    "eval_name": "Build routes docs-only tasks to doc-writer",
     "prompt": "The next ready task ARC-5.4 has a docs-only label. It's about updating the API documentation.",
     "assertions": [
       {
@@ -114,14 +114,14 @@
       },
       {
         "id": 2,
-        "text": "Output dispatches arc-doc-writer subagent (NOT arc-implementer)",
+        "text": "Output dispatches doc-writer subagent (NOT builder)",
         "type": "quality"
       }
     ]
   },
   {
     "eval_id": 6,
-    "eval_name": "Implement parallel dispatch uses worktree isolation",
+    "eval_name": "Build parallel dispatch uses worktree isolation",
     "prompt": "Tasks ARC-5.2, ARC-5.3, and ARC-5.4 are independent with no shared files. Dispatch them in parallel.",
     "assertions": [
       {
@@ -136,12 +136,12 @@
       },
       {
         "id": 3,
-        "text": "All parallel Agent calls use isolation: 'worktree'",
+        "text": "All parallel subagent dispatches use isolated worktrees or forked worker workspaces",
         "type": "quality"
       },
       {
         "id": 4,
-        "text": "All parallel Agent calls are in a single message (not spread across multiple turns)",
+        "text": "All parallel worker dispatches are issued together with isolated work scopes",
         "type": "constraint"
       },
       {
@@ -153,7 +153,7 @@
   },
   {
     "eval_id": 7,
-    "eval_name": "Implement runs integration checkpoint after 2-3 tasks",
+    "eval_name": "Build runs integration checkpoint after 2-3 tasks",
     "prompt": "We just closed ARC-5.1 and ARC-5.2. ARC-5.3 is next.",
     "assertions": [
       {
@@ -165,12 +165,12 @@
   },
   {
     "eval_id": 8,
-    "eval_name": "Implement handles deviation from review — fix path",
-    "prompt": "The review skill reported a Deviation (fix) for ARC-5.1: the implementer used string IDs but the design specifies int64. The reviewer recommends fixing to match the design.",
+    "eval_name": "Build handles deviation from review — fix path",
+    "prompt": "The review skill reported a Deviation (fix) for ARC-5.1: the builder used string IDs but the design specifies int64. The reviewer recommends fixing to match the design.",
     "assertions": [
       {
         "id": 1,
-        "text": "Output re-dispatches arc-implementer with explicit instruction to change string IDs to int64",
+        "text": "Output re-dispatches builder with explicit instruction to change string IDs to int64",
         "type": "quality"
       },
       {
@@ -187,8 +187,8 @@
   },
   {
     "eval_id": 9,
-    "eval_name": "Implement handles deviation from review — accept path",
-    "prompt": "The review skill reported a Deviation (accept) for ARC-5.3: the implementer used a custom error type instead of the plain error return specified in the design. The reviewer says the deviation aligns with existing codebase conventions.",
+    "eval_name": "Build handles deviation from review — accept path",
+    "prompt": "The review skill reported a Deviation (accept) for ARC-5.3: the builder used a custom error type instead of the plain error return specified in the design. The reviewer says the deviation aligns with existing codebase conventions.",
     "assertions": [
       {
         "id": 1,
@@ -209,12 +209,12 @@
   },
   {
     "eval_id": 10,
-    "eval_name": "Implement handles evaluator FAIL — spec-intent gap",
-    "prompt": "The arc-evaluator reported FAIL for ARC-5.2. Spec-Intent Gap: spec says 'Return 401 if refresh token is expired' but the evaluator's acceptance test shows the endpoint returns 400 instead of 401 for expired tokens.",
+    "eval_name": "Build handles evaluator FAIL — spec-intent gap",
+    "prompt": "The evaluator reported FAIL for ARC-5.2. Spec-Intent Gap: spec says 'Return 401 if refresh token is expired' but the evaluator's acceptance test shows the endpoint returns 400 instead of 401 for expired tokens.",
     "assertions": [
       {
         "id": 1,
-        "text": "Output re-dispatches arc-implementer with the evaluator's finding (expected 401, got 400 for expired tokens)",
+        "text": "Output re-dispatches builder with the evaluator's finding (expected 401, got 400 for expired tokens)",
         "type": "quality"
       },
       {
@@ -231,8 +231,8 @@
   },
   {
     "eval_id": 11,
-    "eval_name": "Implement prioritizes evaluator spec-intent over reviewer code quality",
-    "prompt": "For ARC-5.3, the arc-reviewer says the code is clean with no issues. But the arc-evaluator reports FAIL: spec requires 'idempotent delete — deleting a non-existent resource returns 204' but the acceptance test shows 404 is returned.",
+    "eval_name": "Build prioritizes evaluator spec-intent over reviewer code quality",
+    "prompt": "For ARC-5.3, the code-reviewer says the code is clean with no issues. But the evaluator reports FAIL: spec requires 'idempotent delete — deleting a non-existent resource returns 204' but the acceptance test shows 404 is returned.",
     "assertions": [
       {
         "id": 1,
@@ -241,7 +241,7 @@
       },
       {
         "id": 2,
-        "text": "Output re-dispatches arc-implementer to fix the idempotent delete behavior (204 not 404)",
+        "text": "Output re-dispatches builder to fix the idempotent delete behavior (204 not 404)",
         "type": "quality"
       },
       {
@@ -253,8 +253,8 @@
   },
   {
     "eval_id": 12,
-    "eval_name": "Implement applies evaluator circuit breaker after 3 cycles",
-    "prompt": "This is the 3rd evaluate/fix cycle for ARC-5.4. The evaluator keeps reporting FAIL on the same finding: spec says 'rate limit per user' but the implementation rate-limits per IP. The implementer keeps re-implementing per-IP rate limiting.",
+    "eval_name": "Build applies evaluator circuit breaker after 3 cycles",
+    "prompt": "This is the 3rd evaluate/fix cycle for ARC-5.4. The evaluator keeps reporting FAIL on the same finding: spec says 'rate limit per user' but the implementation rate-limits per IP. The builder keeps re-implementing per-IP rate limiting.",
     "assertions": [
       {
         "id": 1,
@@ -268,7 +268,7 @@
       },
       {
         "id": 3,
-        "text": "Output presents both interpretations (evaluator: per-user, implementer: per-IP) for the user to clarify",
+        "text": "Output presents both interpretations (evaluator: per-user, builder: per-IP) for the user to clarify",
         "type": "quality"
       },
       {
@@ -280,12 +280,12 @@
   },
   {
     "eval_id": 13,
-    "eval_name": "Implement skips evaluator for docs-only tasks",
-    "prompt": "The arc-doc-writer just completed ARC-5.9, a docs-only task for updating API reference docs.",
+    "eval_name": "Build skips evaluator for docs-only tasks",
+    "prompt": "The doc-writer just completed ARC-5.9, a docs-only task for updating API reference docs.",
     "assertions": [
       {
         "id": 1,
-        "text": "Output does NOT dispatch arc-evaluator for docs-only tasks",
+        "text": "Output does NOT dispatch evaluator for docs-only tasks",
         "type": "constraint"
       },
       {
@@ -297,12 +297,12 @@
   },
   {
     "eval_id": 14,
-    "eval_name": "Implement handles evaluator BLOCKED — does not blame implementer",
-    "prompt": "The arc-evaluator reported BLOCKED for ARC-5.6. Implementation Health shows PASS (project builds, tests pass). Evaluator Setup shows FAIL (acceptance tests couldn't compile due to a dependency conflict the evaluator introduced).",
+    "eval_name": "Build handles evaluator BLOCKED — does not blame builder",
+    "prompt": "The evaluator reported BLOCKED for ARC-5.6. Implementation Health shows PASS (project builds, tests pass). Evaluator Setup shows FAIL (acceptance tests couldn't compile due to a dependency conflict the evaluator introduced).",
     "assertions": [
       {
         "id": 1,
-        "text": "Output does NOT re-dispatch arc-implementer — BLOCKED is the evaluator's problem, not the implementer's",
+        "text": "Output does NOT re-dispatch builder — BLOCKED is the evaluator's problem, not the builder's",
         "type": "constraint"
       },
       {
@@ -319,17 +319,17 @@
   },
   {
     "eval_id": 15,
-    "eval_name": "Implement handles evaluator FAIL due to broken implementer build",
-    "prompt": "The arc-evaluator reported FAIL for ARC-5.7. Implementation Health shows FAIL — the project doesn't compile. The evaluator never got to run acceptance tests because the build itself is broken.",
+    "eval_name": "Build handles evaluator FAIL due to broken builder build",
+    "prompt": "The evaluator reported FAIL for ARC-5.7. Implementation Health shows FAIL — the project doesn't compile. The evaluator never got to run acceptance tests because the build itself is broken.",
     "assertions": [
       {
         "id": 1,
-        "text": "Output re-dispatches arc-implementer with the build failure as a Critical finding to fix",
+        "text": "Output re-dispatches builder with the build failure as a Critical finding to fix",
         "type": "quality"
       },
       {
         "id": 2,
-        "text": "Output does NOT treat this as an evaluator problem — a broken build is the implementer's fault",
+        "text": "Output does NOT treat this as an evaluator problem — a broken build is the builder's fault",
         "type": "constraint"
       },
       {
@@ -341,8 +341,8 @@
   },
   {
     "eval_id": 16,
-    "eval_name": "Implement dispatches evaluator with worktree isolation",
-    "prompt": "The arc-implementer just reported PASS on all gate checks for ARC-5.3. Tests pass. Time to dispatch evaluation and review.",
+    "eval_name": "Build dispatches evaluator with worktree isolation",
+    "prompt": "The builder just reported PASS on all gate checks for ARC-5.3. Tests pass. Time to dispatch evaluation and review.",
     "assertions": [
       {
         "id": 1,

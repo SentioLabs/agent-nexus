@@ -1,15 +1,21 @@
 ---
-name: implement
+name: build
 description: You MUST use this skill to execute implementation tasks from an arc plan — especially when the user says "implement this", "build this", "execute the plan", "start coding", or wants to dispatch subagents for TDD execution of arc issues. The main agent orchestrates; it never writes implementation code directly. Always prefer this over generic implementation when the project uses arc issue tracking.
 ---
 
-# Implement — Subagent-Driven TDD Execution
+# Build — Subagent-Driven TDD Execution
 
-Orchestrate task implementation by dispatching fresh `arc-implementer` subagents per task. Each subagent gets a clean context window with just the task description.
+Orchestrate task implementation by dispatching fresh `builder` subagents per task. Each subagent gets a clean context window with just the task description.
 
 ## Core Rule
 
 **The main agent NEVER writes implementation code.** It orchestrates, dispatches, and reviews. If you're tempted to "just quickly fix this" — dispatch a subagent instead.
+
+## Pre-flight: Branch Setup
+
+Before dispatching any task, perform the protected-branch check per `skills/arc/_branch-check.md`.
+
+Builder subagents commit to whichever branch the orchestrator is on. Catching trunk-direct work before dispatch prevents a completed task series from landing directly on `main`, `master`, `release`, or `production`.
 
 ## Dispatch Modes
 
@@ -23,7 +29,7 @@ Tasks are dispatched one at a time through the orchestration loop below. Use thi
 
 ### Parallel
 
-Multiple tasks dispatched simultaneously using `isolation: "worktree"`. Use this **only** when ALL of these are true:
+Multiple tasks dispatched simultaneously using isolated worktrees or forked worker workspaces. Use this **only** when ALL of these are true:
 - 3+ independent tasks remain
 - No shared files between any tasks in the batch
 - No `blocks`/`blockedBy` dependencies between tasks in the batch
@@ -35,7 +41,7 @@ Multiple tasks dispatched simultaneously using `isolation: "worktree"`. Use this
 
 By default, use sequential dispatch. For independent tasks, see [Parallel Dispatch Protocol](#parallel-dispatch-protocol) below.
 
-**Task tracking**: At the start of implementation, create a task list using `TaskCreate` with one entry per arc issue to implement. This provides the orchestrator's visible progress tracker in the CLI. Update each task as you work:
+**Task tracking**: At the start of build execution, create a visible progress list with one entry per arc issue to implement. In Codex, use `update_plan` when available; in runtimes with task-list primitives, use the runtime's task tool. Update each task as you work:
 - `in_progress` when dispatching the subagent
 - `completed` when the task is closed in arc
 
@@ -44,7 +50,7 @@ By default, use sequential dispatch. For independent tasks, see [Parallel Dispat
 arc list --parent=<epic-id> --status=open --json
 ```
 
-Create a `TaskCreate` entry for each, then work through this loop:
+Create one progress entry for each issue, then work through this loop:
 
 ### 1. Find Next Task
 
@@ -60,7 +66,7 @@ arc list --parent=<epic-id> --status=open
 arc update <task-id> --take
 ```
 
-### 3. Dispatch Agent
+### 3. Dispatch Subagent
 
 Record the current HEAD before dispatching — needed for review if escalated:
 
@@ -74,7 +80,7 @@ Check whether the task has a `docs-only` label:
 arc show <task-id> --json | jq -e '.labels[] | select(. == "docs-only")' > /dev/null 2>&1
 ```
 
-**If `docs-only`** (exit code 0) — spawn an `arc-doc-writer` subagent:
+**If `docs-only`** (exit code 0) — spawn a `doc-writer` subagent:
 
 ```
 Write/update the documentation described in this task.
@@ -85,7 +91,7 @@ Write/update the documentation described in this task.
 Verify formatting quality and commit your work.
 ```
 
-**Otherwise** — spawn an `arc-implementer` subagent:
+**Otherwise** — spawn a `builder` subagent:
 
 ```
 Implement this task following TDD (RED → GREEN → REFACTOR → GATE).
@@ -114,8 +120,8 @@ Commit your work when all gate checks pass.
 
 When the subagent reports back, check the **Result** and **Gate Results** in its report:
 
-- `PASS`, `PARTIAL`, and `DONE_WITH_CONCERNS` should include gate results because the implementer reached or completed the gate.
-- `NEEDS_CONTEXT` may report `Gate Results: NOT RUN (blocked by context)` because the implementer could not reach the gate. In that case, the required follow-up section is `### Context Needed`.
+- `PASS`, `PARTIAL`, and `DONE_WITH_CONCERNS` should include gate results because the builder reached or completed the gate.
+- `NEEDS_CONTEXT` may report `Gate Results: NOT RUN (blocked by context)` because the builder could not reach the gate. In that case, the required follow-up section is `### Context Needed`.
 
 **If `PASS`** (all gate checks passed):
 - Run the project test command fresh yourself to confirm — do NOT trust the subagent's report alone
@@ -131,7 +137,7 @@ When the subagent reports back, check the **Result** and **Gate Results** in its
 - Read the `### Context Needed` section
 - If the issue is a missing prerequisite (type, file, dependency not on HEAD) → fix dependency ordering, provide the missing definition, or create a follow-up issue if the plan is incomplete
 - If the issue is task ambiguity → clarify the task and re-dispatch with the clarification
-- Do NOT re-dispatch without addressing the context gap — the implementer will hit the same wall again
+- Do NOT re-dispatch without addressing the context gap — the builder will hit the same wall again
 
 **If `DONE_WITH_CONCERNS`** (work complete, all gate checks passed, but out-of-scope concerns were noted):
 - Read the `### Concerns` section
@@ -144,12 +150,12 @@ When the subagent reports back, check the **Result** and **Gate Results** in its
 
 **Handling issues from `PARTIAL` results**:
 
-- **Subagent reports `PARTIAL` with clear gaps** — re-dispatch `arc-implementer` with the specific gaps listed in `Gate: Unresolved`, plus the original task description
+- **Subagent reports `PARTIAL` with clear gaps** — re-dispatch `builder` with the specific gaps listed in `Gate: Unresolved`, plus the original task description
 - **Subagent reports test failures it can't resolve** — invoke the `debug` skill
 - **3+ implementation attempts fail on same issue** — invoke the `debug` skill
 - **Approach was wrong** — re-dispatch the appropriate agent with corrected guidance
 
-When re-dispatching, include the previous gate feedback so the implementer knows exactly what to fix:
+When re-dispatching, include the previous gate feedback so the builder knows exactly what to fix:
 
 ```
 Continue implementing this task. A previous attempt was made but the gate check identified issues.
@@ -178,8 +184,8 @@ HEAD_SHA=$(git rev-parse HEAD)
 
 **Normal code tasks**: In a single response, dispatch all three verification agents in parallel:
 
-- `arc-reviewer` for code quality and conventions. Use the `review` skill or dispatch `arc-reviewer` directly with `## Evaluator Status` set to `active`.
-- `arc-spec-reviewer` for exact task compliance and scope-boundary checking:
+- `code-reviewer` for code quality and conventions. Use the `review` skill or dispatch `code-reviewer` directly with `## Evaluator Status` set to `active`.
+- `spec-reviewer` for exact task compliance and scope-boundary checking:
 
 ```
 Verify this implementation matches its specification exactly.
@@ -187,19 +193,19 @@ Verify this implementation matches its specification exactly.
 ## Task Spec
 <paste output of: arc show <task-id>>
 
-## Implementer Report
-<paste the implementer's report>
+## Builder Report
+<paste the builder's report>
 
 ## Base SHA
 <BASE_SHA> (use for: git diff --name-only <BASE_SHA>..HEAD)
 ```
 
-- `arc-evaluator` for adversarial spec-intent verification, **dispatched with `isolation: "worktree"`**:
+- `evaluator` for adversarial spec-intent verification, dispatched in an isolated worktree or forked worker workspace when the runtime supports it:
 
-The evaluator runs in a worktree so it can freely write acceptance tests and add dependencies without dirtying the main working tree. The worktree is automatically discarded when the agent finishes.
+The evaluator should run in a disposable worktree or forked workspace so it can freely write acceptance tests and add dependencies without dirtying the main working tree. Discard that verification workspace after the agent finishes.
 
 ```
-Evaluate whether this implementation faithfully satisfies the spec. Write your own acceptance tests from the spec alone — do NOT read the implementer's tests or the git diff.
+Evaluate whether this implementation faithfully satisfies the spec. Write your own acceptance tests from the spec alone — do NOT read the builder's tests or the git diff.
 
 ## Task Spec
 <paste output of: arc show <task-id>>
@@ -217,8 +223,8 @@ If no design spec is available, omit this section entirely.
 
 **Docs-only tasks**:
 - Skip the evaluator entirely.
-- Dispatch `arc-reviewer` and `arc-spec-reviewer` only when the task changes developer-facing workflow docs, command docs, or other documentation that materially affects how `arc` is used.
-- When dispatching `arc-spec-reviewer` for docs-only work, use a docs-specific handoff that matches `arc-doc-writer` output and the changed documentation paths:
+- Dispatch `code-reviewer` and `spec-reviewer` only when the task changes developer-facing workflow docs, command docs, or other documentation that materially affects how `arc` is used.
+- When dispatching `spec-reviewer` for docs-only work, use a docs-specific handoff that matches `doc-writer` output and the changed documentation paths:
 
 ```
 Verify this documentation change matches its specification exactly.
@@ -227,7 +233,7 @@ Verify this documentation change matches its specification exactly.
 <paste output of: arc show <task-id>>
 
 ## Doc Writer Report
-<paste the arc-doc-writer report, if available>
+<paste the doc-writer report, if available>
 If no report is available, say so and rely on the changed doc paths plus diff.
 
 ## Changed Doc Paths
@@ -248,24 +254,24 @@ Reviewer, spec reviewer, and evaluator report back independently. Triage their f
 
 | Finding | Action |
 |---------|--------|
-| **Critical/Important** | Re-dispatch `arc-implementer` with fixes. Re-review after. |
+| **Critical/Important** | Re-dispatch `builder` with fixes. Re-review after. |
 | **Minor** | Note in arc comment. Proceed. |
-| **Deviation (fix)** | Re-dispatch `arc-implementer` to match the design. |
+| **Deviation (fix)** | Re-dispatch `builder` to match the design. |
 | **Deviation (accept)** | Log as arc comment: "Accepted deviation: \<description\>. Rationale: \<why\>." Proceed. |
 
 For accepted deviations, the orchestrator decides — not the reviewer. If unsure whether a deviation is an improvement, default to fixing it to match the plan.
-For docs-only tasks, route reviewer-requested fixes to `arc-doc-writer` instead of `arc-implementer`, then re-run only the dispatched docs checks from step 5.
+For docs-only tasks, route reviewer-requested fixes to `doc-writer` instead of `builder`, then re-run only the dispatched docs checks from step 5.
 
 #### Spec reviewer findings
 
 | Finding | Action |
 |---------|--------|
 | **COMPLIANT** | Exact task compliance confirmed. Proceed. |
-| **ISSUES (Missing)** | Re-dispatch `arc-implementer` with the missing requirements called out by the spec reviewer. Re-run step 5 after the fix. |
-| **ISSUES (Extra)** | Re-dispatch `arc-implementer` to remove the extra work and restore scope discipline. Re-run step 5 after the fix. |
-| **ISSUES (Misunderstood)** | Re-dispatch `arc-implementer` with the misread requirement plus the corrected interpretation. Re-run step 5 after the fix. |
+| **ISSUES (Missing)** | Re-dispatch `builder` with the missing requirements called out by the spec reviewer. Re-run step 5 after the fix. |
+| **ISSUES (Extra)** | Re-dispatch `builder` to remove the extra work and restore scope discipline. Re-run step 5 after the fix. |
+| **ISSUES (Misunderstood)** | Re-dispatch `builder` with the misread requirement plus the corrected interpretation. Re-run step 5 after the fix. |
 
-For docs-only tasks, route spec-reviewer-requested fixes to `arc-doc-writer` instead of `arc-implementer`, then re-run only the dispatched docs checks from step 5.
+For docs-only tasks, route spec-reviewer-requested fixes to `doc-writer` instead of `builder`, then re-run only the dispatched docs checks from step 5.
 
 #### Evaluator findings
 
@@ -273,10 +279,10 @@ For docs-only tasks, route spec-reviewer-requested fixes to `arc-doc-writer` ins
 |---------|--------|
 | **PASS** | Evaluator confirms spec compliance independently. Proceed. |
 | **CONCERNS** (edge cases / minor gaps) | Note findings in arc comment. Decide: fix now or defer. |
-| **FAIL — Implementation Health** | The project doesn't build or existing tests fail. This is a real implementer bug — re-dispatch `arc-implementer` with the build/test failure. |
-| **FAIL — Spec-Intent Gap** | Re-dispatch `arc-implementer` with the evaluator's finding. Include what the spec says, what the evaluator expected, and what actually happened. Re-evaluate after. |
-| **FAIL — Missing Behavior** | Re-dispatch `arc-implementer` with the missing behavior. Re-evaluate after. |
-| **BLOCKED** | The evaluator's own test setup failed (compilation, dependency resolution). This is NOT an implementer problem. Do NOT re-dispatch the implementer. Note in arc comment and proceed — the evaluator's verdict is inconclusive for this task. |
+| **FAIL — Implementation Health** | The project doesn't build or existing tests fail. This is a real builder bug — re-dispatch `builder` with the build/test failure. |
+| **FAIL — Spec-Intent Gap** | Re-dispatch `builder` with the evaluator's finding. Include what the spec says, what the evaluator expected, and what actually happened. Re-evaluate after. |
+| **FAIL — Missing Behavior** | Re-dispatch `builder` with the missing behavior. Re-evaluate after. |
+| **BLOCKED** | The evaluator's own test setup failed (compilation, dependency resolution). This is NOT a builder problem. Do NOT re-dispatch the builder. Note in arc comment and proceed — the evaluator's verdict is inconclusive for this task. |
 | **Untestable Requirement** | This may indicate an incomplete public API. Assess whether the interface needs expansion and re-dispatch if so. |
 
 #### Conflict resolution
@@ -307,11 +313,11 @@ After closing 2-3 related tasks, or before switching to a new epic phase, run th
 make test-integration
 ```
 
-This catches cross-task regressions that individual implementer gate checks won't — each implementer only validates its own task's scope. Do not wait until all tasks are complete to discover integration failures.
+This catches cross-task regressions that individual builder gate checks won't — each builder only validates its own task's scope. Do not wait until all tasks are complete to discover integration failures.
 
 If integration tests fail:
 - Identify which task's changes caused the failure
-- Re-dispatch `arc-implementer` with the failing test details and the relevant task context
+- Re-dispatch `builder` with the failing test details and the relevant task context
 - If the failure spans multiple tasks, invoke the `debug` skill
 
 ### 9. Repeat
@@ -360,13 +366,13 @@ If any task fails these checks, remove it from the parallel batch and handle it 
 
 ### P4. Dispatch in Single Turn
 
-All parallel Agent tool calls with `isolation: "worktree"` **must happen in the same orchestrator message**. This ensures they all branch from the same HEAD.
+All parallel Codex subagent spawns with worktree isolation must happen in the same orchestrator message. This ensures they all branch from the same HEAD.
 
 ```
 # In a single response, dispatch all parallel tasks:
-Agent(subagent_type="arc-implementer", isolation="worktree", prompt="Task 1...")
-Agent(subagent_type="arc-implementer", isolation="worktree", prompt="Task 2...")
-Agent(subagent_type="arc-implementer", isolation="worktree", prompt="Task 3...")
+spawn_agent(agent_type="worker", message="You are the builder for Task 1...")
+spawn_agent(agent_type="worker", message="You are the builder for Task 2...")
+spawn_agent(agent_type="worker", message="You are the builder for Task 3...")
 ```
 
 **Never** dispatch worktree agents across multiple turns — HEAD may move between turns, causing stale branches.
@@ -417,7 +423,7 @@ arc close <id> -r "reason"            # Close completed task
 
 - Never write implementation code as the main agent — always dispatch
 - Never close a task without confirming tests pass yourself (fresh run)
-- Never close a task if the implementer reported `PARTIAL` without re-dispatching
+- Never close a task if the builder reported `PARTIAL` without re-dispatching
 - If in doubt about the result, re-dispatch rather than fixing manually
 - Never dispatch parallel agents without committing and pushing all sequential work first
 - Never dispatch parallel agents on tasks that share files

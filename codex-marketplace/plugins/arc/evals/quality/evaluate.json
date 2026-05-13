@@ -1,7 +1,7 @@
 [
   {
     "eval_id": 1,
-    "eval_name": "Evaluator maintains information asymmetry — never reads diff or implementer tests",
+    "eval_name": "Evaluator maintains information asymmetry — never reads diff or builder tests",
     "prompt": "Evaluate ARC-5.2 (OAuth token refresh). Base SHA is abc1234. Task spec says: 'Implement refresh token rotation — on each refresh, invalidate the old token and issue a new one. Return 401 if the refresh token is expired or already used.'",
     "assertions": [
       {
@@ -257,7 +257,7 @@
   {
     "eval_id": 11,
     "eval_name": "Evaluator handles complex spec with mixed pass, fail, and edge case results",
-    "prompt": "Evaluate ARC-5.11 (session management). Spec says: 'Create session on login with configurable TTL. Refresh session extends TTL by original duration. Concurrent sessions limited to 3 per user — oldest evicted. Session invalidated on password change. Return session metadata including created_at and last_active_at.' Base SHA is aaa1111. Your acceptance tests show: creation works, refresh works, concurrent limit is enforced but oldest is NOT evicted (returns 429 instead), password-change invalidation is not implemented at all, and metadata is returned but missing last_active_at.",
+    "prompt": "Evaluate ARC-5.11 (session management). Spec says: 'Create session on login with configurable TTL. Refresh session extends TTL by original duration. Concurrent sessions limited to 3 per user — oldest evicted. Session invalidated on password change. Return session metadata including created_at and last_active_at.' Base SHA is aaa1111. Your acceptance tests show: creation works, refresh works, concurrent limit is enforced but oldest is NOT evicted (returns 429 instead), password-change invalidation is not builded at all, and metadata is returned but missing last_active_at.",
     "assertions": [
       {
         "id": 1,
@@ -293,7 +293,7 @@
   },
   {
     "eval_id": 12,
-    "eval_name": "Evaluator reports FAIL when the implementer's build is broken",
+    "eval_name": "Evaluator reports FAIL when the builder's build is broken",
     "prompt": "Evaluate ARC-5.12 (webhook delivery). Before writing any acceptance tests, you run the project build and it fails: 'error: cannot find crate for webhook_handler'. The existing test suite also fails with the same compilation error.",
     "assertions": [
       {
@@ -303,7 +303,7 @@
       },
       {
         "id": 2,
-        "text": "Overall evaluation result is FAIL (not BLOCKED) — a broken build is the implementer's fault",
+        "text": "Overall evaluation result is FAIL (not BLOCKED) — a broken build is the builder's fault",
         "type": "quality"
       },
       {
@@ -335,7 +335,7 @@
       },
       {
         "id": 3,
-        "text": "Overall evaluation result is BLOCKED (not FAIL) — the evaluator's dependency conflict is not the implementer's fault",
+        "text": "Overall evaluation result is BLOCKED (not FAIL) — the evaluator's dependency conflict is not the builder's fault",
         "type": "quality"
       },
       {

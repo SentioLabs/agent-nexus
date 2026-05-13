@@ -15,7 +15,7 @@ If you don't understand why something is broken, you cannot fix it. A "fix" with
 
 ## 4-Phase Process
 
-Create a TodoWrite checklist with these phases and work through them:
+Create a visible progress list with these phases and work through them. In Codex, use `update_plan`; in runtimes with task-list primitives, use the runtime's task tool:
 
 ### Phase 1: Investigate Root Cause
 
@@ -87,5 +87,5 @@ You're doing it wrong if you:
 - Always write a bug-demonstrating test before the fix
 - Always run the full test suite after fixing
 - Revert failed fix attempts cleanly — don't leave debris
-- After debugging, return to the calling skill — typically `implement` step 4 to re-verify the subagent's result, or `verify` to re-run the gate sequence
+- After debugging, return to the calling skill — typically `build` step 4 to re-verify the subagent's result, or `verify` to re-run the gate sequence
 - Format all arc content (descriptions, plans, comments) per `skills/arc/_formatting.md`

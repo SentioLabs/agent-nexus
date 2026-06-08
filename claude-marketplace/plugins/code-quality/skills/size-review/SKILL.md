@@ -147,7 +147,7 @@ dependencies. Exclude them from the threshold check, the seam analysis,
 and the file counts. **Report them separately** so reviewers know they
 were considered (transparency, not silent dropping).
 
-Build the exclusion glob list from up to three sources, in this order:
+Build the exclusion glob list from these sources, in this order:
 
 1. **Bundled universal defaults** — read
    `${CLAUDE_PLUGIN_ROOT}/skills/size-review/references/default-exclusions.md`.
@@ -162,6 +162,10 @@ Build the exclusion glob list from up to three sources, in this order:
 3. **`.gitattributes` `linguist-generated=true`** — if the repo marks
    files as generated via the GitHub linguist attribute, honor that.
    Optional convenience layer.
+4. **invocation-supplied `--exclude` patterns** — include every `--exclude <pattern>`
+   passed to the size-review command invocation. These augment the bundled
+   defaults, repo-local `.code-quality/size-review-exclude`, and `.gitattributes`
+   generated-file exclusions.
 
 After resolving the union of globs, partition the diff file list:
 

@@ -17,14 +17,6 @@
       }
     },
     {
-      "name": "mneme",
-      "source": "./claude-marketplace/plugins/mneme",
-      "description": "Context window protection — sandboxed execution in 11 languages, FTS knowledge base with BM25 ranking, session continuity. Single Rust binary, <5ms hooks.",
-      "author": {
-        "name": "Sentio Labs"
-      }
-    },
-    {
       "name": "code-quality",
       "source": "./claude-marketplace/plugins/code-quality",
       "description": "Pre-merge code quality plugin. Bundles slop-review (4-lens parallel review for AI-generated code, idiom drift, quality issues, and architecture/solution-fit) with model-tiered subagents and calibration.",

@@ -17,18 +17,6 @@
       "category": "Productivity"
     },
     {
-      "name": "mneme",
-      "source": {
-        "source": "local",
-        "path": "./codex-marketplace/plugins/mneme"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
       "name": "code-quality",
       "source": {
         "source": "local",

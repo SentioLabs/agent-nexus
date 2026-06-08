@@ -21,27 +21,6 @@
         {"type": "test", "section": "Tests", "hidden": true}
       ]
     },
-    "claude-marketplace/plugins/mneme": {
-      "release-type": "simple",
-      "component": "claude-mneme",
-      "bump-minor-pre-major": true,
-      "extra-files": [
-        {
-          "type": "json",
-          "path": ".claude-plugin/plugin.json",
-          "jsonpath": "$.version"
-        }
-      ],
-      "changelog-sections": [
-        {"type": "feat", "section": "Features"},
-        {"type": "fix", "section": "Bug Fixes"},
-        {"type": "perf", "section": "Performance"},
-        {"type": "refactor", "section": "Refactoring"},
-        {"type": "docs", "section": "Documentation", "hidden": true},
-        {"type": "chore", "section": "Miscellaneous", "hidden": true},
-        {"type": "test", "section": "Tests", "hidden": true}
-      ]
-    },
     "claude-marketplace/plugins/code-quality": {
       "release-type": "simple",
       "component": "claude-code-quality",
@@ -87,28 +66,6 @@
     "codex-marketplace/plugins/arc": {
       "release-type": "simple",
       "component": "codex-arc",
-      "bump-minor-pre-major": true,
-      "version-file": "version.txt",
-      "extra-files": [
-        {
-          "type": "json",
-          "path": ".codex-plugin/plugin.json",
-          "jsonpath": "$.version"
-        }
-      ],
-      "changelog-sections": [
-        {"type": "feat", "section": "Features"},
-        {"type": "fix", "section": "Bug Fixes"},
-        {"type": "perf", "section": "Performance"},
-        {"type": "refactor", "section": "Refactoring"},
-        {"type": "docs", "section": "Documentation", "hidden": true},
-        {"type": "chore", "section": "Miscellaneous", "hidden": true},
-        {"type": "test", "section": "Tests", "hidden": true}
-      ]
-    },
-    "codex-marketplace/plugins/mneme": {
-      "release-type": "simple",
-      "component": "codex-mneme",
       "bump-minor-pre-major": true,
       "version-file": "version.txt",
       "extra-files": [

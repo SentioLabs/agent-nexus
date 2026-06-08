@@ -9,38 +9,31 @@ Break an approved design into bite-sized, self-contained tasks with exact file p
 
 ## Review Commands
 
-Design docs live in `docs/plans/<file>.md`. The brainstorm skill registers each doc on one of three review surfaces and writes a routing marker as line 1 of the doc itself:
+Design docs live in `docs/plans/<file>.md`. The brainstorm skill registers each doc on the arc planner and writes a routing marker as line 1 of the doc itself:
 
 ```
-<!-- arc-review: kind=<legacy|share-local|share-remote> id=<id> -->
+<!-- arc-review: id=<id> -->
 ```
 
-**Always read the marker before invoking any review CLI.** The plan skill's CLI calls branch on `kind`:
+**Always read the marker before invoking any review CLI** to get the plan ID:
 
-| kind | Show content | List comments | Pull accepted | Approve | Update content |
-|---|---|---|---|---|---|
-| `legacy` | `arc plan show <id>` | `arc plan comments <id>` | n/a — review thread inline | `arc plan approve <id>` | re-create the plan (no in-place update) |
-| `share-local` | `arc share show <id>` | `arc share comments <id>` | `arc share pull <id>` | `arc share approve <id>` | `arc share update <id> <path>` |
-| `share-remote` | `arc share show <id>` | `arc share comments <id>` | `arc share pull <id>` | `arc share approve <id>` | `arc share update <id> <path>` |
+| Action | CLI |
+|---|---|
+| Show content | `arc plan show <id>` |
+| List comments | `arc plan comments <id>` (flat thread — review inline) |
+| Approve | `arc plan approve <id>` |
+| Update content | re-create the plan (`arc plan create` — no in-place update, new ID) |
 
 Read the marker with one shell call:
 
 ```bash
 MARKER=$(head -1 docs/plans/<file>.md)
-KIND=$(echo "$MARKER" | grep -oE 'kind=[a-z-]+' | cut -d= -f2)
 ID=$(echo "$MARKER" | grep -oE 'id=\S+' | sed 's/id=//' | tr -d '>' | xargs)
-# Now branch on $KIND for every review CLI call.
 ```
 
-**Encrypted-share keyring.** For `share-local` and `share-remote`, the author's edit tokens live in the arc-server's local keyring (a `shares` table in `~/.arc/data.db`) — not in any JSON file. `arc share show <id> --author-url` reprints the Author URL if it's lost. Legacy plans don't have edit tokens; the URL is just `<base>/planner/<id>`.
+The `id=\S+` extraction also works for older docs whose marker still carries a `kind=…` field — it just reads the `id`.
 
-**Fallback for unmarked design docs.** Older design docs created before the marker contract may not have line 1 set. If the marker is missing, fall back to:
-
-```bash
-arc share list --json | jq -r '.[] | select(.plan_file=="docs/plans/<file>.md") | .id'
-```
-
-This only covers `share-*` plans (legacy plans aren't in the share keyring). If the fallback returns no result, ask the user which review surface the plan was registered on.
+**Fallback for unmarked design docs.** Older design docs created before the marker contract may not have line 1 set. If the marker is missing, read the file directly — but the review-state CLIs (approve, comments) need a registered plan ID. With no marker, ask the user to re-register via brainstorm step 6, or proceed without review-state tracking.
 
 ## Granularity Rule
 
@@ -65,21 +58,20 @@ Add tasks for each step below using `TaskCreate`. If continuing from the brainst
 
 ### 1. Read the Design
 
-You're handed a plan-file path (typically `docs/plans/<file>.md`) by the brainstorm skill. Read line 1 to learn which review surface the plan lives on, then call the matching show command:
+You're handed a plan-file path (typically `docs/plans/<file>.md`) by the brainstorm skill. Read line 1 for the plan ID, then call `arc plan show`:
 
 ```bash
 MARKER=$(head -1 docs/plans/<file>.md)
-KIND=$(echo "$MARKER" | grep -oE 'kind=[a-z-]+' | cut -d= -f2)
 ID=$(echo "$MARKER" | grep -oE 'id=\S+' | sed 's/id=//' | tr -d '>' | xargs)
 
-case "$KIND" in
-  legacy)        arc plan  show "$ID" ;;
-  share-local|share-remote) arc share show "$ID" ;;
-  *)             echo "No review marker; reading file directly"; cat docs/plans/<file>.md ;;
-esac
+if [ -n "$ID" ]; then
+  arc plan show "$ID"
+else
+  echo "No review marker; reading file directly"; cat docs/plans/<file>.md
+fi
 ```
 
-The full content is what you'll break down in the next steps. If the file has no marker (an older design doc), reading the file directly is fine — but warn the user the review-state CLI calls (approve, pull) won't work without a registered review surface, and offer to register it via brainstorm step 6.
+The full content is what you'll break down in the next steps. If the file has no marker (an older design doc), reading the file directly is fine — but warn the user the review-state CLI calls (approve, comments) won't work without a registered plan, and offer to register it via brainstorm step 6.
 
 ### 2. Identify Shared Contracts (Foundation Task)
 
@@ -178,23 +170,19 @@ When identifying tasks, assign **file ownership** — each file should be owned 
 
 **Never run `arc create` directly** — always delegate to the `issue-manager` agent. This keeps bulk CLI output in a disposable subagent context.
 
-Read the full plan content first using the kind-aware case from step 1 (`arc plan show "$ID"` for legacy, `arc share show "$ID"` for share-local / share-remote). Then build a task manifest that includes:
+Read the full plan content first with `arc plan show "$ID"` (the ID from step 1's marker). Then build a task manifest that includes:
 1. **The epic** — its description will be populated by the agent from the plan file (see below)
 2. **All child tasks** with self-contained descriptions
 
 **Critical**: Do NOT paste or summarize the plan content into the agent prompt. Instead, pass the plan file path and let the agent read it directly. This prevents content loss from summarization.
 
-You typically already have the plan file path from the brainstorm hand-off. If you only have the ID and need to find the file path, the lookup depends on `kind`:
+You typically already have the plan file path from the brainstorm hand-off. If you only have the ID and need to find the file path, `arc plan show` prints it in its metadata header:
 
 ```bash
-# share-local / share-remote: keyring includes the plan_file mapping
-arc share list --json | jq -r '.[] | select(.id=="<id>") | .plan_file'
-
-# legacy: arc plan show prints "File: <path>" in its metadata header
 arc plan show <id> | grep -oE '^File: \S+' | awk '{print $2}'
 ```
 
-The share keyring entries have `{id, kind, url, key_b64url, plan_file, created_at}` — edit tokens are intentionally redacted. Then dispatch the manifest:
+Then dispatch the manifest:
 
 ```
 Use the Agent tool with subagent_type="arc:issue-manager":
@@ -383,7 +371,7 @@ For `docs-only` tasks, omit `## Test Command` and use `## Verification` instead:
 ## Rules
 
 - Never reference external docs or the full plan in task descriptions — everything needed is in the description
-- Design documents live in `docs/plans/` and are registered via one of `arc plan create` (legacy), `arc share create` (encrypted local default), or `arc share create … --remote` (encrypted remote). The brainstorm skill writes a `<!-- arc-review: kind=… id=… -->` marker as line 1 of the doc — always read the marker before invoking review CLIs to route correctly
+- Design documents live in `docs/plans/` and are registered on the arc planner via `arc plan create`. The brainstorm skill writes a `<!-- arc-review: id=… -->` marker as line 1 of the doc — always read the marker before invoking review CLIs to get the plan ID
 - Task descriptions must include actual code guidance, not vague instructions
 - Team preparation (teammate labels) is optional — only if user chooses team execution
 - The plan skill creates tasks; it does not implement them

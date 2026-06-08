@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.1](https://github.com/SentioLabs/agent-nexus/compare/claude-arc-v0.12.0...claude-arc-v0.12.1) (2026-06-08)
+
+
+### Refactoring
+
+* **arc:** remove arc share review surface, keep only the planner ([#42](https://github.com/SentioLabs/agent-nexus/issues/42)) ([dce4f30](https://github.com/SentioLabs/agent-nexus/commit/dce4f30788604c82f81b8b4755e3ce5d42bc56dd))
+
 ## [0.12.0](https://github.com/SentioLabs/agent-nexus/compare/claude-arc-v0.11.0...claude-arc-v0.12.0) (2026-05-12)
 
 
